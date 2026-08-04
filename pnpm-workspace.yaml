@@ -1,0 +1,62 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+catalog:
+  # --- Language & tooling -------------------------------------------------
+  typescript: 7.0.2
+  '@types/node': 26.1.2
+
+  # --- Runtime: backend ---------------------------------------------------
+  '@nestjs/common': 11.1.28
+  '@nestjs/core': 11.1.28
+  '@nestjs/platform-express': 11.1.28
+  '@nestjs/mongoose': 11.0.4
+  '@nestjs/config': 4.0.4
+  '@nestjs/jwt': 11.0.2
+  '@nestjs/swagger': 11.4.6
+  '@nestjs/bullmq': 11.0.4
+  '@nestjs/schedule': 6.1.3
+  '@nestjs/testing': 11.1.28
+  mongoose: 9.9.1
+  bullmq: 6.0.5
+  ioredis: 6.0.0
+
+  # --- Runtime: frontend --------------------------------------------------
+  next: 16.2.12
+  react: 19.2.8
+  react-dom: 19.2.8
+  '@types/react': 19.2.8
+  '@types/react-dom': 19.2.4
+
+  # --- Providers ----------------------------------------------------------
+  resend: 6.18.1
+  '@react-email/components': 1.0.12
+  cloudinary: 2.10.0
+  next-cloudinary: 6.17.5
+
+  # --- Shared -------------------------------------------------------------
+  zod: 4.4.3
+  date-fns: 4.4.0
+  ulid: 3.0.2
+
+  # --- Testing ------------------------------------------------------------
+  jest: 30.4.2
+  '@swc/jest': 0.2.39
+  '@swc/core': 1.15.47
+  '@types/jest': 30.0.0
+  supertest: 7.2.2
+  fast-check: 4.9.0
+  '@faker-js/faker': 10.5.0
+  msw: 2.13.6
+
+# Native postinstall scripts we explicitly trust.
+allowBuilds:
+  '@scarf/scarf': false
+  '@swc/core': true
+  argon2: true
+  esbuild: true
+  msgpackr-extract: true
+  msw: false
+  sharp: true
+  unrs-resolver: true

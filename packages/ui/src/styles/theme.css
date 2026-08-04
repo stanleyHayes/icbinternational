@@ -1,0 +1,296 @@
+/* AUTO-GENERATED from brand/tokens/brand.tokens.json — do not edit.
+   Regenerate with: pnpm --filter @reliance/ui theme */
+
+:root {
+  color-scheme: light;
+
+  /* Raw brand palette — theme-independent. */
+  --rb-palette-navy-50: #EEF4FA;
+  --rb-palette-navy-100: #D6E5F2;
+  --rb-palette-navy-200: #AEC9E4;
+  --rb-palette-navy-300: #7BA5D0;
+  --rb-palette-navy-400: #4A7EB4;
+  --rb-palette-navy-500: #2A5D93;
+  --rb-palette-navy-600: #164778;
+  --rb-palette-navy-700: #0B3A63;
+  --rb-palette-navy-800: #082B49;
+  --rb-palette-navy-900: #062036;
+  --rb-palette-navy-950: #04141F;
+  --rb-palette-green-50: #E6FBF4;
+  --rb-palette-green-100: #C2F5E4;
+  --rb-palette-green-200: #89EBCB;
+  --rb-palette-green-300: #4EDCB0;
+  --rb-palette-green-400: #1FCC98;
+  --rb-palette-green-500: #00C08B;
+  --rb-palette-green-600: #00A578;
+  --rb-palette-green-700: #00926A;
+  --rb-palette-green-800: #067254;
+  --rb-palette-green-900: #075B45;
+  --rb-palette-gold-400: #E3C86A;
+  --rb-palette-gold-500: #D8B54A;
+  --rb-palette-gold-600: #B7963A;
+  --rb-palette-slate-50: #F7F9FB;
+  --rb-palette-slate-100: #EDF1F6;
+  --rb-palette-slate-200: #DDE4EC;
+  --rb-palette-slate-300: #C3CEDB;
+  --rb-palette-slate-400: #93A3B6;
+  --rb-palette-slate-500: #697B90;
+  --rb-palette-slate-600: #4D5D70;
+  --rb-palette-slate-700: #3A4757;
+  --rb-palette-slate-800: #26303C;
+  --rb-palette-slate-900: #161D26;
+  --rb-palette-credit: #00A578;
+  --rb-palette-debit: #D9534F;
+  --rb-palette-pending: #D8B54A;
+  --rb-palette-danger: #C6362F;
+  --rb-palette-warning: #D98A22;
+  --rb-palette-success: #00A578;
+  --rb-palette-info: #2A5D93;
+
+  /* Type, shape, elevation, rhythm and motion. */
+  --rb-font-display: 'Outfit', system-ui, sans-serif;
+  --rb-font-body: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --rb-font-mono: 'JetBrains Mono', 'SFMono-Regular', ui-monospace, monospace;
+  --rb-font-numeric: 'Outfit', system-ui, sans-serif;
+  --rb-numeric-tabular: 'tnum' 1, 'cv05' 1;
+  --rb-text-xs: 0.75rem;
+  --rb-text-sm: 0.875rem;
+  --rb-text-base: 1rem;
+  --rb-text-lg: 1.125rem;
+  --rb-text-xl: 1.25rem;
+  --rb-text-2xl: 1.5rem;
+  --rb-text-3xl: 1.875rem;
+  --rb-text-4xl: 2.5rem;
+  --rb-text-5xl: 3.25rem;
+  --rb-text-6xl: 4.25rem;
+  --rb-radius-sm: 6px;
+  --rb-radius-md: 10px;
+  --rb-radius-lg: 14px;
+  --rb-radius-xl: 20px;
+  --rb-radius-2xl: 28px;
+  --rb-radius-pill: 999px;
+  --rb-shadow-xs: 0 1px 2px rgba(6, 32, 54, 0.06);
+  --rb-shadow-sm: 0 2px 8px rgba(6, 32, 54, 0.08);
+  --rb-shadow-md: 0 8px 24px rgba(6, 32, 54, 0.10);
+  --rb-shadow-lg: 0 20px 48px rgba(6, 32, 54, 0.14);
+  --rb-shadow-card: 0 1px 3px rgba(6, 32, 54, 0.08), 0 12px 32px -12px rgba(6, 32, 54, 0.18);
+  --rb-space-unit: 4px;
+  --rb-space-gutter: 24px;
+  --rb-space-section-y: 96px;
+  --rb-duration-instant: 80ms;
+  --rb-duration-fast: 150ms;
+  --rb-duration-base: 240ms;
+  --rb-duration-slow: 420ms;
+  --rb-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --rb-ease-decelerate: cubic-bezier(0, 0, 0, 1);
+  --rb-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Semantic roles — light. */
+  --rb-color-canvas: var(--rb-palette-slate-50);
+  --rb-color-surface: white;
+  --rb-color-surface-raised: white;
+  --rb-color-surface-sunken: var(--rb-palette-slate-100);
+  --rb-color-surface-inverse: var(--rb-palette-navy-900);
+  --rb-color-border: var(--rb-palette-slate-200);
+  --rb-color-border-strong: var(--rb-palette-slate-300);
+  --rb-color-fg: var(--rb-palette-navy-900);
+  --rb-color-fg-muted: var(--rb-palette-slate-600);
+  --rb-color-fg-subtle: var(--rb-palette-slate-500);
+  --rb-color-fg-inverse: var(--rb-palette-slate-50);
+  --rb-color-accent: var(--rb-palette-green-600);
+  --rb-color-accent-hover: var(--rb-palette-green-700);
+  --rb-color-accent-active: var(--rb-palette-green-800);
+  --rb-color-accent-fg: white;
+  --rb-color-ink: var(--rb-palette-navy-700);
+  --rb-color-ink-hover: var(--rb-palette-navy-800);
+  --rb-color-credit: var(--rb-palette-credit);
+  --rb-color-debit: var(--rb-palette-debit);
+  --rb-color-pending: var(--rb-palette-gold-600);
+  --rb-color-danger-solid: var(--rb-palette-danger);
+  --rb-color-on-solid: white;
+  --rb-color-success: var(--rb-palette-success);
+  --rb-color-danger: var(--rb-palette-danger);
+  --rb-color-warning: var(--rb-palette-warning);
+  --rb-color-info: var(--rb-palette-info);
+  --rb-color-focus: var(--rb-palette-green-600);
+  --rb-color-skeleton: var(--rb-palette-slate-200);
+  --rb-color-overlay: color-mix(in oklab, var(--rb-palette-navy-950) 45%, transparent);
+  --rb-color-accent-soft: color-mix(in oklab, var(--rb-color-accent) 14%, transparent);
+  --rb-color-ink-soft: color-mix(in oklab, var(--rb-color-ink) 14%, transparent);
+  --rb-color-credit-soft: color-mix(in oklab, var(--rb-color-credit) 14%, transparent);
+  --rb-color-debit-soft: color-mix(in oklab, var(--rb-color-debit) 14%, transparent);
+  --rb-color-pending-soft: color-mix(in oklab, var(--rb-color-pending) 14%, transparent);
+  --rb-color-success-soft: color-mix(in oklab, var(--rb-color-success) 14%, transparent);
+  --rb-color-danger-soft: color-mix(in oklab, var(--rb-color-danger) 14%, transparent);
+  --rb-color-warning-soft: color-mix(in oklab, var(--rb-color-warning) 14%, transparent);
+  --rb-color-info-soft: color-mix(in oklab, var(--rb-color-info) 14%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --rb-color-canvas: var(--rb-palette-navy-950);
+    --rb-color-surface: var(--rb-palette-navy-900);
+    --rb-color-surface-raised: var(--rb-palette-navy-800);
+    --rb-color-surface-sunken: var(--rb-palette-navy-950);
+    --rb-color-surface-inverse: var(--rb-palette-slate-50);
+    --rb-color-border: var(--rb-palette-navy-700);
+    --rb-color-border-strong: var(--rb-palette-navy-600);
+    --rb-color-fg: var(--rb-palette-slate-50);
+    --rb-color-fg-muted: var(--rb-palette-slate-300);
+    --rb-color-fg-subtle: var(--rb-palette-slate-400);
+    --rb-color-fg-inverse: var(--rb-palette-navy-950);
+    --rb-color-accent: var(--rb-palette-green-500);
+    --rb-color-accent-hover: var(--rb-palette-green-400);
+    --rb-color-accent-active: var(--rb-palette-green-300);
+    --rb-color-accent-fg: var(--rb-palette-navy-950);
+    --rb-color-ink: var(--rb-palette-navy-100);
+    --rb-color-ink-hover: white;
+    --rb-color-credit: var(--rb-palette-green-300);
+    --rb-color-debit: color-mix(in oklab, var(--rb-palette-debit) 72%, white);
+    --rb-color-pending: var(--rb-palette-gold-400);
+    --rb-color-danger-solid: var(--rb-palette-danger);
+    --rb-color-on-solid: white;
+    --rb-color-success: var(--rb-palette-green-300);
+    --rb-color-danger: color-mix(in oklab, var(--rb-palette-danger) 70%, white);
+    --rb-color-warning: color-mix(in oklab, var(--rb-palette-warning) 78%, white);
+    --rb-color-info: var(--rb-palette-navy-300);
+    --rb-color-focus: var(--rb-palette-green-400);
+    --rb-color-skeleton: var(--rb-palette-navy-800);
+    --rb-color-overlay: color-mix(in oklab, black 65%, transparent);
+    --rb-color-accent-soft: color-mix(in oklab, var(--rb-color-accent) 14%, transparent);
+    --rb-color-ink-soft: color-mix(in oklab, var(--rb-color-ink) 14%, transparent);
+    --rb-color-credit-soft: color-mix(in oklab, var(--rb-color-credit) 14%, transparent);
+    --rb-color-debit-soft: color-mix(in oklab, var(--rb-color-debit) 14%, transparent);
+    --rb-color-pending-soft: color-mix(in oklab, var(--rb-color-pending) 14%, transparent);
+    --rb-color-success-soft: color-mix(in oklab, var(--rb-color-success) 14%, transparent);
+    --rb-color-danger-soft: color-mix(in oklab, var(--rb-color-danger) 14%, transparent);
+    --rb-color-warning-soft: color-mix(in oklab, var(--rb-color-warning) 14%, transparent);
+    --rb-color-info-soft: color-mix(in oklab, var(--rb-color-info) 14%, transparent);
+  }
+}
+
+/* An explicit choice always beats the OS preference, in both directions, so these come last. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --rb-color-canvas: var(--rb-palette-navy-950);
+  --rb-color-surface: var(--rb-palette-navy-900);
+  --rb-color-surface-raised: var(--rb-palette-navy-800);
+  --rb-color-surface-sunken: var(--rb-palette-navy-950);
+  --rb-color-surface-inverse: var(--rb-palette-slate-50);
+  --rb-color-border: var(--rb-palette-navy-700);
+  --rb-color-border-strong: var(--rb-palette-navy-600);
+  --rb-color-fg: var(--rb-palette-slate-50);
+  --rb-color-fg-muted: var(--rb-palette-slate-300);
+  --rb-color-fg-subtle: var(--rb-palette-slate-400);
+  --rb-color-fg-inverse: var(--rb-palette-navy-950);
+  --rb-color-accent: var(--rb-palette-green-500);
+  --rb-color-accent-hover: var(--rb-palette-green-400);
+  --rb-color-accent-active: var(--rb-palette-green-300);
+  --rb-color-accent-fg: var(--rb-palette-navy-950);
+  --rb-color-ink: var(--rb-palette-navy-100);
+  --rb-color-ink-hover: white;
+  --rb-color-credit: var(--rb-palette-green-300);
+  --rb-color-debit: color-mix(in oklab, var(--rb-palette-debit) 72%, white);
+  --rb-color-pending: var(--rb-palette-gold-400);
+  --rb-color-danger-solid: var(--rb-palette-danger);
+  --rb-color-on-solid: white;
+  --rb-color-success: var(--rb-palette-green-300);
+  --rb-color-danger: color-mix(in oklab, var(--rb-palette-danger) 70%, white);
+  --rb-color-warning: color-mix(in oklab, var(--rb-palette-warning) 78%, white);
+  --rb-color-info: var(--rb-palette-navy-300);
+  --rb-color-focus: var(--rb-palette-green-400);
+  --rb-color-skeleton: var(--rb-palette-navy-800);
+  --rb-color-overlay: color-mix(in oklab, black 65%, transparent);
+  --rb-color-accent-soft: color-mix(in oklab, var(--rb-color-accent) 14%, transparent);
+  --rb-color-ink-soft: color-mix(in oklab, var(--rb-color-ink) 14%, transparent);
+  --rb-color-credit-soft: color-mix(in oklab, var(--rb-color-credit) 14%, transparent);
+  --rb-color-debit-soft: color-mix(in oklab, var(--rb-color-debit) 14%, transparent);
+  --rb-color-pending-soft: color-mix(in oklab, var(--rb-color-pending) 14%, transparent);
+  --rb-color-success-soft: color-mix(in oklab, var(--rb-color-success) 14%, transparent);
+  --rb-color-danger-soft: color-mix(in oklab, var(--rb-color-danger) 14%, transparent);
+  --rb-color-warning-soft: color-mix(in oklab, var(--rb-color-warning) 14%, transparent);
+  --rb-color-info-soft: color-mix(in oklab, var(--rb-color-info) 14%, transparent);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --rb-color-canvas: var(--rb-palette-slate-50);
+  --rb-color-surface: white;
+  --rb-color-surface-raised: white;
+  --rb-color-surface-sunken: var(--rb-palette-slate-100);
+  --rb-color-surface-inverse: var(--rb-palette-navy-900);
+  --rb-color-border: var(--rb-palette-slate-200);
+  --rb-color-border-strong: var(--rb-palette-slate-300);
+  --rb-color-fg: var(--rb-palette-navy-900);
+  --rb-color-fg-muted: var(--rb-palette-slate-600);
+  --rb-color-fg-subtle: var(--rb-palette-slate-500);
+  --rb-color-fg-inverse: var(--rb-palette-slate-50);
+  --rb-color-accent: var(--rb-palette-green-600);
+  --rb-color-accent-hover: var(--rb-palette-green-700);
+  --rb-color-accent-active: var(--rb-palette-green-800);
+  --rb-color-accent-fg: white;
+  --rb-color-ink: var(--rb-palette-navy-700);
+  --rb-color-ink-hover: var(--rb-palette-navy-800);
+  --rb-color-credit: var(--rb-palette-credit);
+  --rb-color-debit: var(--rb-palette-debit);
+  --rb-color-pending: var(--rb-palette-gold-600);
+  --rb-color-danger-solid: var(--rb-palette-danger);
+  --rb-color-on-solid: white;
+  --rb-color-success: var(--rb-palette-success);
+  --rb-color-danger: var(--rb-palette-danger);
+  --rb-color-warning: var(--rb-palette-warning);
+  --rb-color-info: var(--rb-palette-info);
+  --rb-color-focus: var(--rb-palette-green-600);
+  --rb-color-skeleton: var(--rb-palette-slate-200);
+  --rb-color-overlay: color-mix(in oklab, var(--rb-palette-navy-950) 45%, transparent);
+  --rb-color-accent-soft: color-mix(in oklab, var(--rb-color-accent) 14%, transparent);
+  --rb-color-ink-soft: color-mix(in oklab, var(--rb-color-ink) 14%, transparent);
+  --rb-color-credit-soft: color-mix(in oklab, var(--rb-color-credit) 14%, transparent);
+  --rb-color-debit-soft: color-mix(in oklab, var(--rb-color-debit) 14%, transparent);
+  --rb-color-pending-soft: color-mix(in oklab, var(--rb-color-pending) 14%, transparent);
+  --rb-color-success-soft: color-mix(in oklab, var(--rb-color-success) 14%, transparent);
+  --rb-color-danger-soft: color-mix(in oklab, var(--rb-color-danger) 14%, transparent);
+  --rb-color-warning-soft: color-mix(in oklab, var(--rb-color-warning) 14%, transparent);
+  --rb-color-info-soft: color-mix(in oklab, var(--rb-color-info) 14%, transparent);
+}
+
+/* Collapsing durations rather than disabling transitions keeps state changes observable
+   to assistive tech while removing the movement that triggers vestibular symptoms. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+  --rb-duration-instant: 1ms;
+  --rb-duration-fast: 1ms;
+  --rb-duration-base: 1ms;
+  --rb-duration-slow: 1ms;
+  }
+
+  /* The skeleton shimmer loops forever — collapsing its duration alone would strobe. */
+  *, ::before, ::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+@layer base {
+  html {
+    font-family: var(--rb-font-body);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--rb-color-canvas);
+    color: var(--rb-color-fg);
+  }
+
+  /* Balances must not jitter by a pixel when a digit changes under a live update. */
+  .rb-tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: var(--rb-numeric-tabular);
+  }
+}

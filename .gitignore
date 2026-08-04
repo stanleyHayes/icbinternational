@@ -1,0 +1,51 @@
+# dependencies
+node_modules/
+.pnp.*
+.yarn/
+
+# builds
+dist/
+build/
+.next/
+out/
+storybook-static/
+*.tsbuildinfo
+
+# turbo
+.turbo/
+
+# env — NEVER commit real secrets
+.env
+.env.*
+!.env.example
+
+# test & coverage
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+blob-report/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.recommended.json
+
+# local data
+infra/docker/data/
+uploads/
+tmp/
+
+# tooling caches and per-session state — not project source
+.raven/.cache/
+.raven/state/
+.raven/.model-session.json
+.claude/

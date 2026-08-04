@@ -1,0 +1,117 @@
+{
+  "$schema": "https://design-tokens.org/schema.json",
+  "meta": {
+    "brand": "Reliance Bank",
+    "version": "1.0.0",
+    "note": "Single source of truth for colour, type and spacing. packages/ui generates CSS variables and the Tailwind theme from this file."
+  },
+  "color": {
+    "navy": {
+      "50": "#EEF4FA",
+      "100": "#D6E5F2",
+      "200": "#AEC9E4",
+      "300": "#7BA5D0",
+      "400": "#4A7EB4",
+      "500": "#2A5D93",
+      "600": "#164778",
+      "700": "#0B3A63",
+      "800": "#082B49",
+      "900": "#062036",
+      "950": "#04141F"
+    },
+    "green": {
+      "50": "#E6FBF4",
+      "100": "#C2F5E4",
+      "200": "#89EBCB",
+      "300": "#4EDCB0",
+      "400": "#1FCC98",
+      "500": "#00C08B",
+      "600": "#00A578",
+      "700": "#00926A",
+      "800": "#067254",
+      "900": "#075B45"
+    },
+    "gold": {
+      "400": "#E3C86A",
+      "500": "#D8B54A",
+      "600": "#B7963A"
+    },
+    "slate": {
+      "50": "#F7F9FB",
+      "100": "#EDF1F6",
+      "200": "#DDE4EC",
+      "300": "#C3CEDB",
+      "400": "#93A3B6",
+      "500": "#697B90",
+      "600": "#4D5D70",
+      "700": "#3A4757",
+      "800": "#26303C",
+      "900": "#161D26"
+    },
+    "semantic": {
+      "credit": "#00A578",
+      "debit": "#D9534F",
+      "pending": "#D8B54A",
+      "danger": "#C6362F",
+      "warning": "#D98A22",
+      "success": "#00A578",
+      "info": "#2A5D93"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "display": "'Outfit', system-ui, sans-serif",
+      "body": "'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif",
+      "mono": "'JetBrains Mono', 'SFMono-Regular', ui-monospace, monospace",
+      "numeric": "'Outfit', system-ui, sans-serif"
+    },
+    "featureSettings": {
+      "tabularNumerals": "'tnum' 1, 'cv05' 1"
+    },
+    "scale": {
+      "xs": "0.75rem",
+      "sm": "0.875rem",
+      "base": "1rem",
+      "lg": "1.125rem",
+      "xl": "1.25rem",
+      "2xl": "1.5rem",
+      "3xl": "1.875rem",
+      "4xl": "2.5rem",
+      "5xl": "3.25rem",
+      "6xl": "4.25rem"
+    }
+  },
+  "radius": {
+    "sm": "6px",
+    "md": "10px",
+    "lg": "14px",
+    "xl": "20px",
+    "2xl": "28px",
+    "pill": "999px"
+  },
+  "shadow": {
+    "xs": "0 1px 2px rgba(6, 32, 54, 0.06)",
+    "sm": "0 2px 8px rgba(6, 32, 54, 0.08)",
+    "md": "0 8px 24px rgba(6, 32, 54, 0.10)",
+    "lg": "0 20px 48px rgba(6, 32, 54, 0.14)",
+    "card": "0 1px 3px rgba(6, 32, 54, 0.08), 0 12px 32px -12px rgba(6, 32, 54, 0.18)"
+  },
+  "spacing": {
+    "unit": "4px",
+    "gutter": "24px",
+    "sectionY": "96px"
+  },
+  "motion": {
+    "duration": {
+      "instant": "80ms",
+      "fast": "150ms",
+      "base": "240ms",
+      "slow": "420ms"
+    },
+    "easing": {
+      "standard": "cubic-bezier(0.2, 0, 0, 1)",
+      "decelerate": "cubic-bezier(0, 0, 0, 1)",
+      "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+    }
+  }
+}

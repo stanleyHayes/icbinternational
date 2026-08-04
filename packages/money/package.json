@@ -1,0 +1,38 @@
+{
+  "name": "@reliance/money",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Integer-backed, currency-safe monetary value object for Reliance Bank.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "clean": "rimraf dist *.tsbuildinfo",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "@reliance/config": "workspace:*",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "10.8.0",
+    "fast-check": "catalog:",
+    "jest": "catalog:",
+    "rimraf": "6.0.1",
+    "@swc/jest": "catalog:",
+    "@swc/core": "catalog:",
+    "typescript": "catalog:"
+  }
+}

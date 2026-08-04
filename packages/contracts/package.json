@@ -1,0 +1,40 @@
+{
+  "name": "@reliance/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frozen API contract: enums, Zod schemas, DTO types, route paths and error codes shared by the API and all three front ends.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "clean": "rimraf dist *.tsbuildinfo",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --coverage --passWithNoTests"
+  },
+  "dependencies": {
+    "@reliance/money": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@reliance/config": "workspace:*",
+    "@swc/core": "catalog:",
+    "@swc/jest": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "10.8.0",
+    "jest": "catalog:",
+    "rimraf": "6.0.1",
+    "typescript": "catalog:"
+  }
+}

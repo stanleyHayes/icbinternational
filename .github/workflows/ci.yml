@@ -1,0 +1,176 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  # A new push supersedes an in-flight run for the same ref. Reviewers should never be
+  # looking at a green tick from two commits ago.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '11.11.0'
+  TURBO_TELEMETRY_DISABLED: '1'
+
+jobs:
+  # ── Fast feedback: everything that needs no database ──────────────────────
+  static:
+    name: Lint · typecheck · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Turborepo --affected needs history
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      # A "this is a demo" banner is a product defect, so it fails the build like one.
+      - name: Product voice
+        run: pnpm check:voice
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
+  # ── Unit tests with the coverage gate ─────────────────────────────────────
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.11.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '24', cache: pnpm }
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build --filter=@reliance/money --filter=@reliance/contracts
+
+      - name: Test with coverage
+        run: pnpm test
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: '**/coverage/'
+          retention-days: 7
+
+  # ── Integration: the ledger's guarantees only hold against a real replica set ──
+  integration:
+    name: Integration · ledger invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.11.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '24', cache: pnpm }
+
+      - run: pnpm install --frozen-lockfile
+
+      # A standalone mongo would let every test pass and every transaction silently
+      # degrade. The suite is meaningless without a replica set, so CI runs one.
+      - name: Start MongoDB replica set and Redis
+        run: |
+          docker run -d --name ci-mongo -p 27017:27017 mongo:8 \
+            --replSet rs0 --bind_ip_all
+          docker run -d --name ci-redis -p 6379:6379 redis:8-alpine
+          for i in $(seq 1 30); do
+            if docker exec ci-mongo mongosh --quiet --eval \
+              "try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}).ok }" \
+              >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          docker exec ci-mongo mongosh --quiet --eval \
+            "if (!db.runCommand({hello:1}).isWritablePrimary) { quit(1) }"
+
+      - name: Integration tests
+        run: pnpm --filter @reliance/api test
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://localhost:27017/reliancebank_test?replicaSet=rs0&directConnection=true
+          REDIS_URL: redis://localhost:6379
+          JWT_ACCESS_SECRET: ci-access-secret-of-sufficient-length-000000
+          JWT_REFRESH_SECRET: ci-refresh-secret-of-sufficient-length-00000
+          CSRF_SECRET: ci-csrf-secret-000000
+          ENCRYPTION_KEY: ci-encryption-key-of-thirty-two-chars
+
+      - name: Verify the ledger reproduces every balance from its postings
+        run: pnpm ledger:verify
+        env:
+          MONGODB_URI: mongodb://localhost:27017/reliancebank_test?replicaSet=rs0&directConnection=true
+          REDIS_URL: redis://localhost:6379
+          JWT_ACCESS_SECRET: ci-access-secret-of-sufficient-length-000000
+          JWT_REFRESH_SECRET: ci-refresh-secret-of-sufficient-length-00000
+          CSRF_SECRET: ci-csrf-secret-000000
+          ENCRYPTION_KEY: ci-encryption-key-of-thirty-two-chars
+
+      - if: always()
+        run: docker rm -f ci-mongo ci-redis || true
+
+  # ── Supply chain and secrets ──────────────────────────────────────────────
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.11.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '24', cache: pnpm }
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level=high
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── SonarQube: the same rules the local ESLint gate enforces, reported centrally ──
+  sonar:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [unit]
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/download-artifact@v4
+        with: { name: coverage }
+
+      - uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

@@ -1,0 +1,153 @@
+/**
+ * The complete error vocabulary of the Reliance Bank API.
+ *
+ * Clients switch on `code`, never on `message`. Messages are for humans and may be
+ * reworded or localised at any time; codes are part of the contract and changing one is
+ * a breaking change. Every `throw` in the API carries one of these — a bare
+ * `new Error(...)` reaching the exception filter is itself a defect.
+ */
+
+export const ErrorCode = {
+  // --- Generic (4xx) ------------------------------------------------------
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
+  PRECONDITION_FAILED: 'PRECONDITION_FAILED',
+  RATE_LIMITED: 'RATE_LIMITED',
+  UNSUPPORTED_MEDIA_TYPE: 'UNSUPPORTED_MEDIA_TYPE',
+  PAYLOAD_TOO_LARGE: 'PAYLOAD_TOO_LARGE',
+
+  // --- Generic (5xx) ------------------------------------------------------
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+  DEPENDENCY_FAILED: 'DEPENDENCY_FAILED',
+
+  // --- Authentication -----------------------------------------------------
+  UNAUTHENTICATED: 'UNAUTHENTICATED',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+  TOKEN_INVALID: 'TOKEN_INVALID',
+  TOKEN_REUSE_DETECTED: 'TOKEN_REUSE_DETECTED',
+  EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
+  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
+  ACCOUNT_SUSPENDED: 'ACCOUNT_SUSPENDED',
+  EMAIL_ALREADY_REGISTERED: 'EMAIL_ALREADY_REGISTERED',
+  PHONE_ALREADY_REGISTERED: 'PHONE_ALREADY_REGISTERED',
+  // These are error *codes*, not credentials — the scanner matches on the word alone.
+  // eslint-disable-next-line sonarjs/no-hardcoded-passwords
+  PASSWORD_TOO_WEAK: 'PASSWORD_TOO_WEAK',
+  // eslint-disable-next-line sonarjs/no-hardcoded-passwords
+  PASSWORD_REUSED: 'PASSWORD_REUSED',
+
+  // --- MFA / step-up ------------------------------------------------------
+  MFA_REQUIRED: 'MFA_REQUIRED',
+  MFA_INVALID_CODE: 'MFA_INVALID_CODE',
+  MFA_ALREADY_ENROLLED: 'MFA_ALREADY_ENROLLED',
+  MFA_NOT_ENROLLED: 'MFA_NOT_ENROLLED',
+  STEP_UP_REQUIRED: 'STEP_UP_REQUIRED',
+  PASSKEY_VERIFICATION_FAILED: 'PASSKEY_VERIFICATION_FAILED',
+  DEVICE_NOT_TRUSTED: 'DEVICE_NOT_TRUSTED',
+
+  // --- Authorisation ------------------------------------------------------
+  FORBIDDEN: 'FORBIDDEN',
+  PERMISSION_DENIED: 'PERMISSION_DENIED',
+  IP_NOT_ALLOWED: 'IP_NOT_ALLOWED',
+  DUAL_APPROVAL_REQUIRED: 'DUAL_APPROVAL_REQUIRED',
+  SELF_APPROVAL_FORBIDDEN: 'SELF_APPROVAL_FORBIDDEN',
+
+  // --- KYC ----------------------------------------------------------------
+  KYC_REQUIRED: 'KYC_REQUIRED',
+  KYC_PENDING_REVIEW: 'KYC_PENDING_REVIEW',
+  KYC_REJECTED: 'KYC_REJECTED',
+  KYC_TIER_TOO_LOW: 'KYC_TIER_TOO_LOW',
+  KYC_DOCUMENT_INVALID: 'KYC_DOCUMENT_INVALID',
+  SANCTIONS_HIT: 'SANCTIONS_HIT',
+
+  // --- Accounts -----------------------------------------------------------
+  ACCOUNT_NOT_FOUND: 'ACCOUNT_NOT_FOUND',
+  ACCOUNT_CLOSED: 'ACCOUNT_CLOSED',
+  ACCOUNT_FROZEN: 'ACCOUNT_FROZEN',
+  ACCOUNT_DORMANT: 'ACCOUNT_DORMANT',
+  ACCOUNT_NOT_EMPTY: 'ACCOUNT_NOT_EMPTY',
+  ACCOUNT_HAS_ACTIVE_HOLDS: 'ACCOUNT_HAS_ACTIVE_HOLDS',
+  ACCOUNT_LIMIT_REACHED: 'ACCOUNT_LIMIT_REACHED',
+
+  // --- Ledger & money -----------------------------------------------------
+  INSUFFICIENT_FUNDS: 'INSUFFICIENT_FUNDS',
+  CURRENCY_MISMATCH: 'CURRENCY_MISMATCH',
+  UNBALANCED_JOURNAL_ENTRY: 'UNBALANCED_JOURNAL_ENTRY',
+  INVALID_AMOUNT: 'INVALID_AMOUNT',
+  AMOUNT_BELOW_MINIMUM: 'AMOUNT_BELOW_MINIMUM',
+  AMOUNT_ABOVE_MAXIMUM: 'AMOUNT_ABOVE_MAXIMUM',
+  LIMIT_EXCEEDED: 'LIMIT_EXCEEDED',
+  HOLD_NOT_FOUND: 'HOLD_NOT_FOUND',
+  HOLD_ALREADY_RELEASED: 'HOLD_ALREADY_RELEASED',
+  TRANSACTION_NOT_REVERSIBLE: 'TRANSACTION_NOT_REVERSIBLE',
+
+  // --- Idempotency --------------------------------------------------------
+  IDEMPOTENCY_KEY_REQUIRED: 'IDEMPOTENCY_KEY_REQUIRED',
+  IDEMPOTENCY_KEY_REUSED: 'IDEMPOTENCY_KEY_REUSED',
+  IDEMPOTENT_REQUEST_IN_FLIGHT: 'IDEMPOTENT_REQUEST_IN_FLIGHT',
+
+  // --- Transfers & payments ----------------------------------------------
+  BENEFICIARY_NOT_FOUND: 'BENEFICIARY_NOT_FOUND',
+  BENEFICIARY_COOLING_OFF: 'BENEFICIARY_COOLING_OFF',
+  INVALID_ACCOUNT_NUMBER: 'INVALID_ACCOUNT_NUMBER',
+  INVALID_IBAN: 'INVALID_IBAN',
+  INVALID_BIC: 'INVALID_BIC',
+  UNSUPPORTED_CORRIDOR: 'UNSUPPORTED_CORRIDOR',
+  RAIL_UNAVAILABLE: 'RAIL_UNAVAILABLE',
+  RAIL_REJECTED: 'RAIL_REJECTED',
+  CUT_OFF_PASSED: 'CUT_OFF_PASSED',
+  TRANSFER_NOT_CANCELLABLE: 'TRANSFER_NOT_CANCELLABLE',
+  SAME_ACCOUNT_TRANSFER: 'SAME_ACCOUNT_TRANSFER',
+  BILLER_REJECTED: 'BILLER_REJECTED',
+  PAYMENT_REQUEST_EXPIRED: 'PAYMENT_REQUEST_EXPIRED',
+  MANDATE_CANCELLED: 'MANDATE_CANCELLED',
+
+  // --- FX -----------------------------------------------------------------
+  QUOTE_EXPIRED: 'QUOTE_EXPIRED',
+  QUOTE_NOT_FOUND: 'QUOTE_NOT_FOUND',
+  RATE_UNAVAILABLE: 'RATE_UNAVAILABLE',
+
+  // --- Cards --------------------------------------------------------------
+  CARD_NOT_FOUND: 'CARD_NOT_FOUND',
+  CARD_FROZEN: 'CARD_FROZEN',
+  CARD_EXPIRED: 'CARD_EXPIRED',
+  CARD_NOT_ACTIVATED: 'CARD_NOT_ACTIVATED',
+  CARD_CANCELLED: 'CARD_CANCELLED',
+  CARD_CONTROL_BLOCKED: 'CARD_CONTROL_BLOCKED',
+  CARD_LIMIT_EXCEEDED: 'CARD_LIMIT_EXCEEDED',
+  PIN_INCORRECT: 'PIN_INCORRECT',
+  PIN_TRIES_EXCEEDED: 'PIN_TRIES_EXCEEDED',
+  AUTHORISATION_DECLINED: 'AUTHORISATION_DECLINED',
+
+  // --- Credit -------------------------------------------------------------
+  LOAN_NOT_FOUND: 'LOAN_NOT_FOUND',
+  LOAN_NOT_ELIGIBLE: 'LOAN_NOT_ELIGIBLE',
+  LOAN_ALREADY_SETTLED: 'LOAN_ALREADY_SETTLED',
+  OFFER_EXPIRED: 'OFFER_EXPIRED',
+  DEPOSIT_NOT_MATURE: 'DEPOSIT_NOT_MATURE',
+  DEPOSIT_ALREADY_BROKEN: 'DEPOSIT_ALREADY_BROKEN',
+  OVERDRAFT_NOT_AVAILABLE: 'OVERDRAFT_NOT_AVAILABLE',
+
+  // --- Risk ---------------------------------------------------------------
+  BLOCKED_BY_FRAUD_RULE: 'BLOCKED_BY_FRAUD_RULE',
+  BLOCKED_BY_AML_RULE: 'BLOCKED_BY_AML_RULE',
+  DISPUTE_WINDOW_CLOSED: 'DISPUTE_WINDOW_CLOSED',
+  DISPUTE_ALREADY_RAISED: 'DISPUTE_ALREADY_RAISED',
+
+  // --- Platform -----------------------------------------------------------
+  FEATURE_DISABLED: 'FEATURE_DISABLED',
+  MAINTENANCE_MODE: 'MAINTENANCE_MODE',
+  SIMULATION_ONLY: 'SIMULATION_ONLY',
+} as const;
+
+export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
+
+/** Every declared code, for exhaustive tests and admin tooling. */
+export const ERROR_CODES: readonly ErrorCode[] = Object.freeze(Object.values(ErrorCode));
+
+export function isErrorCode(value: unknown): value is ErrorCode {
+  return typeof value === 'string' && (ERROR_CODES as readonly string[]).includes(value);
+}

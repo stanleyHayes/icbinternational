@@ -1,0 +1,10 @@
+{
+  "extends": "@reliance/config/tsconfig/node-library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "lib": ["ES2024", "DOM"],
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*.ts"]
+}

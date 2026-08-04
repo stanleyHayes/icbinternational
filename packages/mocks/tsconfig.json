@@ -1,0 +1,26 @@
+{
+  "extends": "@reliance/config/tsconfig/node-library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "lib": ["ES2024", "DOM"],
+    "types": ["node", "jest"],
+
+    // MSW's exports map sets `"node": null` on `./browser`, so under plain NodeNext
+    // resolution `import { setupWorker } from 'msw/browser'` does not resolve at all —
+    // deliberately, because that entry point is for bundlers, which is exactly how the
+    // Next.js apps consume it.
+    //
+    // `browser` unblocks that subpath. `module` is needed alongside it: without it the
+    // root `msw` import resolves to the CommonJS declarations while `msw/browser`
+    // resolves to the ESM ones, producing two structurally identical but nominally
+    // distinct `RequestHandler` classes — and `setupWorker(...handlers)` then fails to
+    // typecheck against handlers built by `http.get()`. Both conditions together keep
+    // every msw import on one set of declarations.
+    //
+    // Type resolution only. Emitted specifiers are unchanged, so Node still picks
+    // `./node` for `msw/node` and a bundler still picks `./browser`.
+    "customConditions": ["browser", "module"]
+  },
+  "include": ["src/**/*.ts"]
+}

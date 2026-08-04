@@ -1,0 +1,75 @@
+# Reliance Bank — local infrastructure.
+#
+# MongoDB runs as a SINGLE-NODE REPLICA SET, not a standalone. This is not optional:
+# multi-document transactions are unavailable outside a replica set, and every movement
+# of money in this system is a multi-document transaction. A standalone mongo would let
+# the app boot and then silently lose the atomicity the ledger depends on.
+#
+# Email (Resend) and media (Cloudinary) are hosted providers — there are no local
+# stand-ins here. Both sit behind ports with in-memory fakes used by the test suite.
+
+name: reliancebank
+
+services:
+  mongo:
+    image: mongo:8
+    # The container listens on the SAME port it is published on. A replica set advertises
+    # its members by the host:port given to rs.initiate(), and the driver dials that
+    # address directly once `replicaSet=` is in the URI. Publishing 27317→27017 would make
+    # the set advertise localhost:27017 — a port another local stack may well own, so
+    # discovery would either hang for the full serverSelectionTimeoutMS or, far worse,
+    # reach a different project's database. Same number both sides removes the ambiguity.
+    container_name: rb-mongo
+    restart: unless-stopped
+    command: ['--replSet', 'rs0', '--bind_ip_all', '--port', '${MONGO_PORT:-27317}']
+    ports:
+      - '${MONGO_PORT:-27317}:${MONGO_PORT:-27317}'
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    healthcheck:
+      # Initiates the replica set on first boot, then reports healthy once it is primary.
+      test: >
+        mongosh --port ${MONGO_PORT:-27317} --quiet --eval "
+          try { rs.status().ok }
+          catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:${MONGO_PORT:-27317}'}]}).ok }
+        "
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
+
+  redis:
+    image: redis:8-alpine
+    container_name: rb-redis
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    ports:
+      - '${REDIS_PORT:-6579}:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Optional: a browsable view of the ledger while developing. Not used by the app.
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: rb-mongo-express
+    restart: unless-stopped
+    profiles: ['tools']
+    ports:
+      - '${MONGO_EXPRESS_PORT:-8481}:8081'
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:${MONGO_PORT:-27317}/?replicaSet=rs0&directConnection=true
+      ME_CONFIG_BASICAUTH: 'false'
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+volumes:
+  mongo-data:
+  mongo-config:
+  redis-data:

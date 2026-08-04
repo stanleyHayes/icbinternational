@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+@import '@reliance/ui/styles/theme.css';
+@import '@reliance/ui/styles/tailwind-theme.css';
+
+/* Tailwind 4 discovers utilities by scanning source text, and it does not walk into node_modules.
+   Without this the design system's components render unstyled: their class names exist only in
+   `packages/ui`, so nothing here would ever generate the CSS for them. */
+@source '../../../../packages/ui/src';
+
+/* Outfit is loaded by `next/font` and exposed as `--font-outfit`. Repointing the brand's own font
+   variables at it means every component keeps reading the token it already reads, and the
+   self-hosted face is what actually gets used — including for the tabular figures on balances. */
+:root {
+  --rb-font-display: var(--font-outfit), system-ui, sans-serif;
+  --rb-font-body: var(--font-outfit), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --rb-font-numeric: var(--font-outfit), system-ui, sans-serif;
+}
+
+@layer base {
+  /* A bank is read on a phone in bright sun and on a 32-inch monitor at midnight. Smooth the
+     first and stop the second from over-rendering. */
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Anchors and buttons inside long documents should stop under the sticky top bar, not behind
+     it — a customer sent to `#limits` must be able to see the heading they were sent to. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+
+  /* The focus ring is the only thing telling a keyboard user where they are. It is never removed,
+     only replaced by the design system's own, so it survives a stylesheet reset. */
+  :focus-visible {
+    outline: 2px solid var(--rb-color-focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--rb-color-accent-soft);
+  }
+}
+
+@layer components {
+  /* The shell's scrollable regions. A thin, theme-aware bar rather than the platform default,
+     which on Windows is a wide light-grey slab that fights the dark theme. */
+  .rb-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--rb-color-border-strong) transparent;
+  }
+
+  /* Skip link: present in the tab order from the first Tab press, invisible until focused. */
+  .rb-skip-link {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 100;
+    transform: translateY(-200%);
+    transition: transform var(--rb-duration-fast) var(--rb-ease-decelerate);
+  }
+
+  .rb-skip-link:focus-visible {
+    transform: translateY(0);
+  }
+}

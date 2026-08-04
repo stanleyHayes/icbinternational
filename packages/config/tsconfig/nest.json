@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Reliance Bank — NestJS application",
+  "extends": "./base.json",
+  "compilerOptions": {
+    // NodeNext with `"type": "commonjs"` in package.json emits CommonJS, which is what
+    // Nest's decorator-driven DI and CLI expect — while still requiring explicit `.js`
+    // import specifiers, so the same source compiles unchanged if the app ever moves
+    // to ESM. TypeScript 7 removed the old `node10` resolution entirely.
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "rootDir": ".",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    // Nest injects properties after construction, and DTO classes are populated by the
+    // validation pipe; definite-assignment everywhere would be noise, not safety.
+    "strictPropertyInitialization": false,
+    "exactOptionalPropertyTypes": false,
+    "isolatedModules": false,
+    "types": ["node", "jest"]
+  }
+}

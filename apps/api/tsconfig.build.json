@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Only the build emits, so only the build constrains the layout. Typechecking also
+    // covers `test/`, which sits outside `src` and cannot satisfy this.
+    "rootDir": "./src"
+  },
+  "exclude": ["node_modules", "dist", "test", "**/*.test.ts", "**/*.spec.ts"]
+}

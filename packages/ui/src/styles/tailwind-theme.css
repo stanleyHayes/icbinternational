@@ -1,0 +1,132 @@
+/* AUTO-GENERATED from brand/tokens/brand.tokens.json — do not edit.
+   Regenerate with: pnpm --filter @reliance/ui theme */
+
+/* Tailwind 4 consumes design tokens as CSS variables. Import this after theme.css:
+     @import '@reliance/ui/styles/theme.css';
+     @import '@reliance/ui/styles/tailwind-theme.css'; */
+@theme {
+  --color-navy-50: var(--rb-palette-navy-50);
+  --color-navy-100: var(--rb-palette-navy-100);
+  --color-navy-200: var(--rb-palette-navy-200);
+  --color-navy-300: var(--rb-palette-navy-300);
+  --color-navy-400: var(--rb-palette-navy-400);
+  --color-navy-500: var(--rb-palette-navy-500);
+  --color-navy-600: var(--rb-palette-navy-600);
+  --color-navy-700: var(--rb-palette-navy-700);
+  --color-navy-800: var(--rb-palette-navy-800);
+  --color-navy-900: var(--rb-palette-navy-900);
+  --color-navy-950: var(--rb-palette-navy-950);
+  --color-green-50: var(--rb-palette-green-50);
+  --color-green-100: var(--rb-palette-green-100);
+  --color-green-200: var(--rb-palette-green-200);
+  --color-green-300: var(--rb-palette-green-300);
+  --color-green-400: var(--rb-palette-green-400);
+  --color-green-500: var(--rb-palette-green-500);
+  --color-green-600: var(--rb-palette-green-600);
+  --color-green-700: var(--rb-palette-green-700);
+  --color-green-800: var(--rb-palette-green-800);
+  --color-green-900: var(--rb-palette-green-900);
+  --color-gold-400: var(--rb-palette-gold-400);
+  --color-gold-500: var(--rb-palette-gold-500);
+  --color-gold-600: var(--rb-palette-gold-600);
+  --color-slate-50: var(--rb-palette-slate-50);
+  --color-slate-100: var(--rb-palette-slate-100);
+  --color-slate-200: var(--rb-palette-slate-200);
+  --color-slate-300: var(--rb-palette-slate-300);
+  --color-slate-400: var(--rb-palette-slate-400);
+  --color-slate-500: var(--rb-palette-slate-500);
+  --color-slate-600: var(--rb-palette-slate-600);
+  --color-slate-700: var(--rb-palette-slate-700);
+  --color-slate-800: var(--rb-palette-slate-800);
+  --color-slate-900: var(--rb-palette-slate-900);
+  --color-credit: var(--rb-palette-credit);
+  --color-debit: var(--rb-palette-debit);
+  --color-pending: var(--rb-palette-pending);
+  --color-danger: var(--rb-palette-danger);
+  --color-warning: var(--rb-palette-warning);
+  --color-success: var(--rb-palette-success);
+  --color-info: var(--rb-palette-info);
+  --color-canvas: var(--rb-color-canvas);
+  --color-surface: var(--rb-color-surface);
+  --color-surface-raised: var(--rb-color-surface-raised);
+  --color-surface-sunken: var(--rb-color-surface-sunken);
+  --color-surface-inverse: var(--rb-color-surface-inverse);
+  --color-border: var(--rb-color-border);
+  --color-border-strong: var(--rb-color-border-strong);
+  --color-fg: var(--rb-color-fg);
+  --color-fg-muted: var(--rb-color-fg-muted);
+  --color-fg-subtle: var(--rb-color-fg-subtle);
+  --color-fg-inverse: var(--rb-color-fg-inverse);
+  --color-accent: var(--rb-color-accent);
+  --color-accent-hover: var(--rb-color-accent-hover);
+  --color-accent-active: var(--rb-color-accent-active);
+  --color-accent-fg: var(--rb-color-accent-fg);
+  --color-ink: var(--rb-color-ink);
+  --color-ink-hover: var(--rb-color-ink-hover);
+  --color-credit: var(--rb-color-credit);
+  --color-debit: var(--rb-color-debit);
+  --color-pending: var(--rb-color-pending);
+  --color-danger-solid: var(--rb-color-danger-solid);
+  --color-on-solid: var(--rb-color-on-solid);
+  --color-success: var(--rb-color-success);
+  --color-danger: var(--rb-color-danger);
+  --color-warning: var(--rb-color-warning);
+  --color-info: var(--rb-color-info);
+  --color-focus: var(--rb-color-focus);
+  --color-skeleton: var(--rb-color-skeleton);
+  --color-overlay: var(--rb-color-overlay);
+  --color-accent-soft: var(--rb-color-accent-soft);
+  --color-ink-soft: var(--rb-color-ink-soft);
+  --color-credit-soft: var(--rb-color-credit-soft);
+  --color-debit-soft: var(--rb-color-debit-soft);
+  --color-pending-soft: var(--rb-color-pending-soft);
+  --color-success-soft: var(--rb-color-success-soft);
+  --color-danger-soft: var(--rb-color-danger-soft);
+  --color-warning-soft: var(--rb-color-warning-soft);
+  --color-info-soft: var(--rb-color-info-soft);
+
+  --font-display: var(--rb-font-display);
+  --font-body: var(--rb-font-body);
+  --font-mono: var(--rb-font-mono);
+  --font-numeric: var(--rb-font-numeric);
+  --text-xs: var(--rb-text-xs);
+  --text-sm: var(--rb-text-sm);
+  --text-base: var(--rb-text-base);
+  --text-lg: var(--rb-text-lg);
+  --text-xl: var(--rb-text-xl);
+  --text-2xl: var(--rb-text-2xl);
+  --text-3xl: var(--rb-text-3xl);
+  --text-4xl: var(--rb-text-4xl);
+  --text-5xl: var(--rb-text-5xl);
+  --text-6xl: var(--rb-text-6xl);
+  --radius-sm: var(--rb-radius-sm);
+  --radius-md: var(--rb-radius-md);
+  --radius-lg: var(--rb-radius-lg);
+  --radius-xl: var(--rb-radius-xl);
+  --radius-2xl: var(--rb-radius-2xl);
+  --radius-pill: var(--rb-radius-pill);
+  --shadow-xs: var(--rb-shadow-xs);
+  --shadow-sm: var(--rb-shadow-sm);
+  --shadow-md: var(--rb-shadow-md);
+  --shadow-lg: var(--rb-shadow-lg);
+  --shadow-card: var(--rb-shadow-card);
+  --ease-standard: var(--rb-ease-standard);
+  --ease-decelerate: var(--rb-ease-decelerate);
+  --ease-spring: var(--rb-ease-spring);
+  --spacing-gutter: var(--rb-space-gutter);
+  --spacing-section: var(--rb-space-section-y);
+
+  --animate-fade-in: rb-fade-in var(--rb-duration-fast) var(--rb-ease-decelerate);
+  --animate-scale-in: rb-scale-in var(--rb-duration-base) var(--rb-ease-spring);
+  --animate-slide-up: rb-slide-up var(--rb-duration-base) var(--rb-ease-decelerate);
+  --animate-skeleton: rb-skeleton var(--rb-duration-slow) var(--rb-ease-standard) infinite;
+
+  @keyframes rb-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes rb-scale-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+  @keyframes rb-slide-up { from { opacity: 0; transform: translateY(0.5rem); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes rb-skeleton { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+}
+
+/* Roles already follow the OS preference via theme.css, so `dark:` only needs to track the
+   explicit choice — a system-mode user on a dark OS is already dark, attribute or not. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));

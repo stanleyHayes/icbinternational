@@ -1,0 +1,82 @@
+@import 'tailwindcss';
+@import '@reliance/ui/styles/theme.css';
+@import '@reliance/ui/styles/tailwind-theme.css';
+
+/* Tailwind scans the app tree automatically but stops at package boundaries, so the
+   design system's own class names have to be pointed at explicitly. Both trees are
+   listed because the package resolves to `dist` in a build and to `src` under the
+   workspace's transpile setting. */
+@source '../../../../packages/ui/dist';
+@source '../../../../packages/ui/src';
+
+/* The brand's faces, loaded by `app/layout.tsx` and bound to the design system's own
+   font roles so every component picks them up without knowing they came from Next. */
+:root {
+  --rb-font-display: var(--font-outfit), system-ui, sans-serif;
+  --rb-font-body: var(--font-outfit), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --rb-font-numeric: var(--font-outfit), system-ui, sans-serif;
+  --rb-font-mono: var(--font-jetbrains-mono), 'SFMono-Regular', ui-monospace, monospace;
+}
+
+/* Operational density.
+
+   The customer app breathes; this one does not. An operator works a queue for eight
+   hours and every row the chrome pushes below the fold is a row they have to scroll to
+   reach, so the console tightens the vertical rhythm the design system ships with. It
+   tightens spacing only — type sizes, colour roles and focus treatment are untouched,
+   because those are what make the two applications recognisably the same bank. */
+@layer base {
+  html {
+    /* No smooth scrolling in a tool that is driven from the keyboard: an operator paging
+       a queue wants the next screenful now, not an animation of it arriving. */
+    scroll-behavior: auto;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--rb-color-canvas);
+    color: var(--rb-color-fg);
+    font-family: var(--rb-font-body);
+    font-size: var(--rb-text-sm);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Money and identifiers must not jitter as a table refreshes under the operator. */
+  table,
+  [data-tabular] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A dense table gets a thin, unobtrusive scrollbar; the default macOS overlay bar is
+     invisible until it moves, which hides how much of a long queue is left. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--rb-color-border-strong) transparent;
+  }
+}
+
+@layer utilities {
+  /* Sticky first column, for wide reconciliation and ledger tables where the row's
+     identity has to stay on screen while the operator scrolls right through its figures. */
+  .rb-sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--rb-color-surface);
+  }
+}
+
+/* An operator who has asked their operating system to reduce motion has usually done so
+   because motion makes the screen harder to work with, which matters more here than
+   anywhere else in the bank. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

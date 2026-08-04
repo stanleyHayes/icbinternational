@@ -1,0 +1,11 @@
+{
+  "extends": "@reliance/config/tsconfig/nest.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    // The app root, not `src`: typechecking also covers `test/`. The build narrows this
+    // back to `src` so `dist` keeps its flat layout — see tsconfig.build.json.
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

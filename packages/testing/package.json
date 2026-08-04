@@ -1,0 +1,48 @@
+{
+  "name": "@reliance/testing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Test harness for Reliance Bank: seeded faker, contract-valid data builders, custom Jest matchers and an isolated MongoDB database-per-suite harness.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./jest.setup": {
+      "types": "./dist/jest.setup.d.ts",
+      "default": "./dist/jest.setup.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "clean": "rimraf dist *.tsbuildinfo",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@faker-js/faker": "catalog:",
+    "@reliance/contracts": "workspace:*",
+    "@reliance/money": "workspace:*",
+    "mongoose": "catalog:",
+    "ulid": "catalog:"
+  },
+  "devDependencies": {
+    "@reliance/config": "workspace:*",
+    "@swc/core": "catalog:",
+    "@swc/jest": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "10.8.0",
+    "jest": "catalog:",
+    "rimraf": "6.0.1",
+    "typescript": "catalog:"
+  }
+}

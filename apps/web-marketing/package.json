@@ -1,0 +1,51 @@
+{
+  "name": "@reliance/web-marketing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reliance Bank public site.",
+  "scripts": {
+    "dev": "next dev --turbopack --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "clean": "rimraf .next coverage *.tsbuildinfo",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "@reliance/api-client": "workspace:*",
+    "@reliance/contracts": "workspace:*",
+    "@reliance/money": "workspace:*",
+    "@reliance/ui": "workspace:*",
+    "@tanstack/react-query": "5.101.4",
+    "lucide-react": "1.28.0",
+    "next": "catalog:",
+    "next-cloudinary": "catalog:",
+    "next-themes": "0.4.6",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@reliance/config": "workspace:*",
+    "@reliance/mocks": "workspace:*",
+    "@swc/core": "catalog:",
+    "@swc/jest": "catalog:",
+    "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/jest-dom": "7.0.0",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.1",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "eslint": "10.8.0",
+    "jest": "catalog:",
+    "jest-environment-jsdom": "30.4.1",
+    "msw": "2.15.0",
+    "rimraf": "6.0.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "catalog:"
+  }
+}

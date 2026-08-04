@@ -1,0 +1,40 @@
+{
+  "name": "@reliance/api-client",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Typed fetch client for the Reliance Bank API: cookie auth, shared refresh-on-401, idempotency keys and contract-validated responses.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "clean": "rimraf dist *.tsbuildinfo",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --coverage --passWithNoTests"
+  },
+  "dependencies": {
+    "@reliance/contracts": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@reliance/config": "workspace:*",
+    "@swc/core": "catalog:",
+    "@swc/jest": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "10.8.0",
+    "jest": "catalog:",
+    "rimraf": "6.0.1",
+    "typescript": "catalog:"
+  }
+}
