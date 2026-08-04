@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { IdGenerator } from '../../../common/ids/id-generator.js';
+import { RbacModule } from '../../rbac/rbac.module.js';
 
+import { AdminCustomersController } from './admin-customers.controller.js';
 import { User, UserSchema } from './schemas/user.schema.js';
 import { UserRepository } from './user.repository.js';
 import { UsersService } from './users.service.js';
@@ -15,7 +17,8 @@ import { UsersService } from './users.service.js';
  * on `UsersService` would add indirection without adding a rule.
  */
 @Module({
-  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
+  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), RbacModule],
+  controllers: [AdminCustomersController],
   providers: [UsersService, UserRepository, IdGenerator],
   exports: [UsersService, UserRepository, MongooseModule],
 })

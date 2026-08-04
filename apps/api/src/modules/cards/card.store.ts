@@ -114,6 +114,12 @@ export interface CardQuery {
   readonly limit: number;
 }
 
+/** Admin-side card listing — no userId filter. */
+export interface AdminCardQuery {
+  readonly cursor?: string;
+  readonly limit: number;
+}
+
 /** Live cards whose validity has run out. Feeds the expiry sweep. */
 export interface ExpiredCardQuery {
   readonly asOf: Date;
@@ -152,6 +158,9 @@ export abstract class CardStore {
     exceptCardId: string;
     session?: ClientSession;
   }): Promise<void>;
+
+  /** Every card in the system, admin-only — newest first. */
+  abstract listAdmin(query: AdminCardQuery): Promise<{ records: CardRecord[] }>;
 
   /** Live cards past their expiry date, oldest first. */
   abstract listExpired(query: ExpiredCardQuery): Promise<CardRecord[]>;

@@ -6,6 +6,7 @@ import { IdGenerator } from '../../common/ids/id-generator.js';
 
 import {
   HoldStore,
+  type AdminHoldQuery,
   type ExpiredHoldQuery,
   type HoldRecord,
   type NewHold,
@@ -74,6 +75,14 @@ export class InMemoryHoldStore extends HoldStore {
       .filter((hold) => hold.expiresAt !== null && hold.expiresAt.getTime() <= query.asOf.getTime())
       .sort((left, right) => expiryOf(left) - expiryOf(right))
       .slice(0, query.limit);
+  }
+
+  override async listAdmin(query: AdminHoldQuery): Promise<HoldRecord[]> {
+    const all = [...this.byId.values()].sort(
+      (left, right) => right.placedAt.getTime() - left.placedAt.getTime(),
+    );
+    const startIdx = query.cursor ? all.findIndex((h) => h.id === query.cursor) + 1 : 0;
+    return all.slice(startIdx, startIdx + query.limit + 1);
   }
 
   /** Every stored hold, for assertions. */

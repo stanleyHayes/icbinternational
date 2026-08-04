@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Res } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { type Response } from 'express';
 import { Connection, ConnectionStates } from 'mongoose';
 
 import { routes } from '@reliance/contracts';
@@ -45,6 +46,26 @@ export class HealthController {
       status: ready ? 'ready' : 'not_ready',
       checks: { database },
     };
+  }
+
+  @Get(routes.system.metrics)
+  metrics(@Res({ passthrough: true }) response: Response): string {
+    response.type('text/plain; version=0.0.4; charset=utf-8');
+
+    const databaseConnected = this.connection.readyState === ConnectionStates.connected ? 1 : 0;
+    const lines = [
+      '# HELP reliance_process_uptime_seconds Process uptime in seconds.',
+      '# TYPE reliance_process_uptime_seconds gauge',
+      `reliance_process_uptime_seconds ${Math.floor(process.uptime())}`,
+      '# HELP reliance_clock_offset_seconds Simulated clock offset from wall time in seconds.',
+      '# TYPE reliance_clock_offset_seconds gauge',
+      `reliance_clock_offset_seconds ${this.clock.offsetSeconds}`,
+      '# HELP reliance_mongodb_connected Whether MongoDB is currently connected.',
+      '# TYPE reliance_mongodb_connected gauge',
+      `reliance_mongodb_connected ${databaseConnected}`,
+    ];
+
+    return `${lines.join('\n')}\n`;
   }
 
   /**

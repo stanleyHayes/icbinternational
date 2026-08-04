@@ -15,10 +15,17 @@ export { RequirePermission } from './require-permission.decorator.js';
 export { AdminEndpoint } from './admin-endpoint.decorator.js';
 export { CurrentAdmin } from './current-admin.decorator.js';
 
-// Services for the admin login flow (A-05/K-01) and the seed lane (L-01).
+// Services for the sign-in flow and the seed lane (L-01).
 export { AdminTokenService } from './admin-token.service.js';
-export { AdminUserService, type ProvisionAdminInput } from './admin-user.service.js';
+export {
+  AdminUserService,
+  type ProvisionAdminInput,
+  type ProvisionOutcome,
+} from './admin-user.service.js';
 export { RoleSyncService } from './role-sync.service.js';
+
+// The wire surface of a staff session, for anything that has to speak to it.
+export { ADMIN_ACCESS_COOKIE, ADMIN_LOGOUT_ROUTE } from './rbac.constants.js';
 
 // The catalogue, for anything that lists roles without a database.
 export { ROLE_PERMISSIONS, permissionsForRoles } from './role-catalog.js';

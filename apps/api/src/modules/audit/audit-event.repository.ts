@@ -57,9 +57,50 @@ export class AuditEventRepository {
     return this.model.find({ entity, entityId }).sort({ sequence: -1 }).limit(limit).exec();
   }
 
+  /**
+   * Cursor-paginated query for the admin audit log.
+   *
+   * Cursor is a sequence number — events are naturally ordered that way and the number
+   * does not change under concurrent inserts, so it is stable.
+   */
+  async query(params: AuditEventQuery): Promise<AuditEventDoc[]> {
+    const filter: Record<string, unknown> = {};
+
+    if (params.cursor) {
+      filter['sequence'] = { $lt: Number(params.cursor) };
+    }
+    if (params.actorId) filter['actorId'] = params.actorId;
+    if (params.entity) filter['entity'] = params.entity;
+    if (params.entityId) filter['entityId'] = params.entityId;
+    if (params.action) filter['action'] = { $regex: params.action, $options: 'i' };
+    if (params.from || params.to) {
+      filter['at'] = {
+        ...(params.from ? { $gte: new Date(params.from) } : {}),
+        ...(params.to ? { $lte: new Date(params.to) } : {}),
+      };
+    }
+
+    return this.model
+      .find(filter)
+      .sort({ sequence: -1 })
+      .limit(params.limit)
+      .exec();
+  }
+
   async countAll(): Promise<number> {
     return this.model.countDocuments().exec();
   }
+}
+
+export interface AuditEventQuery {
+  cursor?: string;
+  limit: number;
+  actorId?: string;
+  entity?: string;
+  entityId?: string;
+  action?: string;
+  from?: string;
+  to?: string;
 }
 
 /** Fields supplied on insert. `sequence`, `previousHash` and `hash` are computed upstream. */

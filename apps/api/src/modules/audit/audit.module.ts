@@ -3,7 +3,9 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { IdGenerator } from '../../common/ids/id-generator.js';
+import { RbacModule } from '../rbac/rbac.module.js';
 
+import { AuditAdminController } from './audit-admin.controller.js';
 import { AuditEventRepository } from './audit-event.repository.js';
 import { AuditEventDocument, AuditEventSchema } from './audit-event.schema.js';
 import { AuditVerifierService } from './audit-verifier.service.js';
@@ -24,7 +26,9 @@ import { AuditService } from './audit.service.js';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: AuditEventDocument.name, schema: AuditEventSchema }]),
+    RbacModule,
   ],
+  controllers: [AuditAdminController],
   providers: [
     AuditEventRepository,
     AuditService,

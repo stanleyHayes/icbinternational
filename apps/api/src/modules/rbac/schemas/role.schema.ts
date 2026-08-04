@@ -20,8 +20,14 @@ export class RoleDocument {
   @Prop({ type: String, required: true, unique: true, immutable: true, index: true })
   id!: string;
 
-  /** Contract `AdminRole` value; also the natural key the sync upserts on. */
-  @Prop({ type: String, required: true, unique: true, immutable: true })
+  /**
+   * Contract `AdminRole` value; also the natural key the sync upserts on.
+   *
+   * Uniqueness is declared once, on the named index below. Declaring it here as well
+   * asked Mongo to build the same key twice under two names, which it refuses — and the
+   * refusal only surfaces when something actually waits for the index build.
+   */
+  @Prop({ type: String, required: true, immutable: true })
   name!: string;
 
   @Prop({ type: String, required: true })

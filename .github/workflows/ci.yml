@@ -45,6 +45,11 @@ jobs:
       - name: Product voice
         run: pnpm check:voice
 
+      # A route the contract promises and no controller serves is a screen that breaks in
+      # front of a customer. 77 of them accumulated before anything checked.
+      - name: Route coverage
+        run: pnpm check:routes
+
       - name: Lint
         run: pnpm lint
 
@@ -70,7 +75,7 @@ jobs:
       - run: pnpm build --filter=@reliance/money --filter=@reliance/contracts
 
       - name: Test with coverage
-        run: pnpm test
+        run: pnpm test:cov
 
       - uses: actions/upload-artifact@v4
         if: always()

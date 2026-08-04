@@ -3,6 +3,8 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { Permission, routes, type TrialBalance } from '@reliance/contracts';
 import { isCurrencyCode, type CurrencyCode } from '@reliance/money';
 
+import { AdminAuthGuard } from '../rbac/admin-auth.guard.js';
+
 import { AdminPermissionGuard } from './admin-permission.guard.js';
 import { RequireAdminPermission } from './require-admin-permission.decorator.js';
 import { TrialBalanceService } from './trial-balance.service.js';
@@ -14,7 +16,10 @@ import { TrialBalanceService } from './trial-balance.service.js';
  * that must sum to zero, and says so (`balanced`) when it does not.
  */
 @Controller()
-@UseGuards(AdminPermissionGuard)
+// `AdminAuthGuard` first: it is what puts `adminPermissions` on the request.
+// Without it `AdminPermissionGuard` fails closed and every route here 401s, even
+// for a SUPER_ADMIN holding the permission — which is exactly what happened.
+@UseGuards(AdminAuthGuard, AdminPermissionGuard)
 export class TrialBalanceController {
   constructor(private readonly service: TrialBalanceService) {}
 

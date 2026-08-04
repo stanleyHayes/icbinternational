@@ -13,10 +13,10 @@ import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono, Outfit } from 'next/font/google';
 import type { ReactNode } from 'react';
 
-import { THEME_INIT_SCRIPT } from '@reliance/ui';
+import { THEME_INIT_SCRIPT, tokens } from '@reliance/ui';
 
 import { AppFrame } from '@/components/shell/app-frame';
-import { BANK_NAME } from '@/lib/env';
+import { BANK_NAME, CONSOLE_URL } from '@/lib/env';
 
 import { Providers } from './providers';
 
@@ -35,6 +35,9 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  // Absolute base for the icon and Open Graph URLs. Without it Next resolves them against
+  // localhost and reports it only as a build-time warning.
+  metadataBase: new URL(CONSOLE_URL),
   title: {
     default: `Operations · ${BANK_NAME}`,
     template: `%s · Operations · ${BANK_NAME}`,
@@ -44,6 +47,18 @@ export const metadata: Metadata = {
   referrer: 'same-origin',
   applicationName: `${BANK_NAME} Operations`,
   formatDetection: { telephone: false, email: false, address: false },
+  // Set despite `noindex`, because a chat unfurler reads neither that nor `robots.txt`.
+  // See `opengraph-image.tsx` for why a fixed card beats whatever it would scrape.
+  openGraph: {
+    type: 'website',
+    siteName: `${BANK_NAME} Operations`,
+    title: `Operations · ${BANK_NAME}`,
+    description: 'Staff access only.',
+    url: CONSOLE_URL,
+    locale: 'en_GB',
+  },
+  twitter: { card: 'summary_large_image' },
+  appleWebApp: { capable: true, title: 'RB Operations', statusBarStyle: 'black-translucent' },
 };
 
 export const viewport: Viewport = {
@@ -53,6 +68,14 @@ export const viewport: Viewport = {
   // prevents that.
   maximumScale: 5,
   colorScheme: 'light dark',
+  // The address bar and task-switcher colour. Read by the operating system before any
+  // stylesheet exists, so it cannot come from a CSS variable — but it comes from the same
+  // brand tokens the stylesheet is generated from, so the chrome cannot drift from the
+  // canvas beneath it.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: tokens.color.slate['50'] },
+    { media: '(prefers-color-scheme: dark)', color: tokens.color.navy['950'] },
+  ],
 };
 
 /** Wraps every route in the console. */

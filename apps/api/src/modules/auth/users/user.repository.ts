@@ -22,6 +22,17 @@ export class UserRepository extends BaseRepository<User> {
   }
 
   /**
+   * Paginates all customers for the admin console's customer list.
+   *
+   * Cursor is the customer's `id` field. Results are ordered by `createdAt DESC`
+   * so newer sign-ups appear first.
+   */
+  async listPaginated(query: AdminCustomerQuery): Promise<UserDocument[]> {
+    const filter: QueryFilter<User> = query.cursor ? ({ id: { $lt: query.cursor } } as QueryFilter<User>) : {};
+    return this.find(filter, { sort: { createdAt: -1 }, limit: query.limit }) as Promise<UserDocument[]>;
+  }
+
+  /**
    * Reads a user without any credential material.
    *
    * @param email Already normalised to lower case by the contract schema.
@@ -99,6 +110,12 @@ export type InsertUserResult =
 
 /** The fields a sign-up can collide on. */
 export type UniqueUserField = 'email' | 'phone';
+
+/** Admin-side paginated customer query (no userId scope). */
+export interface AdminCustomerQuery {
+  readonly cursor?: string;
+  readonly limit: number;
+}
 
 const DUPLICATE_KEY_CODE = 11_000;
 

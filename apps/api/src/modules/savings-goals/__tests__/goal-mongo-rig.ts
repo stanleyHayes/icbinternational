@@ -60,7 +60,13 @@ const CONNECT_TIMEOUT_MS = 3000;
  *
  * A counter rather than a timestamp: the wall clock is banned in this tree, and two rigs
  * built in the same millisecond would collide on one anyway.
+ *
+ * The counter is module state, so it restarts at zero in every Jest worker. Pairing it with
+ * `JEST_WORKER_ID` is what makes the name unique across the run rather than merely within
+ * one process — see the same note in `modules/transfers/__tests__/mongo-rig.ts`, where two
+ * workers sharing a database surfaced as a phantom concurrency failure.
  */
+const WORKER_ID = process.env['JEST_WORKER_ID'] ?? '0';
 let databaseSuffix = 0;
 
 /** Reports whether a replica set is reachable, so the suite can skip rather than fail. */
@@ -86,7 +92,7 @@ export async function goalRig(): Promise<GoalRig> {
   databaseSuffix += 1;
   const connection = createConnection(uri(), {
     serverSelectionTimeoutMS: CONNECT_TIMEOUT_MS,
-    dbName: `reliance_test_goals_${databaseSuffix}`,
+    dbName: `reliance_test_goals_w${WORKER_ID}_${databaseSuffix}`,
   });
   await connection.asPromise();
 

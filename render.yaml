@@ -1,0 +1,238 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Reliance Bank — Render Blueprint
+#
+#  Defines the core banking API as a Render Web Service.
+#
+#  External services:
+#    • MongoDB Atlas — must be a replica set; standalone disables transactions
+#    • Redis         — provisioned automatically as a Render Key Value service by this blueprint
+#
+#  Quick start:
+#    1. Fork/push this repo to GitHub
+#    2. In Render dashboard → New → Blueprint and point at this repo
+#    3. Fill in the environment variables marked sync: false below
+#    4. After the first deploy, run the seed once:
+#         render run --service reliance-api -- node apps/api/dist/seed/run-seed.js
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  - type: keyvalue
+    name: reliance-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+
+  - type: web
+    name: reliance-api
+    runtime: node
+    region: oregon          # Change to your preferred region
+    plan: starter           # Upgrade to standard for always-on (no spin-down)
+    branch: main
+
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @reliance/contracts... build && pnpm --filter @reliance/money... build && pnpm --filter @reliance/api build
+    startCommand: cd apps/api && node --enable-source-maps dist/main.js
+
+    healthCheckPath: /v1/health/ready
+
+    # Scale down to one instance; the ledger uses Mongo transactions for safety
+    # not Redis locking, so horizontal scale is safe but not needed at start.
+    numInstances: 1
+    autoDeploy: true
+
+    envVars:
+      # ── Runtime ──────────────────────────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+
+      - key: LOG_LEVEL
+        value: info
+
+      # Render injects PORT automatically; the app reads it from config.
+      # TRUST_PROXY: set to "1" to trust exactly one hop (Render's load balancer).
+      - key: TRUST_PROXY
+        value: "1"
+
+      # ── Service URLs ─────────────────────────────────────────────────────────
+      # Set these to your actual deployed domains.
+      - key: API_URL
+        sync: false   # e.g. https://reliance-api.onrender.com
+
+      - key: WEB_MARKETING_URL
+        sync: false   # e.g. https://www.yourdomain.com
+
+      - key: WEB_CLIENT_URL
+        sync: false   # e.g. https://app.yourdomain.com
+
+      - key: WEB_ADMIN_URL
+        sync: false   # e.g. https://operations.yourdomain.com
+
+      # ── Database ─────────────────────────────────────────────────────────────
+      # MongoDB Atlas free tier (M0) does not support replica sets.
+      # Use M10 or above — or a free shared cluster on Atlas that enables replica sets.
+      # Format: mongodb+srv://<user>:<pass>@cluster.mongodb.net/reliancebank?replicaSet=rs0
+      - key: MONGODB_URI
+        sync: false
+
+      - key: MONGODB_DB
+        value: reliancebank
+
+      # Redis — Render's managed Redis service is provisioned by this blueprint.
+      # The connection string is injected automatically after the service is created.
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: reliance-redis
+          property: connectionString
+
+      # ── Auth ─────────────────────────────────────────────────────────────────
+      # Generate each with:  openssl rand -base64 48
+      - key: JWT_ACCESS_SECRET
+        sync: false
+
+      - key: JWT_REFRESH_SECRET
+        sync: false
+
+      - key: JWT_ACCESS_TTL
+        value: 15m
+
+      - key: JWT_REFRESH_TTL
+        value: 30d
+
+      - key: STEP_UP_TTL
+        value: 5m
+
+      # Set to your deployed API's public hostname (no protocol, no trailing slash).
+      # e.g. reliance-api.onrender.com  — used as the cookie domain.
+      - key: COOKIE_DOMAIN
+        sync: false
+
+      - key: COOKIE_SECURE
+        value: "true"
+
+      # Generate with:  openssl rand -base64 32
+      - key: CSRF_SECRET
+        sync: false
+
+      # Argon2id cost — OWASP minimums; raise memory before time.
+      - key: ARGON2_MEMORY_KIB
+        value: "19456"
+
+      - key: ARGON2_TIME_COST
+        value: "2"
+
+      - key: ARGON2_PARALLELISM
+        value: "1"
+
+      # AES-256-GCM key for PII field encryption.
+      # Generate with:  openssl rand -base64 32
+      - key: ENCRYPTION_KEY
+        sync: false
+
+      # ── Email — Resend ────────────────────────────────────────────────────────
+      # Leave empty to log emails to stdout instead of sending.
+      - key: RESEND_API_KEY
+        sync: false
+
+      - key: RESEND_WEBHOOK_SECRET
+        sync: false
+
+      - key: MAIL_FROM
+        value: "Reliance Bank <no-reply@yourdomain.com>"
+
+      - key: MAIL_REPLY_TO
+        value: support@yourdomain.com
+
+      # ── Media — Cloudinary ────────────────────────────────────────────────────
+      # Leave empty to use the local fake (no real uploads).
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+
+      - key: CLOUDINARY_API_KEY
+        sync: false
+
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      - key: CLOUDINARY_UPLOAD_FOLDER
+        value: reliancebank/prod
+
+      - key: CLOUDINARY_SIGNED_URL_TTL
+        value: "300"
+
+      # ── Web Push — VAPID ─────────────────────────────────────────────────────
+      # Generate with:  npx web-push generate-vapid-keys
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+
+      - key: VAPID_SUBJECT
+        value: mailto:support@yourdomain.com
+
+      # ── Bank identity ─────────────────────────────────────────────────────────
+      - key: BANK_NAME
+        value: "Reliance Bank"
+
+      - key: BANK_CODE
+        value: RLNC
+
+      - key: BANK_BIC
+        value: RLNCGB2LXXX
+
+      - key: BANK_COUNTRY
+        value: GB
+
+      - key: BANK_SORT_CODE
+        value: "049921"
+
+      - key: BASE_CURRENCY
+        value: GBP
+
+      - key: SUPPORTED_CURRENCIES
+        value: "GBP,USD,EUR,NGN,GHS,KES,ZAR,JPY,CAD,AUD"
+
+      # ── Simulation ────────────────────────────────────────────────────────────
+      - key: SIM_CLOCK_ENABLED
+        value: "true"
+
+      - key: SIM_SEED
+        value: reliance-prod
+
+      - key: SIM_RAIL_FAILURE_BPS
+        value: "300"
+
+      - key: SIM_RAIL_LATENCY_MIN_MS
+        value: "250"
+
+      - key: SIM_RAIL_LATENCY_MAX_MS
+        value: "2500"
+
+      # ── Feature flags ─────────────────────────────────────────────────────────
+      - key: FEATURE_BUSINESS_BANKING
+        value: "true"
+
+      - key: FEATURE_INVESTMENTS
+        value: "false"
+
+      - key: FEATURE_PASSKEYS
+        value: "true"
+
+      # ── Rate limiting ─────────────────────────────────────────────────────────
+      - key: RATE_LIMIT_WINDOW_SECONDS
+        value: "60"
+
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "120"
+
+      - key: LOGIN_MAX_ATTEMPTS
+        value: "5"
+
+      - key: LOGIN_LOCKOUT_MINUTES
+        value: "15"
+
+      # ── Observability ─────────────────────────────────────────────────────────
+      - key: SENTRY_DSN
+        sync: false
+
+      - key: METRICS_ENABLED
+        value: "true"

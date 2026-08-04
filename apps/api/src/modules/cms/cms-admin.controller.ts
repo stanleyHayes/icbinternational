@@ -18,7 +18,7 @@ import { Audited } from '../audit/index.js';
 import { AdminEndpoint, CurrentAdmin, type AdminPrincipal } from '../rbac/index.js';
 
 import { toContentDetail, toContentSummary, toRevisionSummary } from './cms-admin.presenter.js';
-import { PREVIEW_TOKEN_TTL_SECONDS } from './cms.constants.js';
+import { ContentKind, PREVIEW_TOKEN_TTL_SECONDS } from './cms.constants.js';
 import {
   contentActionRequestSchema,
   createContentRequestSchema,
@@ -175,5 +175,48 @@ export class CmsAdminController {
     });
 
     return toContentDetail(updated);
+  }
+
+  /**
+   * Kind-filtered listing helpers.
+   *
+   * The generic `/admin/cms/pages` endpoint accepts a `kind` query parameter, but the
+   * console's per-kind screens each call a dedicated URL so the path communicates intent
+   * and a bookmark goes directly to the right view.
+   */
+  @Get(routes.admin.cmsPosts)
+  @AdminEndpoint(Permission.CONTENT_WRITE)
+  async listPosts(
+    @Query(zodBody(listContentQuerySchema)) query: ListContentQuery,
+  ): Promise<Paginated<ContentSummary>> {
+    const { records, total } = await this.content.list({ ...query, kind: ContentKind.POST });
+    return {
+      data: records.map((record) => toContentSummary(record)),
+      page: { cursor: null, limit: query.limit, hasMore: query.offset + records.length < total, total },
+    };
+  }
+
+  @Get(routes.admin.cmsFaqs)
+  @AdminEndpoint(Permission.CONTENT_WRITE)
+  async listFaqs(
+    @Query(zodBody(listContentQuerySchema)) query: ListContentQuery,
+  ): Promise<Paginated<ContentSummary>> {
+    const { records, total } = await this.content.list({ ...query, kind: ContentKind.FAQ });
+    return {
+      data: records.map((record) => toContentSummary(record)),
+      page: { cursor: null, limit: query.limit, hasMore: query.offset + records.length < total, total },
+    };
+  }
+
+  @Get(routes.admin.cmsLocations)
+  @AdminEndpoint(Permission.CONTENT_WRITE)
+  async listLocations(
+    @Query(zodBody(listContentQuerySchema)) query: ListContentQuery,
+  ): Promise<Paginated<ContentSummary>> {
+    const { records, total } = await this.content.list({ ...query, kind: ContentKind.LOCATION });
+    return {
+      data: records.map((record) => toContentSummary(record)),
+      page: { cursor: null, limit: query.limit, hasMore: query.offset + records.length < total, total },
+    };
   }
 }

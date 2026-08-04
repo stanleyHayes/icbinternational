@@ -25,6 +25,10 @@ export interface PageMetaInput {
     readonly section: string;
     readonly tags: readonly string[];
   };
+  /** Search terms that help this page rank for the right phrases. */
+  readonly keywords?: readonly string[];
+  /** Optional share images, resolved against the site origin. */
+  readonly images?: readonly string[];
 }
 
 /** Absolute URL for a site-relative path. */
@@ -35,10 +39,12 @@ export function absoluteUrl(path: string): string {
 /** Builds a page's `Metadata`, with canonical and Open Graph filled in. */
 export function pageMetadata(input: PageMetaInput): Metadata {
   const url = absoluteUrl(input.path);
+  const images = input.images?.map((image) => absoluteUrl(image));
 
   return {
     title: input.title,
     description: input.description,
+    keywords: input.keywords?.length ? [...input.keywords] : undefined,
     alternates: { canonical: url },
     ...(input.noIndex === true ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
@@ -48,6 +54,7 @@ export function pageMetadata(input: PageMetaInput): Metadata {
       title: input.title,
       description: input.description,
       locale: 'en_GB',
+      ...(images ? { images } : {}),
       ...(input.article
         ? {
             publishedTime: input.article.publishedTime,
@@ -61,6 +68,7 @@ export function pageMetadata(input: PageMetaInput): Metadata {
       card: 'summary_large_image',
       title: input.title,
       description: input.description,
+      ...(images ? { images: images[0] } : {}),
     },
   };
 }

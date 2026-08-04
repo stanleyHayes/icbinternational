@@ -39,6 +39,9 @@ export abstract class HoldStore {
 
   /** Live holds whose expiry has passed, oldest first. Feeds the expiry sweep. */
   abstract listExpired(query: ExpiredHoldQuery): Promise<HoldRecord[]>;
+
+  /** Every hold in the system, admin-only — newest first. */
+  abstract listAdmin(query: AdminHoldQuery): Promise<HoldRecord[]>;
 }
 
 /** A persisted hold as services see it — a plain value, with no `.save()` on it. */
@@ -79,4 +82,10 @@ export interface ExpiredHoldQuery {
   readonly asOf: Date;
   readonly limit: number;
   readonly session?: ClientSession;
+}
+
+/** Admin-side hold listing — all accounts, no scope filter. */
+export interface AdminHoldQuery {
+  readonly cursor?: string;
+  readonly limit: number;
 }

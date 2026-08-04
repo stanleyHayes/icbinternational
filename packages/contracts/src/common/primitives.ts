@@ -48,6 +48,7 @@ export const ID_PREFIX = {
   notification: 'ntf',
   ticket: 'tkt',
   dispute: 'dsp',
+  fraudReport: 'frp',
   alert: 'alt',
   case: 'cse',
   product: 'prd',
@@ -58,6 +59,11 @@ export const ID_PREFIX = {
   // Added after four lanes reported minting a borrowed prefix. A `tro_` on a mandate or a
   // `qte_` on a loan application is harmless until someone greps a log for the wrong thing.
   loanApplication: 'lap',
+  // Approvals had no prefix, and the dual-control queue reached for one that did not exist:
+  // `generate('approval' as never)` indexes this object with a key it does not have, so every
+  // manual posting was filed under the literal id `undefined_<ulid>`. Not harmless — the id is
+  // what a second operator approves against.
+  approval: 'apr',
   billPayment: 'bil',
   paymentRequest: 'prq',
   mandate: 'mdt',

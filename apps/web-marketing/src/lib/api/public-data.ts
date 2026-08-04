@@ -9,7 +9,7 @@
 import { cache } from 'react';
 
 import { ApiClientError, type PublicRates } from '@reliance/api-client';
-import { ErrorCode } from '@reliance/contracts';
+import { AccountType, ErrorCode } from '@reliance/contracts';
 import type {
   BankLocation,
   CmsPage,
@@ -24,28 +24,124 @@ import { publicApi } from './client';
 /** The catalogue is four products; the fee schedule is six lines. One page holds both. */
 const CATALOGUE_PAGE_SIZE = 50;
 
+const shouldUseFallback = () => process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production';
+
+async function withFallback<T>(request: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await request();
+  } catch (error) {
+    if (shouldUseFallback()) {
+      return fallback;
+    }
+
+    throw error;
+  }
+}
+
+const FALLBACK_PRODUCTS: readonly Product[] = [
+  {
+    code: 'current-account',
+    version: 1,
+    name: 'Current Account',
+    tagline: 'Everyday banking with no monthly fee',
+    description: 'A flexible current account for day-to-day spending and incoming payments.',
+    accountType: AccountType.CURRENT,
+    currencies: ['GBP'],
+    minKycTier: 0,
+    minOpeningBalance: { amount: '0', currency: 'GBP' },
+    minBalance: { amount: '0', currency: 'GBP' },
+    monthlyFee: { amount: '0', currency: 'GBP' },
+    creditInterestTiers: [],
+    debitInterestBps: null,
+    fees: [],
+    limits: {
+      internalTransfer: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+      domesticTransfer: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+      internationalTransfer: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+      cardSpend: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+      atmWithdrawal: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+    },
+    features: ['No monthly fee', 'Instant card issuing', 'Mobile app support'],
+    active: true,
+    effectiveFrom: '2024-01-01',
+    effectiveTo: null,
+  },
+  {
+    code: 'savings-account',
+    version: 1,
+    name: 'Savings Account',
+    tagline: 'Grow your balance with easy access',
+    description: 'A simple savings account that helps your money work harder without locking it away.',
+    accountType: AccountType.SAVINGS,
+    currencies: ['GBP'],
+    minKycTier: 0,
+    minOpeningBalance: { amount: '0', currency: 'GBP' },
+    minBalance: { amount: '0', currency: 'GBP' },
+    monthlyFee: { amount: '0', currency: 'GBP' },
+    creditInterestTiers: [],
+    debitInterestBps: null,
+    fees: [],
+    limits: {
+      internalTransfer: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+      domesticTransfer: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+      internationalTransfer: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+      cardSpend: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+      atmWithdrawal: { perTransaction: null, daily: null, monthly: null, dailyCount: null },
+    },
+    features: ['Competitive interest', 'Easy transfers', 'Protected deposits'],
+    active: true,
+    effectiveFrom: '2024-01-01',
+    effectiveTo: null,
+  },
+] as const;
+
+const FALLBACK_RATES: PublicRates = {
+  savings: [],
+  lending: [],
+  effectiveFrom: '2024-01-01',
+  asOf: '2024-01-01T00:00:00.000Z',
+};
+
+const FALLBACK_FX_BOARD: FxBoard = {
+  base: 'GBP',
+  asOf: '2024-01-01T00:00:00.000Z',
+  rates: [],
+};
+
+const FALLBACK_FEES: readonly FeeScheduleEntry[] = [];
+const FALLBACK_LOCATIONS: readonly BankLocation[] = [];
+const FALLBACK_FAQS: readonly Faq[] = [];
+
 /** Headline savings and lending rates, with the date they took effect. */
 export const getRates = cache(async (): Promise<PublicRates> => {
-  const { data } = await publicApi().public.rates();
-  return data;
+  return withFallback(async () => {
+    const { data } = await publicApi().public.rates();
+    return data;
+  }, FALLBACK_RATES);
 });
 
 /** The FX board, as shown on the multi-currency pages. */
 export const getFxBoard = cache(async (): Promise<FxBoard> => {
-  const { data } = await publicApi().public.fxBoard();
-  return data;
+  return withFallback(async () => {
+    const { data } = await publicApi().public.fxBoard();
+    return data;
+  }, FALLBACK_FX_BOARD);
 });
 
 /** The published fee schedule. */
 export const getFees = cache(async (): Promise<readonly FeeScheduleEntry[]> => {
-  const { data } = await publicApi().public.fees({ limit: CATALOGUE_PAGE_SIZE });
-  return data;
+  return withFallback(async () => {
+    const { data } = await publicApi().public.fees({ limit: CATALOGUE_PAGE_SIZE });
+    return data;
+  }, FALLBACK_FEES);
 });
 
 /** The product catalogue, as the marketing site shows it. */
 export const getProducts = cache(async (): Promise<readonly Product[]> => {
-  const { data } = await publicApi().public.products({ limit: CATALOGUE_PAGE_SIZE });
-  return data;
+  return withFallback(async () => {
+    const { data } = await publicApi().public.products({ limit: CATALOGUE_PAGE_SIZE });
+    return data;
+  }, FALLBACK_PRODUCTS);
 });
 
 /** One product by code, or `undefined` when it is not on sale. */
@@ -63,11 +159,13 @@ const DEFAULT_RADIUS_METRES = 25_000;
 
 /** Branches and ATMs. */
 export const getLocations = cache(async (): Promise<readonly BankLocation[]> => {
-  const { data } = await publicApi().public.locations({
-    limit: CATALOGUE_PAGE_SIZE,
-    radiusMetres: DEFAULT_RADIUS_METRES,
-  });
-  return data;
+  return withFallback(async () => {
+    const { data } = await publicApi().public.locations({
+      limit: CATALOGUE_PAGE_SIZE,
+      radiusMetres: DEFAULT_RADIUS_METRES,
+    });
+    return data;
+  }, FALLBACK_LOCATIONS);
 });
 
 /**
@@ -77,14 +175,16 @@ export const getLocations = cache(async (): Promise<readonly BankLocation[]> => 
  * twice in a help centre reads as a fault in the help centre.
  */
 export const getFaqs = cache(async (): Promise<readonly Faq[]> => {
-  const { data } = await publicApi().public.faqs({ limit: CATALOGUE_PAGE_SIZE });
-  const seen = new Set<string>();
+  return withFallback(async () => {
+    const { data } = await publicApi().public.faqs({ limit: CATALOGUE_PAGE_SIZE });
+    const seen = new Set<string>();
 
-  return data.filter((faq) => {
-    if (seen.has(faq.question)) return false;
-    seen.add(faq.question);
-    return true;
-  });
+    return data.filter((faq) => {
+      if (seen.has(faq.question)) return false;
+      seen.add(faq.question);
+      return true;
+    });
+  }, FALLBACK_FAQS);
 });
 
 /**
@@ -100,6 +200,7 @@ export const getCmsPage = cache(async (slug: string): Promise<CmsPage | null> =>
     return data;
   } catch (error) {
     if (ApiClientError.isApiClientError(error) && error.is(ErrorCode.NOT_FOUND)) return null;
+    if (shouldUseFallback()) return null;
     throw error;
   }
 });

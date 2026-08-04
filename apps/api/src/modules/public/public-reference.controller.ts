@@ -1,6 +1,7 @@
 import { Controller, Get, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 
 import {
+  type FxBoard,
   locationSearchQuerySchema,
   routes,
   type BankLocation,
@@ -42,6 +43,12 @@ export class PublicReferenceController {
   @PublicCache({ maxAgeSeconds: RATES_MAX_AGE_SECONDS })
   async fees(): Promise<FeeSchedule[]> {
     return this.rates.fees();
+  }
+
+  @Get(routes.public.fxBoard)
+  @PublicCache({ maxAgeSeconds: RATES_MAX_AGE_SECONDS })
+  async fxBoard(): Promise<FxBoard> {
+    return this.rates.fxBoard();
   }
 
   /**

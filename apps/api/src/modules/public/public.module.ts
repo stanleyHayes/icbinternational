@@ -4,6 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ClockModule } from '../../common/clock/clock.module.js';
 import { IdGenerator } from '../../common/ids/id-generator.js';
 import { CmsModule } from '../cms/index.js';
+import { RateProviderPort } from '../fx/rate-feed/rate-provider.port.js';
+import { SimulatedRateProvider } from '../fx/rate-feed/simulated-rate.provider.js';
 
 import { CalculatorService } from './calculators/calculator.service.js';
 import { LeadRepository } from './leads/lead.repository.js';
@@ -39,6 +41,7 @@ import { RatesService } from './rates.service.js';
   controllers: [PublicContentController, PublicReferenceController, PublicToolsController],
   providers: [
     { provide: LeadStore, useClass: LeadRepository },
+    { provide: RateProviderPort, useClass: SimulatedRateProvider },
     RatesService,
     CalculatorService,
     LeadService,

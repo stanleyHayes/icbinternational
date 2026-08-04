@@ -10,6 +10,7 @@ import { HOLD_MODEL } from './hold.constants.js';
 import { HoldSchemaClass, type HoldDocument } from './hold.schema.js';
 import {
   HoldStore,
+  type AdminHoldQuery,
   type ExpiredHoldQuery,
   type HoldRecord,
   type NewHold,
@@ -93,6 +94,15 @@ export class HoldRepository extends HoldStore {
       .sort({ expiresAt: 1 })
       .limit(query.limit)
       .session(query.session ?? null)
+      .exec();
+    return documents.map((document) => toRecord(document as HoldDocument));
+  }
+  override async listAdmin(query: AdminHoldQuery): Promise<HoldRecord[]> {
+    const filter = query.cursor ? { id: { $lt: query.cursor } } : {};
+    const documents = await this.model
+      .find(filter)
+      .sort({ placedAt: -1 })
+      .limit(query.limit + 1)
       .exec();
     return documents.map((document) => toRecord(document as HoldDocument));
   }

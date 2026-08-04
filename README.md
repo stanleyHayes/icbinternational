@@ -118,6 +118,45 @@ agent_plan.md       The build plan — task board, ownership rules, acceptance c
 | `pnpm ledger:verify`                  | Rebuild every balance from postings and diff                |
 | `pnpm audit:verify`                   | Verify the audit hash chain                                 |
 
+## Deploying
+
+Recommended split: **API on Render, front ends on Vercel**.
+
+### Backend — Render
+
+The repo ships a Render Blueprint (`render.yaml`) that defines the web service, build/start
+commands, and every environment variable in one file.
+
+1. In the Render dashboard → **New → Blueprint** → connect this repo.
+2. Render detects `render.yaml` automatically and provisions the service.
+3. Fill in every variable marked `sync: false` (secrets, URLs, connection strings).  
+   See `.env.example` for descriptions of each.
+4. Required external services — provision these before deploying:
+   - **MongoDB** — [MongoDB Atlas](https://cloud.mongodb.com) M10 or above (replica set required).
+   - **Redis** — Render's Redis service is provisioned automatically by the blueprint. If you prefer a different provider, set `REDIS_URL` manually.
+5. After the first successful deploy, run the seed once to provision the admin account:
+   ```
+   render run --service reliance-api -- node apps/api/dist/seed/run-seed.js
+   ```
+
+### Front ends — Vercel
+
+Each front end is a separate Vercel project. All three have `vercel.json` files that handle
+the pnpm monorepo build automatically.
+
+| App | Root Directory (set in Vercel) | Key env variables |
+|-----|-------------------------------|-------------------|
+| `apps/web-marketing` | `apps/web-marketing` | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_URL` |
+| `apps/web-client` | `apps/web-client` | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_APP_URL` |
+| `apps/web-admin` | `apps/web-admin` | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_CONSOLE_URL`, `API_ORIGIN` |
+
+For each project:
+1. In Vercel → **New Project** → import this repo → set **Root Directory** to the value above.
+2. Vercel detects `vercel.json` and uses the monorepo-aware build commands automatically.
+3. Add the environment variables for that app (see the table and `.env.example`).
+4. Set `API_ORIGIN` on the admin console to the Render service URL so its BFF can reach the API
+   via an internal/private path (keeps the API hostname out of the browser bundle).
+
 ## Quality bar
 
 CI enforces what `agent_plan.md` §2.4 specifies: files ≤ 250 lines, functions ≤ 40, cyclomatic

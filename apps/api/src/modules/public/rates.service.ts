@@ -8,8 +8,16 @@
 
 import { Injectable } from '@nestjs/common';
 
+import { CustomerSegment, type FxBoard } from '@reliance/contracts';
+
+import { ClockService } from '../../common/clock/clock.service.js';
 import { AppError } from '../../common/errors/app-error.js';
+import { AppConfigService } from '../../config/config.service.js';
+import { toIso } from '../accounts/index.js';
 import { ContentKind, ContentService, type ContentRecord } from '../cms/index.js';
+import { spreadBpsFor } from '../fx/fx-spread.js';
+import { toContractRate } from '../fx/fx.mapper.js';
+import { RateProviderPort } from '../fx/rate-feed/rate-provider.port.js';
 
 import { type FeeRow, type FeeSchedule, type RateRow, type RateTable } from './public.dto.js';
 
@@ -21,7 +29,12 @@ const DETAIL_KEYS = ['access', 'interestPaid', 'term', 'earlyRepayment', 'minimu
 
 @Injectable()
 export class RatesService {
-  constructor(private readonly content: ContentService) {}
+  constructor(
+    private readonly content: ContentService,
+    private readonly rates: RateProviderPort,
+    private readonly config: AppConfigService,
+    private readonly clock: ClockService,
+  ) {}
 
   /** Every published rate table. */
   async tables(): Promise<RateTable[]> {
@@ -58,6 +71,27 @@ export class RatesService {
         row.product.toLowerCase().startsWith(productPrefix.toLowerCase()),
       ) ?? null
     );
+  }
+
+  /** The unauthenticated FX board, priced at the standard retail spread. */
+  async fxBoard(): Promise<FxBoard> {
+    const base = this.config.bank.baseCurrency;
+    const quotes = await this.rates.board(base);
+
+    return {
+      base,
+      rates: quotes.map((quote) =>
+        toContractRate(
+          quote,
+          spreadBpsFor({
+            from: quote.rate.from,
+            to: quote.rate.to,
+            customer: { segment: CustomerSegment.PERSONAL, kycTier: 0 },
+          }),
+        ),
+      ),
+      asOf: toIso(this.clock.now()),
+    };
   }
 }
 

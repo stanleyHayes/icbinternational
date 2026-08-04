@@ -167,3 +167,14 @@ export const createFraudReportRequestSchema = z.object({
   freezeAccounts: z.boolean().default(false),
 });
 export type CreateFraudReportRequest = z.infer<typeof createFraudReportRequestSchema>;
+
+/** Acknowledgement of a fraud report, naming what was frozen. */
+export const fraudReportSchema = z.object({
+  id: entityId('frp'),
+  reference: z.string(),
+  frozenCardIds: z.array(entityId('crd')),
+  frozenAccountIds: z.array(entityId('acc')),
+  ticketId: entityId('tkt').nullable(),
+  createdAt: isoDateTimeSchema,
+});
+export type FraudReport = z.infer<typeof fraudReportSchema>;

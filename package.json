@@ -2,7 +2,7 @@
   "name": "reliancebank",
   "version": "1.0.0",
   "private": true,
-  "description": "Reliance Bank — full-stack banking platform simulation",
+  "description": "Reliance Bank \u2014 full-stack banking platform simulation",
   "packageManager": "pnpm@11.11.0",
   "engines": {
     "node": ">=22.0.0"
@@ -14,7 +14,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
-    "verify": "pnpm check:voice && turbo run lint typecheck test build",
+    "verify": "pnpm check:voice && pnpm check:routes && turbo run lint typecheck test:cov build",
     "clean": "turbo run clean && rimraf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,yml,yaml}\"",
@@ -28,7 +28,9 @@
     "ledger:verify": "pnpm --filter @reliance/api ledger:verify",
     "audit:verify": "pnpm --filter @reliance/api audit:verify",
     "check:voice": "node scripts/check-product-voice.mjs",
-    "db:wait": "until docker exec rb-mongo mongosh --port ${MONGO_PORT:-27317} --quiet --eval 'quit(db.runCommand({hello:1}).isWritablePrimary ? 0 : 1)' >/dev/null 2>&1; do sleep 1; done"
+    "db:wait": "until docker exec rb-mongo mongosh --port ${MONGO_PORT:-27317} --quiet --eval 'quit(db.runCommand({hello:1}).isWritablePrimary ? 0 : 1)' >/dev/null 2>&1; do sleep 1; done",
+    "check:routes": "node scripts/check-route-coverage.mjs",
+    "test:cov": "turbo run test:cov"
   },
   "devDependencies": {
     "@reliance/config": "workspace:*",

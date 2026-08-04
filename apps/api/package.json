@@ -11,14 +11,15 @@
     "clean": "rimraf dist coverage *.tsbuildinfo",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "jest --passWithNoTests",
-    "test:cov": "jest --coverage",
-    "test:watch": "jest --watch",
+    "test": "jest --passWithNoTests --runInBand",
+    "test:cov": "jest --coverage --runInBand",
+    "test:watch": "jest --watch --runInBand",
     "seed": "node --env-file=../../.env dist/seed/run-seed.js",
     "demo:reset": "node --env-file=../../.env dist/seed/run-showcase.js",
     "ledger:verify": "node --env-file=../../.env dist/seed/verify-ledger.js",
     "audit:verify": "node --env-file=../../.env dist/modules/audit/verify-audit.command.js",
-    "test:showcase": "RUN_SHOWCASE_TEST=1 jest src/seed/personas/__tests__/showcase.integration --coverage=false --runInBand"
+    "test:showcase": "RUN_SHOWCASE_TEST=1 jest src/seed/personas/__tests__/showcase.integration --coverage=false --runInBand",
+    "start:prod": "node --enable-source-maps dist/main.js"
   },
   "dependencies": {
     "@bull-board/api": "8.5.0",

@@ -1,0 +1,12 @@
+{
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm --filter @reliance/web-admin... build",
+  "outputDirectory": ".next",
+  "rewrites": [
+    {
+      "source": "/api/bff/:path*",
+      "destination": "/api/bff/:path*"
+    }
+  ]
+}

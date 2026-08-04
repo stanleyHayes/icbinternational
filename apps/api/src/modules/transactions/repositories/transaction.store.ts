@@ -43,6 +43,9 @@ export abstract class TransactionStore {
   /** Newest-first page under the customer's full filter set. */
   abstract list(query: TransactionListQuery): Promise<PageResult<TransactionRecord>>;
 
+  /** Admin-only: newest-first page with no userId scope. */
+  abstract listAdmin(query: AdminTransactionQuery): Promise<PageResult<TransactionRecord>>;
+
   /** Applies the only fields a customer may change. Returns null if the row is gone. */
   abstract patch(input: TransactionPatch): Promise<TransactionRecord | null>;
 
@@ -168,4 +171,10 @@ export interface TransactionPatch {
   readonly category?: SpendCategory;
   readonly notes?: string | null;
   readonly session?: ClientSession;
+}
+
+/** Admin-only transaction listing — no userId scope filter. */
+export interface AdminTransactionQuery {
+  readonly cursor?: string;
+  readonly limit: number;
 }

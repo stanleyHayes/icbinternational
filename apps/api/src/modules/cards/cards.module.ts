@@ -12,8 +12,10 @@ import { HoldsModule } from '../holds/index.js';
 import { IdempotencyModule } from '../idempotency/index.js';
 import { LedgerModule } from '../ledger/ledger.module.js';
 import { MfaModule } from '../mfa/mfa.module.js';
+import { RbacModule } from '../rbac/rbac.module.js';
 import { TransactionsModule } from '../transactions/transactions.module.js';
 
+import { AdminCardsController } from './admin-cards.controller.js';
 import { AuthorisationBookingService } from './authorisation/authorisation-booking.service.js';
 import { CardNetworkGateway } from './authorisation/authorisation-gateway.service.js';
 import { AuthorisationGuardService } from './authorisation/authorisation-guard.service.js';
@@ -91,8 +93,9 @@ import { CardReplacementService } from './lifecycle/card-replacement.service.js'
     MfaModule,
     IdempotencyModule,
     AuditModule,
+    RbacModule,
   ],
-  controllers: [CardsController, CardDetailsController, CardFeedController],
+  controllers: [AdminCardsController, CardsController, CardDetailsController, CardFeedController],
   providers: [
     { provide: CardStore, useClass: CardRepository },
     { provide: AuthorisationStore, useClass: AuthorisationRepository },

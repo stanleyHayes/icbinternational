@@ -50,9 +50,38 @@ Last measured against the working tree, not against lane reports. Method: every 
 controllers (including routes bound through local constants), plus a page-by-page inventory of the
 three front ends. Where a lane's own report disagreed with the tree, the tree won.
 
-**Headline: 143 of 221 declared routes are implemented. 77 are not.** The gap is not spread evenly —
-it is almost entirely the back office and a handful of customer features. See §0.2 for how a gap
-this size stayed invisible.
+**Headline (2026-08-04): 221 of 221 declared routes are implemented, and the waiver list is
+empty.** The tables below still describe the 143/221 measurement they were written against; treat
+the headline as current and the per-task rows as the record of how it was reached.
+
+Two caveats, because a round number invites the wrong conclusion:
+
+1. **Route coverage is reachability, not completeness.** The gate answers "does a registered
+   controller serve this path", which is what it was built to answer. It does not judge what the
+   handler does. `/admin/screening` is registered and refuses with `FEATURE_DISABLED`; that counts
+   as covered and is not a finished feature.
+2. **The gate was gamed once, and the fix is in it now.** `admin-stubs.controller.ts` was written
+   with the docstring "wired so the route coverage check passes" and three handlers returning `[]`.
+   Separately, seven admin controllers sat in a module `AppModule` never imported — every one 404'd
+   while coverage counted them served. M-09 now refuses a controller no module registers, and that
+   check is proven by a test that unregisters one and watches the gate go red.
+
+**Test coverage is the honest gap.** `pnpm verify` is red on it, and only on it:
+
+| Metric     | Now    | Threshold | Short by |
+| ---------- | ------ | --------- | -------- |
+| statements | 76.9%  | 80%       | 3.1 pt   |
+| branches   | 59.8%  | 70%       | 10.2 pt  |
+| lines      | 78.1%  | 80%       | 1.9 pt   |
+| functions  | 66.0%  | 75%       | 9.0 pt   |
+
+2,420 tests pass; none fail. The shortfall is new code landing untested, not tests breaking. The
+branch gap is concentrated in Mongo repositories and outbound adapters — `cloudinary-media-storage`,
+`web-push-crypto`, `authorisation.repository`, `card.repository`, `content.repository` — which need
+a replica set or a faked SDK, so they are the expensive ones. At the rate measured (two focused
+suites moved statements +0.4 pt and branches +0.44 pt), closing branches needs roughly 45 more
+suites. **Do not lower the thresholds to go green.** That is the same move as the stub controller,
+one level up.
 
 ### Foundation and platform
 
@@ -462,8 +491,16 @@ an interface so you are not blocked, and keep moving.
 
 ### 4.5 Shared conventions (read before your first line of code)
 
-- **Errors**: `AppError(code: ErrorCode, message, details?, httpStatus)`. Global exception filter
-  maps to `{ error: { code, message, details, traceId } }`. Codes live in contracts.
+- **Errors**: `new AppError({ code, message, status?, details?, retryAfterSeconds?, context?, cause? })`
+  — **one options object, not positional arguments.** Global exception filter maps to
+  `{ error: { code, message, details, traceId } }`. Codes live in contracts. `context` is for the
+  log line only and is never serialised to the caller, so it is where identifiers and other
+  sensitive detail belong.
+
+  > This line said `AppError(code, message, details?, httpStatus)` until 2026-08-04. It never
+  > matched the implementation, which has always taken a single object. Six admin controllers were
+  > written against the documented form and none of them compiled. If you are reading a convention
+  > here and the compiler disagrees, the compiler is right — fix this file too.
 - **Responses**: lists are `{ data: T[], page: { cursor, limit, hasMore, total? } }`. Cursor
   pagination everywhere; offset only in admin exports.
 - **Dates**: ISO-8601 UTC strings on the wire. `Date` in Mongo. Display TZ is a user preference.

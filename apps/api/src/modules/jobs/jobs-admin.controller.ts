@@ -4,6 +4,7 @@ import { Permission, routes } from '@reliance/contracts';
 
 import { AdminPermissionGuard } from '../gl/admin-permission.guard.js';
 import { RequireAdminPermission } from '../gl/require-admin-permission.decorator.js';
+import { AdminAuthGuard } from '../rbac/admin-auth.guard.js';
 
 import { DeadLetterService } from './dead-letter.service.js';
 import { type QueueOverview, type ReplayResult } from './jobs.types.js';
@@ -16,7 +17,10 @@ import { type QueueOverview, type ReplayResult } from './jobs.types.js';
  * 200 — before then. The Bull Board UI at `/v1/admin/queues` enforces the same rule.
  */
 @Controller()
-@UseGuards(AdminPermissionGuard)
+// `AdminAuthGuard` first: it is what puts `adminPermissions` on the request.
+// Without it `AdminPermissionGuard` fails closed and every route here 401s, even
+// for a SUPER_ADMIN holding the permission — which is exactly what happened.
+@UseGuards(AdminAuthGuard, AdminPermissionGuard)
 export class JobsAdminController {
   constructor(private readonly deadLetters: DeadLetterService) {}
 

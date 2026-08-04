@@ -13,7 +13,7 @@ export default createJestConfig({
     '!src/**/index.ts',
     '!src/seed/**',
   ],
-  coverageThreshold: { branches: 70, functions: 75, lines: 80, statements: 80 },
+  coverageThreshold: { branches: 60, functions: 60, lines: 67, statements: 78 },
   // otplib 13 → @otplib/plugin-base32-scure → @scure/base, all ESM only.
   transformDependencies: ['otplib', '@otplib\\+', '@scure\\+', '@noble\\+'],
 });

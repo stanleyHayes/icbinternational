@@ -12,11 +12,18 @@ import { getProducts, getRates } from '@/lib/api/public-data';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = pageMetadata({
-  title: 'Reliance Bank — Banking you can stand on',
+  title: 'Current accounts, savings and business banking in the UK',
   description:
-    'A current account with no monthly fee, savings that pay interest monthly, and lending ' +
-    'that shows the total cost before you apply. Deposits protected up to £85,000.',
+    'Open a current account, compare savings rates and apply for business banking or lending with no hidden fees. Deposits are protected up to £85,000.',
   path: '/',
+  keywords: [
+    'current account',
+    'savings account',
+    'business banking',
+    'personal loan',
+    'mortgage',
+    'multi-currency wallet',
+  ],
 });
 
 const PROMISES = [

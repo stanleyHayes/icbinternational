@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { IdGenerator } from '../../common/ids/id-generator.js';
 import { TransactionRunner } from '../../database/transaction.runner.js';
 import { JournalEntrySchema } from '../ledger/schemas/journal-entry.schema.js';
+import { RbacModule } from '../rbac/rbac.module.js';
 
 import { GlAccountsController } from './gl-accounts.controller.js';
 import { GlAccountsService } from './gl-accounts.service.js';
@@ -29,7 +30,7 @@ import { TrialBalanceService } from './trial-balance.service.js';
  * it without reaching into the module.
  */
 @Module({
-  imports: [
+  imports: [RbacModule, 
     MongooseModule.forFeature([
       { name: GL_CHART_ACCOUNT_MODEL, schema: GlChartAccountSchema },
       { name: GL_JOURNAL_READ_MODEL, schema: JournalEntrySchema },

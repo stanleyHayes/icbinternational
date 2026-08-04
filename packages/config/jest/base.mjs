@@ -119,6 +119,13 @@ export function createJestConfig(options = {}) {
     // Source files import with an explicit `.js` extension for NodeNext resolution;
     // Jest resolves the TypeScript file behind it.
     moduleNameMapper: { '^(\\.{1,2}/.*)\\.js$': '$1' },
+    // Build output is not source and must never be walked. A package whose `rootDir` is the
+    // package root — the Next apps — otherwise has its haste map crawl `.next/`, where Jest
+    // finds a directory whose `package.json` the build has since removed and fails with
+    // `Cannot parse .next/build/package.json`. That reads as a broken test suite when it is
+    // really a stale artefact from a previous build, and it clears on a `rm -rf .next` just
+    // often enough to look intermittent.
+    modulePathIgnorePatterns: ['<rootDir>/\\.next/', '<rootDir>/dist/', '<rootDir>/coverage/'],
     collectCoverageFrom,
     coverageDirectory: '../coverage',
     coverageThreshold: { global: coverageThreshold },

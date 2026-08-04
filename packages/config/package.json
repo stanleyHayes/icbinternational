@@ -26,6 +26,7 @@
     "lint": "echo 'config package: nothing to lint'",
     "typecheck": "echo 'config package: no TypeScript sources'",
     "test": "echo 'config package: no tests'",
+    "test:cov": "echo 'config package: no tests'",
     "build": "echo 'config package: nothing to build'"
   },
   "dependencies": {

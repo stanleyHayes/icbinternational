@@ -92,11 +92,28 @@ function stripComments(source) {
 }
 
 /**
+ * Removes module specifiers.
+ *
+ * A path is not copy. `import { SimulatedRateProvider } from './simulated-rate.provider.js'`
+ * names a file accurately and can never reach a screen, but it is a string literal like any
+ * other, so the scanner flagged it. Renaming the file to satisfy a copy rule would make the
+ * code less honest about itself in order to make the check pass — the wrong trade in both
+ * directions.
+ */
+function stripModuleSpecifiers(source) {
+  return source
+    .replaceAll(/^\s*(?:import|export)\s[^;\n]*?from\s*['"`][^'"`]*['"`]/gm, ' ')
+    .replaceAll(/^\s*import\s*['"`][^'"`]*['"`]/gm, ' ')
+    .replaceAll(/\bimport\(\s*['"`][^'"`]*['"`]\s*\)/g, ' ')
+    .replaceAll(/\brequire\(\s*['"`][^'"`]*['"`]\s*\)/g, ' ');
+}
+
+/**
  * Extracts anything that can reach a screen: quoted strings and JSX text nodes.
  * Returns `{ text, line }` so a failure can point at a line the author can fix.
  */
 function extractRenderableText(source) {
-  const cleaned = stripComments(source);
+  const cleaned = stripModuleSpecifiers(stripComments(source));
   const found = [];
 
   const patterns = [
@@ -170,7 +187,7 @@ const RENDERED_POSITIONS = [
 ];
 
 function extractRenderedDefaults(source) {
-  const cleaned = stripComments(source);
+  const cleaned = stripModuleSpecifiers(stripComments(source));
   const found = [];
 
   for (const pattern of RENDERED_POSITIONS) {

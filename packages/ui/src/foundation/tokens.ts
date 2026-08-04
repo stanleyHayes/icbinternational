@@ -53,8 +53,22 @@ export interface BrandTokens {
   };
 }
 
-/** The brand tokens, typed. */
-export const tokens: BrandTokens = brandTokens;
+/**
+ * The brand tokens, typed.
+ *
+ * `satisfies` rather than an annotation, deliberately. `BrandTokens` describes the ramps as
+ * open records, because their shades are generated and each ramp carries a different set —
+ * navy runs 50 to 950, gold only 400 to 600. Annotating with it would widen every lookup to
+ * `string | undefined`, and under `noUncheckedIndexedAccess` a caller reading one colour for
+ * an OS-level surface — a `theme_color`, an icon, a share card, none of which can use a CSS
+ * variable — would have to reach for `!` or invent a fallback hex. A fallback hex is exactly
+ * the drift these tokens exist to prevent.
+ *
+ * Checking against the interface while keeping the JSON's own inferred type gives both: the
+ * document still has to conform, and `tokens.color.navy['900']` is a `string` while
+ * `tokens.color.gold['50']` does not compile.
+ */
+export const tokens = brandTokens satisfies BrandTokens;
 
 export { SOFT_THEME_ROLES, THEME_ROLES };
 

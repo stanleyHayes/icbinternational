@@ -5,6 +5,8 @@ import { AdminRole, Permission, type AdminUser } from '@reliance/contracts';
 import { ClockService } from '../../common/clock/clock.service.js';
 import { AppError } from '../../common/errors/app-error.js';
 import { IdGenerator } from '../../common/ids/id-generator.js';
+import { PasswordService } from '../auth/password.service.js';
+import { SecretCipher } from '../auth/support/secret-cipher.js';
 
 import { type AdminPrincipal } from './admin-auth.types.js';
 import { toAdminUserDto } from './admin-user.mapper.js';
@@ -20,6 +22,23 @@ export interface ProvisionAdminInput {
   roles: readonly AdminRole[];
   grants?: readonly Permission[];
   ipAllowlist?: readonly string[];
+  /**
+   * Plaintext sign-in password. Hashed here; the caller's copy is the only one that ever
+   * exists in the clear. Optional, because an account can be opened before its holder has
+   * a credential — until they do, no password will authenticate them.
+   */
+  password?: string;
+  /**
+   * Plaintext base32 authenticator seed, sealed here. Supplying one completes enrolment;
+   * without it the account has no second factor and therefore cannot sign in at all.
+   */
+  totpSecret?: string;
+}
+
+/** Result of an idempotent provision: the principal, and whether this call created it. */
+export interface ProvisionOutcome {
+  readonly principal: AdminPrincipal;
+  readonly created: boolean;
 }
 
 /**
@@ -36,6 +55,8 @@ export class AdminUserService {
     private readonly admins: AdminUserRepository,
     private readonly ids: IdGenerator,
     private readonly clock: ClockService,
+    private readonly passwords: PasswordService,
+    private readonly cipher: SecretCipher,
   ) {}
 
   /**
@@ -75,9 +96,45 @@ export class AdminUserService {
       roles: [...input.roles],
       grants: [...(input.grants ?? [])],
       ipAllowlist: allowlist,
+      ...(await this.credentialsFor(input)),
     };
     const doc = await this.admins.createAdmin(create);
     return toPrincipal(doc);
+  }
+
+  /**
+   * Provisions a staff account unless one already holds the address.
+   *
+   * The seed lane needs this and could not write it itself. An Argon2 digest is salted, so
+   * hashing the same password twice gives different bytes; a seeder that compared stored
+   * to intended would rewrite the row on every run and never be idempotent. An account
+   * that exists is returned untouched — its holder may have changed their password since.
+   */
+  async provisionIfAbsent(input: ProvisionAdminInput): Promise<ProvisionOutcome> {
+    const existing = await this.admins.findByEmail(input.email.trim().toLowerCase());
+    if (existing) return { principal: toPrincipal(existing), created: false };
+
+    return { principal: await this.provision(input), created: true };
+  }
+
+  /**
+   * Hashes the password and seals the authenticator seed.
+   *
+   * Both are omitted rather than written as null when absent, so a provision that supplies
+   * neither leaves the schema defaults in place instead of asserting an empty credential.
+   */
+  private async credentialsFor(input: ProvisionAdminInput): Promise<Partial<CreateAdminUserInput>> {
+    return {
+      ...(input.password ? { passwordHash: await this.passwords.hash(input.password) } : {}),
+      ...(input.totpSecret
+        ? {
+            mfa: {
+              totpSecret: this.cipher.seal(input.totpSecret),
+              enrolledAt: this.clock.now(),
+            },
+          }
+        : {}),
+    };
   }
 
   /** Records a successful login on the simulated clock. */
@@ -88,6 +145,12 @@ export class AdminUserService {
   /** Deactivates a staff account. Takes effect on the very next request. */
   async deactivate(id: string): Promise<void> {
     await this.admins.deactivate(id);
+  }
+
+  /** Paginated staff listing for the operations console. */
+  async list(params: { cursor?: string; limit: number }): Promise<AdminUser[]> {
+    const docs = await this.admins.listAll(params);
+    return docs.map((doc) => toAdminUserDto(doc, toPrincipal(doc)));
   }
 }
 

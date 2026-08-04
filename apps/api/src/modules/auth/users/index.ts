@@ -7,6 +7,6 @@
  */
 export { UsersModule } from './users.module.js';
 export { UsersService, type CreateUserInput, type LockoutPolicy } from './users.service.js';
-export { UserRepository, type InsertUserResult, type UniqueUserField } from './user.repository.js';
+export { UserRepository, type InsertUserResult, type UniqueUserField, type AdminCustomerQuery } from './user.repository.js';
 export { toUserView } from './user.mapper.js';
 export { User, UserSchema, UserMfa, type UserDocument } from './schemas/user.schema.js';

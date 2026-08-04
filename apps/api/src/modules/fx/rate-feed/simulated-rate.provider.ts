@@ -53,6 +53,8 @@ interface Leg {
 export class SimulatedRateProvider extends RateProviderPort {
   private readonly legs = new Map<CurrencyCode, Leg>();
   private readonly seedPhrase: string;
+  /** Signed bps shifts added on top of the walk, keyed by `"FROM/TO"`. */
+  private readonly nudges = new Map<string, number>();
 
   constructor(
     private readonly clock: ClockService,
@@ -62,6 +64,23 @@ export class SimulatedRateProvider extends RateProviderPort {
     this.seedPhrase = config.simulation.seed;
   }
 
+  /**
+   * Applies a one-time basis-point shift on a specific pair.
+   *
+   * Positive values strengthen the base currency, negative values weaken it. The nudge
+   * persists until the next `resetNudges()` — it is intended for the operations console's
+   * "move rate" command, not for sustained manipulation.
+   */
+  nudge(from: CurrencyCode, to: CurrencyCode, bps: number): void {
+    const key = `${from}/${to}`;
+    this.nudges.set(key, (this.nudges.get(key) ?? 0) + bps);
+  }
+
+  /** Clears all pending nudges, reverting to the random-walk baseline. */
+  resetNudges(): void {
+    this.nudges.clear();
+  }
+
   override async midFor(from: CurrencyCode, to: CurrencyCode): Promise<MidQuote | null> {
     if (!isQuotable(from) || !isQuotable(to)) return null;
 
@@ -69,8 +88,12 @@ export class SimulatedRateProvider extends RateProviderPort {
     const source = this.legAt(from, asOf);
     const target = this.legAt(to, asOf);
 
+    const base = cross(from, to, source.walk.value, target.walk.value);
+    const nudgeBps = this.nudges.get(`${from}/${to}`) ?? 0;
+    const rate = nudgeBps === 0 ? base : applyNudge(base, nudgeBps);
+
     return {
-      rate: cross(from, to, source.walk.value, target.walk.value),
+      rate,
       changeBps: changeBps(
         crossValue(anchorFor(from).value, anchorFor(to).value),
         crossValue(source.walk.value, target.walk.value),
@@ -152,3 +175,13 @@ function cross(
 ): ExchangeRate {
   return { from, to, value: crossValue(fromLevel, toLevel), scale: RATE_SCALE };
 }
+
+/** Applies a signed basis-point shift to an exchange rate. */
+function applyNudge(rate: ExchangeRate, bps: number): ExchangeRate {
+  // bps are parts per 10,000; apply as a multiplicative factor.
+  const factor = BPS_SCALE + BigInt(bps);
+  const adjusted = (rate.value * factor) / BPS_SCALE;
+  return { ...rate, value: adjusted };
+}
+
+const BPS_SCALE = 10_000n;

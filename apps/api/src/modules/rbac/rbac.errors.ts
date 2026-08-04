@@ -23,6 +23,44 @@ export function adminInactive(): AppError {
   return AppError.forbidden('This staff account is deactivated');
 }
 
+/**
+ * A rejected sign-in: unknown address, wrong password, or wrong authenticator code.
+ *
+ * Deliberately one answer for all three. Both factors are submitted together, so a
+ * refusal that distinguished them would tell an attacker that the password was right and
+ * hand back most of the value of having a second factor. It is also why the login path
+ * hashes against a decoy for an address that does not exist — same answer, same cost.
+ */
+export function adminCredentialsRejected(): AppError {
+  return new AppError({
+    code: ErrorCode.INVALID_CREDENTIALS,
+    message: 'Those sign-in details were not accepted.',
+  });
+}
+
+/**
+ * The password was right but the account has been deactivated.
+ *
+ * Distinct from {@link adminInactive}, which is the guard refusing an already-issued
+ * token: this reaches the sign-in screen, which ends the attempt on it rather than
+ * inviting a retry that cannot succeed. Reported only after a correct password, so it
+ * never tells a stranger which addresses are staff.
+ */
+export function adminDeactivated(): AppError {
+  return new AppError({
+    code: ErrorCode.ACCOUNT_SUSPENDED,
+    message: 'This staff account is deactivated. Contact the security team.',
+  });
+}
+
+/** Staff sign-in always needs an enrolled authenticator; there is no password-only path. */
+export function adminMfaNotEnrolled(): AppError {
+  return new AppError({
+    code: ErrorCode.MFA_NOT_ENROLLED,
+    message: 'This staff account has no authenticator enrolled. Contact the security team.',
+  });
+}
+
 /** TOTP was not verified at login. Mandatory for every staff session. */
 export function adminMfaRequired(): AppError {
   return new AppError({

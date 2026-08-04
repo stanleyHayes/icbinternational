@@ -6,10 +6,9 @@
  * own methods and its own type rather than being flattened into the ticket flow.
  */
 
-import { z } from 'zod';
-
 import {
   disputeSchema,
+  fraudReportSchema,
   paginated,
   resource,
   routes,
@@ -20,6 +19,7 @@ import {
   type CursorQuery,
   type Dispute,
   type DisputeStatus,
+  type FraudReport,
   type Paginated,
   type Resource,
   type Ticket,
@@ -35,18 +35,6 @@ const ticketList = paginated(ticketSchema);
 const ticketResource = resource(ticketSchema);
 const disputeList = paginated(disputeSchema);
 const disputeResource = resource(disputeSchema);
-
-/** Acknowledgement of a fraud report, naming what was frozen. */
-export const fraudReportSchema = z.object({
-  id: z.string(),
-  reference: z.string(),
-  frozenCardIds: z.array(z.string()),
-  frozenAccountIds: z.array(z.string()),
-  ticketId: z.string().nullable(),
-  createdAt: z.iso.datetime({ offset: false }),
-});
-/** A fraud report acknowledgement. */
-export type FraudReport = z.infer<typeof fraudReportSchema>;
 
 const fraudReportResource = resource(fraudReportSchema);
 

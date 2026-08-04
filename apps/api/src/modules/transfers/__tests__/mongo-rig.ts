@@ -54,11 +54,25 @@ export interface MongoRig {
  * A counter rather than a timestamp: the wall clock is banned in this tree (the simulator
  * moves time), and two rigs built in the same millisecond would collide on a timestamp
  * anyway. The database is dropped on close, so uniqueness only has to hold within a run.
+ *
+ * The counter alone was not enough, and the way it failed is worth keeping. It is module
+ * state, so it is per *worker process*, not per run — Jest runs two workers here, each
+ * loads this module fresh, and each starts at zero. Two suites in different workers both
+ * asked for `reliance_test_transfers_1` and got the same database. They then shared the
+ * account-number fixture's space and the run failed with `Fixture account collided on
+ * number`, in the concurrency suite, which reads exactly like the overdraw bug it exists to
+ * catch. It passed on every re-run in isolation, because in isolation there is one worker.
+ *
+ * `JEST_WORKER_ID` is one-based and distinct per worker, so pairing it with the counter
+ * makes the name unique across the whole run. It is absent outside Jest; `0` then, which is
+ * a value no worker uses.
  */
+const WORKER_ID = process.env['JEST_WORKER_ID'] ?? '0';
+
 let databaseSuffix = 0;
-function nextDatabaseSuffix(): number {
+function nextDatabaseSuffix(): string {
   databaseSuffix += 1;
-  return databaseSuffix;
+  return `w${WORKER_ID}_${databaseSuffix}`;
 }
 
 /** Where the local replica set lives. Matches `infra/docker/docker-compose.yml`. */

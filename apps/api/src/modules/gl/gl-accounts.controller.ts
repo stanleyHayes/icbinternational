@@ -3,6 +3,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@n
 import { Permission, type LedgerAccount } from '@reliance/contracts';
 
 import { zodBody } from '../../common/pipes/zod-validation.pipe.js';
+import { AdminAuthGuard } from '../rbac/admin-auth.guard.js';
 
 import { AdminPermissionGuard } from './admin-permission.guard.js';
 import { GlAccountsService } from './gl-accounts.service.js';
@@ -23,7 +24,10 @@ import { RequireAdminPermission } from './require-admin-permission.decorator.js'
  * is recorded in the task handoff.
  */
 @Controller('/admin/gl/accounts')
-@UseGuards(AdminPermissionGuard)
+// `AdminAuthGuard` first: it is what puts `adminPermissions` on the request.
+// Without it `AdminPermissionGuard` fails closed and every route here 401s, even
+// for a SUPER_ADMIN holding the permission — which is exactly what happened.
+@UseGuards(AdminAuthGuard, AdminPermissionGuard)
 export class GlAccountsController {
   constructor(private readonly service: GlAccountsService) {}
 

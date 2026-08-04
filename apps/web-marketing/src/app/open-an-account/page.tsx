@@ -6,18 +6,25 @@ import { AccountPicker } from '@/components/marketing/account-picker';
 import { FaqList } from '@/components/marketing/faq-list';
 import { PageHeader } from '@/components/marketing/page-header';
 import { Section, SectionHeading } from '@/components/marketing/section';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { APP_URL, DEPOSIT_PROTECTION } from '@/content/site';
 import { getProducts } from '@/lib/api/public-data';
+import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo/json-ld';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 const ICON_SIZE = 20;
 
 export const metadata = pageMetadata({
-  title: 'Open an account',
+  title: 'Open a current account or savings account online',
   description:
-    'Choose an account, tell us who you are, and confirm your identity. Most applications take ' +
-    'about five minutes and are decided the same day.',
+    'Choose an account, tell us who you are and confirm your identity in about five minutes. Most applications are decided the same day.',
   path: '/open-an-account',
+  keywords: [
+    'open a bank account',
+    'open current account',
+    'open savings account',
+    'open bank account online',
+  ],
 });
 
 const STEPS = [
@@ -86,6 +93,7 @@ const QUESTIONS = [
  */
 export default async function OpenAnAccountPage() {
   const products = await getProducts();
+  const breadcrumbTrail = [{ name: 'Home', path: '/' }, { name: 'Open an account', path: '/open-an-account' }];
 
   return (
     <>
@@ -165,6 +173,9 @@ export default async function OpenAnAccountPage() {
           </div>
         </div>
       </Section>
+
+      <JsonLdScript data={breadcrumbJsonLd(breadcrumbTrail)} />
+      <JsonLdScript data={faqJsonLd(QUESTIONS)} />
     </>
   );
 }

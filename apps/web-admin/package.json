@@ -10,7 +10,8 @@
     "clean": "rimraf .next coverage *.tsbuildinfo",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "jest --passWithNoTests"
+    "test": "jest --passWithNoTests",
+    "test:cov": "jest --coverage --passWithNoTests"
   },
   "dependencies": {
     "@hookform/resolvers": "5.7.1",

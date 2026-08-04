@@ -14,6 +14,9 @@ const DEFAULT_API_URL = 'http://localhost:4400/v1';
 
 const DEFAULT_BANK_NAME = 'Reliance Bank';
 
+/** Matches `APP_URL` in the marketing site's `content/site.ts`, which links here. */
+const DEFAULT_APP_URL = 'https://app.reliancebank.example';
+
 /** The only value of `NEXT_PUBLIC_USE_MOCKS` that switches the app off the network. */
 const IN_BROWSER_HANDLERS_FLAG = '1';
 
@@ -36,6 +39,17 @@ function toOrigin(raw: string): string {
 
 /** The bank's name, as it appears in titles, headings and transactional copy. */
 export const BANK_NAME = process.env.NEXT_PUBLIC_BANK_NAME?.trim() || DEFAULT_BANK_NAME;
+
+/**
+ * This host's own canonical origin.
+ *
+ * Needed because `metadata.metadataBase` has to be absolute: relative Open Graph and icon
+ * URLs are resolved against it, and Next falls back to `localhost` with a build-time warning
+ * if it is missing — which ships share cards pointing at a machine nobody else can reach.
+ */
+export const APP_URL = withoutTrailingSlash(
+  process.env.NEXT_PUBLIC_APP_URL?.trim() || DEFAULT_APP_URL,
+);
 
 /** Origin of the core banking API, without the version segment. Server-side use only. */
 export const API_ORIGIN = toOrigin(process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_URL);

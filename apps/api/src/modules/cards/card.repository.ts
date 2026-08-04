@@ -10,6 +10,7 @@ import { CARD_MODEL, NEWEST_FIRST } from './card.constants.js';
 import { CardSchemaClass, type CardDocument } from './card.schema.js';
 import {
   CardStore,
+  type AdminCardQuery,
   type CardPatchInput,
   type CardQuery,
   type CardRecord,
@@ -95,6 +96,18 @@ export class CardRepository extends CardStore {
         { session: input.session ?? undefined },
       )
       .exec();
+  }
+
+  override async listAdmin(query: AdminCardQuery): Promise<{ records: CardRecord[] }> {
+    const filter: QueryFilter<CardSchemaClass> = query.cursor
+      ? ({ id: { $lt: query.cursor } } as QueryFilter<CardSchemaClass>)
+      : {};
+    const documents = await this.model
+      .find(filter)
+      .sort({ orderedAt: NEWEST_FIRST, id: NEWEST_FIRST })
+      .limit(query.limit + 1)
+      .exec();
+    return { records: documents.map((document) => toRecord(document as CardDocument)) };
   }
 
   override async listExpired(query: ExpiredCardQuery): Promise<CardRecord[]> {

@@ -4,7 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { IdGenerator } from '../../common/ids/id-generator.js';
 import { TransactionRunner } from '../../database/transaction.runner.js';
 import { AccountsModule } from '../accounts/index.js';
+import { RbacModule } from '../rbac/rbac.module.js';
 
+import { AdminHoldsController } from './admin-holds.controller.js';
 import { BalanceService } from './balance.service.js';
 import { HoldCaptureService } from './hold-capture.service.js';
 import { HOLD_MODEL } from './hold.constants.js';
@@ -28,7 +30,8 @@ import { HoldStore } from './hold.store.js';
  * customer balances yet.
  */
 @Module({
-  imports: [MongooseModule.forFeature([{ name: HOLD_MODEL, schema: HoldSchema }]), AccountsModule],
+  imports: [MongooseModule.forFeature([{ name: HOLD_MODEL, schema: HoldSchema }]), AccountsModule, RbacModule],
+  controllers: [AdminHoldsController],
   providers: [
     { provide: HoldStore, useClass: HoldRepository },
     BalanceService,

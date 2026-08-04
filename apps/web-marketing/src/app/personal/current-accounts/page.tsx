@@ -7,19 +7,26 @@ import { Section, SectionHeading } from '@/components/marketing/section';
 import { FeeTable } from '@/components/rates/fee-table';
 import { FxBoardTable } from '@/components/rates/fx-board-table';
 import { LimitsTable } from '@/components/rates/limits-table';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { getFxBoard, getProduct } from '@/lib/api/public-data';
 import { formatBps } from '@/lib/format';
+import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo/json-ld';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 const PRODUCT_CODE = 'RB-CURRENT-PLUS';
 const WALLET_CODE = 'RB-MULTI-CURRENCY';
 
 export const metadata = pageMetadata({
-  title: 'Current accounts',
+  title: 'Current accounts in the UK',
   description:
-    'The Current Account Plus: no monthly fee, no minimum balance, salary a day early, and every ' +
-    'limit and charge published in full.',
+    'The Current Account Plus has no monthly fee, no minimum balance, salary a day early and all fees published clearly. Compare current accounts and discover the multi-currency wallet.',
   path: '/personal/current-accounts',
+  keywords: [
+    'current account',
+    'free current account',
+    'no monthly fee account',
+    'multi-currency wallet',
+  ],
 });
 
 const QUESTIONS = [
@@ -52,6 +59,12 @@ export default async function CurrentAccountsPage() {
   ]);
 
   if (!product) notFound();
+
+  const breadcrumbTrail = [
+    { name: 'Home', path: '/' },
+    { name: 'Personal', path: '/personal' },
+    { name: product.name, path: '/personal/current-accounts' },
+  ];
 
   return (
     <>
@@ -152,6 +165,9 @@ export default async function CurrentAccountsPage() {
         primary={{ href: '/open-an-account', label: 'Open an account' }}
         secondary={{ href: '/rates-and-fees', label: 'Compare every account' }}
       />
+
+      <JsonLdScript data={breadcrumbJsonLd(breadcrumbTrail)} />
+      <JsonLdScript data={faqJsonLd(QUESTIONS)} />
     </>
   );
 }

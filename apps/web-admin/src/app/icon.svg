@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Reliance Bank Operations">
+  <title>Reliance Bank Operations</title>
+  <desc>The bank's mark with the operations accent, so a staff tab is never mistaken for a customer one.</desc>
+  <defs>
+    <linearGradient id="rbo" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B3A63"/>
+      <stop offset="1" stop-color="#062036"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#rbo)"/>
+  <g transform="translate(-1 4) scale(1.06)" fill="#FFFFFF" fill-rule="evenodd">
+    <path d="M21 13h13c6 0 10.5 4.5 10.5 10 0 4.6-2.9 8.4-7 9.7L46 41h-8.6l-7.6-8.1H27.5V41H21Zm6.5 6v8h6.1c2.3 0 4.2-1.8 4.2-4s-1.9-4-4.2-4Z"/>
+  </g>
+  <rect x="19" y="50" width="26" height="4" rx="2" fill="#D8B54A"/>
+</svg>

@@ -3,6 +3,7 @@ import { Injectable, type CanActivate, type ExecutionContext } from '@nestjs/com
 import { type AdminRequest } from './admin-auth.types.js';
 import { AdminTokenService } from './admin-token.service.js';
 import { AdminUserService } from './admin-user.service.js';
+import { ADMIN_ACCESS_COOKIE } from './rbac.constants.js';
 import { adminInactive, adminMfaRequired, adminUnauthenticated } from './rbac.errors.js';
 
 const BEARER_PREFIX = 'bearer ';
@@ -53,12 +54,17 @@ export class AdminAuthGuard implements CanActivate {
 }
 
 /**
- * Pulls the bearer token off the request, or throws.
+ * Pulls the admin token off the request, or throws. Cookie first, `Authorization` second.
  *
- * Admin tokens travel in the `Authorization` header only: the contract's cookie names
- * are frozen and cover the customer surface, so the ops console's BFF attaches a header.
+ * The console's BFF forwards cookies and drops every other credential header, so a
+ * browser session arrives in the httpOnly `rb.aat` cookie and no script in the console's
+ * origin can read a token. The bearer form stays for callers that are not a browser —
+ * integration suites and internal tooling — which is why the guard accepts both.
  */
 function extractToken(request: AdminRequest): string {
+  const fromCookie: unknown = request.cookies?.[ADMIN_ACCESS_COOKIE];
+  if (typeof fromCookie === 'string' && fromCookie.length > 0) return fromCookie;
+
   const header = request.headers.authorization;
   const token =
     typeof header === 'string' && header.toLowerCase().startsWith(BEARER_PREFIX)

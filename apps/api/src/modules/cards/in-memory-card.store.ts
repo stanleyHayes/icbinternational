@@ -6,6 +6,7 @@ import { decodeCursor } from '../../common/pagination/cursor.js';
 
 import {
   CardStore,
+  type AdminCardQuery,
   type CardPatchInput,
   type CardQuery,
   type CardRecord,
@@ -81,6 +82,15 @@ export class InMemoryCardStore extends CardStore {
         card.accountId === input.accountId && card.id !== input.exceptCardId && card.isDefault;
       if (shouldClear) this.byId.set(card.id, { ...card, isDefault: false });
     }
+  }
+
+  override async listAdmin(query: AdminCardQuery): Promise<{ records: CardRecord[] }> {
+    const before = query.cursor ? decodeCursor(query.cursor) : null;
+    const cutOff = before ? new Date(before.sortValue).getTime() : null;
+    const all = [...this.byId.values()].filter(
+      (card) => cutOff === null || card.orderedAt.getTime() < cutOff,
+    );
+    return { records: this.newestFirst(all).slice(0, query.limit + 1) };
   }
 
   override async listExpired(query: ExpiredCardQuery): Promise<CardRecord[]> {

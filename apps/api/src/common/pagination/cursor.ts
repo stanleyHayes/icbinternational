@@ -1,4 +1,4 @@
-import { DEFAULT_PAGE_SIZE, type PageInfo } from '@reliance/contracts';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, type PageInfo } from '@reliance/contracts';
 
 /**
  * Cursor pagination.
@@ -35,6 +35,21 @@ export function decodeCursor(cursor: string): CursorPayload | null {
 export interface PageResult<T> {
   data: T[];
   page: PageInfo;
+}
+
+/**
+ * A `?limit=` from the query string, brought inside its bounds.
+ *
+ * Controllers were each doing their own arithmetic on this and getting it subtly wrong.
+ * `Number('')` is `0`, `Number(undefined)` is `NaN`, and `Math.min(NaN, 100)` is `NaN` — so
+ * `?limit=` with nothing after it produced an empty page that reads like an empty book, and
+ * a junk value reached the driver. Both now fall back to the default: a malformed page size
+ * is not worth failing a list request over, but it must never silently mean "none".
+ */
+export function clampLimit(raw: string | undefined): number {
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < 1) return DEFAULT_PAGE_SIZE;
+  return Math.min(parsed, MAX_PAGE_SIZE);
 }
 
 /**

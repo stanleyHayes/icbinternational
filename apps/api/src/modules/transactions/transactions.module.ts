@@ -5,7 +5,9 @@ import { IdGenerator } from '../../common/ids/id-generator.js';
 import { AccountBalanceModule } from '../accounts/account-balance.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { LedgerModule } from '../ledger/ledger.module.js';
+import { RbacModule } from '../rbac/rbac.module.js';
 
+import { AdminTransactionsController } from './admin-transactions.controller.js';
 import { CategorisationService } from './categorisation.service.js';
 import { TransactionRepository } from './repositories/transaction.repository.js';
 import { TransactionStore } from './repositories/transaction.store.js';
@@ -44,8 +46,9 @@ import { TransactionsController } from './transactions.controller.js';
     AccountBalanceModule,
     LedgerModule,
     AuthModule,
+    RbacModule,
   ],
-  controllers: [TransactionsController],
+  controllers: [AdminTransactionsController, TransactionsController],
   providers: [
     { provide: TransactionStore, useClass: TransactionRepository },
     CategorisationService,

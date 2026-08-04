@@ -7,9 +7,11 @@ import { FeatureGrid } from '@/components/marketing/feature-grid';
 import { PageHeader } from '@/components/marketing/page-header';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { SavingsRateTable } from '@/components/rates/savings-rate-table';
+import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { BANK, DEPOSIT_PROTECTION } from '@/content/site';
 import { getCmsPage, getRates } from '@/lib/api/public-data';
 import { formatAer } from '@/lib/format';
+import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo/json-ld';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 const FALLBACK_TITLE = 'Savings';
@@ -21,9 +23,15 @@ export async function generateMetadata() {
   const page = await getCmsPage('savings');
 
   return pageMetadata({
-    title: page?.seo.title ?? FALLBACK_TITLE,
-    description: page?.seo.description ?? FALLBACK_DESCRIPTION,
+    title: page?.seo.title ?? 'Savings accounts with monthly interest',
+    description: page?.seo.description ?? 'Open a savings account with monthly interest, same-day withdrawals and FSCS protection up to £85,000.',
     path: '/savings',
+    keywords: [
+      'savings account',
+      'easy access savings',
+      'monthly interest savings',
+      'FSCS protected savings',
+    ],
   });
 }
 
@@ -89,6 +97,7 @@ const QUESTIONS = [
 export default async function SavingsPage() {
   const rates = await getRates();
   const headlineRate = Math.max(...rates.savings.map((entry) => entry.annualRateBps));
+  const breadcrumbTrail = [{ name: 'Home', path: '/' }, { name: 'Savings', path: '/savings' }];
 
   return (
     <>
@@ -179,6 +188,9 @@ export default async function SavingsPage() {
         primary={{ href: '/open-an-account', label: 'Open a savings account' }}
         secondary={{ href: '/rates-and-fees', label: 'Compare all our rates' }}
       />
+
+      <JsonLdScript data={breadcrumbJsonLd(breadcrumbTrail)} />
+      <JsonLdScript data={faqJsonLd(QUESTIONS)} />
     </>
   );
 }

@@ -25,6 +25,7 @@
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "jest --coverage",
+    "test:cov": "jest --coverage --coverage",
     "test:watch": "jest --watch"
   },
   "dependencies": {

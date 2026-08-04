@@ -8,7 +8,6 @@ import { AppConfigService } from '../../config/config.service.js';
 
 import { createBullBoardHandlers } from './bull-board.middleware.js';
 import { DeadLetterService } from './dead-letter.service.js';
-import { JobsAdminController } from './jobs-admin.controller.js';
 import { BULL_BOARD_ROUTE, JOB_QUEUE_NAMES, deadLetterQueueName } from './jobs.constants.js';
 import { JobQueueRegistry } from './queue.registry.js';
 import { JOB_REDIS_CONNECTION, redisOptionsFromUrl } from './redis-connection.js';
@@ -32,7 +31,6 @@ import { JOB_REDIS_CONNECTION, redisOptionsFromUrl } from './redis-connection.js
  * their dead-letter companions.
  */
 @Module({
-  controllers: [JobsAdminController],
   providers: [
     {
       provide: JOB_REDIS_CONNECTION,

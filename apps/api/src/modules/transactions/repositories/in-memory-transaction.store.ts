@@ -9,6 +9,7 @@ import {
 } from './in-memory-match.js';
 import { unreadableCursor } from './transaction-filter.js';
 import {
+  type AdminTransactionQuery,
   type EntryAccountQuery,
   type LatestBeforeQuery,
   type NewTransaction,
@@ -80,6 +81,16 @@ export class InMemoryTransactionStore extends TransactionStore {
 
     return buildPage({
       records: matches.slice(from, from + query.limit + 1),
+      limit: query.limit,
+      toCursor: (row) => ({ sortValue: row.bookedAt.toISOString(), id: row.id }),
+    });
+  }
+
+  override async listAdmin(query: AdminTransactionQuery): Promise<PageResult<TransactionRecord>> {
+    const all = this.all().sort(newestFirst);
+    const from = query.cursor ? cursorIndex(all, query.cursor) : 0;
+    return buildPage({
+      records: all.slice(from, from + query.limit + 1),
       limit: query.limit,
       toCursor: (row) => ({ sortValue: row.bookedAt.toISOString(), id: row.id }),
     });

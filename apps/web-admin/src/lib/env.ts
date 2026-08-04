@@ -18,6 +18,20 @@ export const USE_IN_BROWSER_API = process.env.NEXT_PUBLIC_USE_MOCKS === MOCK_FLA
 /** The institution's name, as it appears in titles and headings. */
 export const BANK_NAME = process.env.NEXT_PUBLIC_BANK_NAME ?? 'Reliance Bank';
 
+/** Fallback origin, so a clone with no `.env.local` still resolves absolute URLs sensibly. */
+const DEFAULT_CONSOLE_URL = 'https://operations.reliancebank.example';
+
+/**
+ * This host's own canonical origin.
+ *
+ * Required by `metadata.metadataBase`, against which relative icon and Open Graph URLs are
+ * resolved. Next falls back to `localhost` with only a build-time warning if it is unset,
+ * which would ship a share card pointing at whichever machine ran the build.
+ */
+export const CONSOLE_URL = (
+  process.env.NEXT_PUBLIC_CONSOLE_URL?.trim() || DEFAULT_CONSOLE_URL
+).replace(/\/$/, '');
+
 /**
  * Origin-relative base for every API call the browser makes.
  *

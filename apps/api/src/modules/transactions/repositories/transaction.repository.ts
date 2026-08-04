@@ -15,6 +15,7 @@ import { TRANSACTION_MODEL } from '../transactions.constants.js';
 import { buildListFilter, buildRangeFilter } from './transaction-filter.js';
 import { toTransactionRecord } from './transaction.mapper.js';
 import {
+  type AdminTransactionQuery,
   type EntryAccountQuery,
   type LatestBeforeQuery,
   type NewTransaction,
@@ -89,6 +90,19 @@ export class TransactionRepository
       limit: query.limit + 1,
     });
 
+    return buildPage({
+      records: documents.map((document) => toTransactionRecord(document)),
+      limit: query.limit,
+      toCursor: newestFirstCursor,
+    });
+  }
+
+  async listAdmin(query: AdminTransactionQuery): Promise<PageResult<TransactionRecord>> {
+    const filter: Filter = query.cursor ? ({ id: { $lt: query.cursor } } as Filter) : ({} as Filter);
+    const documents = await this.find(filter, {
+      sort: { bookedAt: -1, id: -1 },
+      limit: query.limit + 1,
+    });
     return buildPage({
       records: documents.map((document) => toTransactionRecord(document)),
       limit: query.limit,
