@@ -78,8 +78,7 @@ export class LoanDisbursementService {
 
     const product = this.requireProduct(application.productCode);
     const account = await this.accounts.requireOwned(
-      application.disbursementAccountId,
-      userId,
+      { userId, accountId: application.disbursementAccountId },
       session,
     );
     const advance = fromWire(requireOffer(application).amount);

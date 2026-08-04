@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 import { type CurrencyCode, type ExchangeRate } from '@reliance/money';
 
-import { ExchangeRatePort } from '../accounts/index.js';
+// The port's own file, not the accounts barrel. `AccountsModule` imports the module that
+// binds this adapter, so a barrel import would be read back while the barrel is still
+// loading and resolve to undefined at `extends`.
+import { ExchangeRatePort } from '../accounts/exchange-rate.port.js';
 
 import { RateProviderPort } from './rate-feed/rate-provider.port.js';
 

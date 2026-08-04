@@ -93,7 +93,10 @@ export class OverdraftService {
     request: RequestOverdraftRequest,
     session: ClientSession,
   ): Promise<OverdraftRecord> {
-    const account = await this.accounts.requireOwned(request.accountId, userId, session);
+    const account = await this.accounts.requireOwned(
+      { userId, accountId: request.accountId },
+      session,
+    );
     await this.assertNoLiveFacility(account.id, session);
 
     const granted = await this.assessment.sizeFor(userId, request);
@@ -118,7 +121,7 @@ export class OverdraftService {
 
   /** The facility on one of the customer's accounts, priced against its balance today. */
   async forAccount(userId: string, accountId: string): Promise<OverdraftFacility> {
-    await this.accounts.requireOwned(accountId, userId);
+    await this.accounts.requireOwned({ userId, accountId });
     const facility = await this.facilities.findByAccount(accountId);
     if (!facility) throw facilityNotFound(accountId);
 
@@ -133,7 +136,10 @@ export class OverdraftService {
   }): Promise<OverdraftFacility> {
     const facility = await this.requireOwned(input.userId, input.accountId);
     if (input.sweepFromAccountId) {
-      await this.accounts.requireOwned(input.sweepFromAccountId, input.userId);
+      await this.accounts.requireOwned({
+        userId: input.userId,
+        accountId: input.sweepFromAccountId,
+      });
     }
 
     const updated = await this.facilities.patch(facility.id, {
@@ -228,7 +234,7 @@ export class OverdraftService {
     accountId: string,
     session?: ClientSession,
   ): Promise<OverdraftRecord> {
-    await this.accounts.requireOwned(accountId, userId, session);
+    await this.accounts.requireOwned({ userId, accountId }, session);
     return this.requireByAccount(accountId, session);
   }
 

@@ -43,39 +43,151 @@ Three mechanisms make that possible:
 
 ---
 
-## 0.1 Current state — what is already built
+## 0.1 Current state — measured, not reported
 
-Phase 0 is complete and the API boots. `pnpm verify` is green across every package.
+Last measured against the working tree, not against lane reports. Method: every route declared in
+`packages/contracts/src/common/routes.ts` resolved against every route actually declared by the 47
+controllers (including routes bound through local constants), plus a page-by-page inventory of the
+three front ends. Where a lane's own report disagreed with the tree, the tree won.
 
-| Task                                  | Status  | Evidence                                                                                                              |
-| ------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------- |
-| **F-01** monorepo skeleton            | ✅ DONE | pnpm 11 workspace + Turborepo 2, catalog-pinned                                                                       |
-| **F-02** shared config                | ✅ DONE | TS 7 bases, ESLint 10 + SonarJS + 2 house rules, SWC/Jest preset                                                      |
-| **F-03** `packages/money`             | ✅ DONE | 137 tests, **100%** statements/branches/functions/lines                                                               |
-| **F-04** `packages/contracts`         | ✅ DONE | 20 modules, full route map + error vocabulary; lint + build clean                                                     |
-| **F-05** infra                        | ✅ DONE | Mongo `rs0` primary verified, multi-doc transaction committed, Redis up                                               |
-| **F-06** api-client + mocks           | ✅ DONE | Typed client with shared-refresh on 401; MSW handlers with a stateful store                                           |
-| **F-07** testing harness              | ✅ DONE | `packages/testing` — seeded faker, builders                                                                           |
-| **A-04/05** auth · MFA · devices      | ✅ DONE | Argon2id, refresh rotation with family revocation, TOTP, passkeys, step-up. 3 harness tests open (`docs/HANDOFFS.md`) |
-| **A-06** RBAC                         | ✅ DONE | 10 roles, permission-string guards                                                                                    |
-| **A-07/08** audit · idempotency       | ✅ DONE | Hash-chained append-only log; index-race-proof key claim                                                              |
-| **A-10** jobs                         | ✅ DONE | BullMQ queues, DLQ, replay                                                                                            |
-| **B-02/03** ledger persistence · GL   | ✅ DONE | Balance invariant guarded at three layers; verifier detects injected drift                                            |
-| **B-04/05** accounts · holds          | ✅ DONE | mod-97 IBAN, ownership-checked, availability under concurrency                                                        |
-| **B-06** transactions · insights      | ✅ DONE | Cursor pagination, categorisation, CSV/OFX, budgets                                                                   |
-| **C-01/L-01** products · seed         | ✅ DONE | Effective-dated versions; seed idempotent (89 unchanged on rerun)                                                     |
-| **D-02/05** transfers · beneficiaries | ✅ DONE | One journal entry per transfer; 94 ledger+transfer tests green against the real replica set                           |
-| **I-01..04** design system            | ✅ DONE | 222/226 tests; 4 OTP failures open (`docs/HANDOFFS.md`)                                                               |
-| **M-06** CI · SonarQube               | ✅ DONE | Four-job pipeline; integration job stands up a real replica set                                                       |
-| everything else                       | ⬜ TODO | See the workstream tables below                                                                                       |
+**Headline: 143 of 221 declared routes are implemented. 77 are not.** The gap is not spread evenly —
+it is almost entirely the back office and a handful of customer features. See §0.2 for how a gap
+this size stayed invisible.
 
-**Next on the critical path:** the three front ends (`WS-I 06–10`, `WS-J`, `WS-K`) — the API now has
-72 routes and nothing consuming them. Then `WS-L` personas, and the remaining API modules (cards,
-credit, FX, payments, risk, comms).
+### Foundation and platform
 
-Lanes unblocked **right now** with no shared files: `WS-J` client dashboard, `WS-K` admin console,
-`WS-I 06–10` marketing site (all three against `@reliance/mocks`), `WS-E` cards, `WS-F` credit,
-`WS-C 03/04` FX, `WS-G` risk, `WS-H` comms.
+| Task                       | Status     | Evidence                                                                                                            |
+| -------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------- |
+| **F-01..F-07** foundation  | ✅ DONE    | pnpm 11 + Turborepo 2, TS 7, `money` at 100% coverage, contracts frozen, Mongo `rs0`, api-client + MSW, testing kit |
+| **A-01..A-03** bootstrap   | ✅ DONE    | Boots; bad env aborts readably; `TransactionRunner` retry proven by a forced write-conflict test                    |
+| **A-04/A-05** auth · MFA   | ✅ DONE    | Argon2id, refresh rotation with family revocation, TOTP, passkeys, step-up, device trust                            |
+| **A-06** RBAC              | 🟡 PARTIAL | Guards, roles and permissions exist and work. **No way to authenticate as an operator** — see A-13                  |
+| **A-07** audit             | 🟡 PARTIAL | Hash-chained writer + `pnpm audit:verify` work. No `/admin/audit` endpoints, so nothing can read the trail          |
+| **A-08** idempotency       | ✅ DONE    | Index-race-proof key claim; concurrent identical transfers produce one entry                                        |
+| **A-09** rate limiting     | ⬜ TODO    | `modules/throttle/` does not exist. No login throttle, no sliding window, no velocity signal to AML                 |
+| **A-10/A-11** jobs · files | ✅ DONE    | BullMQ with DLQ and replay; magic-byte sniffing; Cloudinary behind `MediaStoragePort`                               |
+| **A-12** observability     | 🟡 PARTIAL | `/health`, `/health/ready` and Swagger at `/docs` all serve. **No `/metrics`** — Prometheus never built             |
+| **A-13** admin auth        | ⬜ TODO    | **New.** No login endpoint, no password field, no seeded operator. Blocks the entire console                        |
+
+### The ledger and the money paths
+
+| Task                           | Status  | Evidence                                                                                                                                                                                             |
+| ------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **B-01..B-03** ledger · GL     | ✅ DONE | Balance invariant guarded in the constructor, a Mongoose hook and a server-side `$jsonSchema`; verifier detects injected drift                                                                       |
+| **B-04/B-05** accounts·holds   | ✅ DONE | mod-97 IBAN, availability correct under concurrency. (Statements are a separate, missing route — see below)                                                                                          |
+| **B-06** transactions          | ✅ DONE | Cursor pagination, categorisation, CSV/OFX. Projection now actually runs — it did not until §0.2                                                                                                     |
+| **C-01..C-04** products · FX   | ✅ DONE | Effective-dated versions; limits with remaining allowance; time-locked FX quotes; spread booked to GL 4200                                                                                           |
+| **D-01..D-10** movement        | ✅ DONE | One journal entry per transfer; bill pay, payment requests, split, mandates. Standing orders are an _engine only_ — `/transfer-orders` has no HTTP surface                                           |
+| **E-01..E-05** cards           | ✅ DONE | Issuing, authorisation, controls. A live cross-customer defect here was found and fixed — §0.2                                                                                                       |
+| **F1-01..F1-07** credit        | ✅ DONE | Loans, arrears, amortisation, overdraft, term deposits, savings goals and round-ups                                                                                                                  |
+| **L-01..L-05** data · personas | ✅ DONE | 8 archetypes deterministic from `SIM_SEED`; 26 merchants with MCCs; `pnpm demo:reset` posts 3,020 movements through the real `PostingService` and refuses to finish if the ledger does not reconcile |
+
+### What customers can and cannot reach
+
+| Area                                                                                                              | Status  |
+| ----------------------------------------------------------------------------------------------------------------- | ------- |
+| Accounts, cards, transfers, payments, borrow, save, KYC, FX, insights, notifications, beneficiaries, devices, MFA | ✅ DONE |
+| **Disputes** — 5 customer + 3 admin routes, provisional credit posted and projected                               | ✅ DONE |
+| **Statements** `/accounts/:id/statements`, `/accounts/letters`                                                    | ⬜ TODO |
+| **Standing orders** `/transfer-orders` (engine exists; no HTTP surface)                                           | ⬜ TODO |
+| **Support tickets** `/tickets`                                                                                    | ⬜ TODO |
+| **Profile** `/profile`, `/profile/close`, `/profile/export`                                                       | ⬜ TODO |
+| **Bulk transfers**, **business banking**, **fraud reports**, `/public/fx-board`, `/notifications/stream`          | ⬜ TODO |
+
+### What operators can reach
+
+**Nothing.** 35 admin routes exist — CMS, comms templates, GL accounts, jobs, KYC queue, limits
+overrides, loan applications and arrears, products, trial balance — and every one sits behind an
+admin JWT that nothing can issue (A-13).
+
+Beyond that, 51 declared admin routes have no implementation: approvals and dual control, customers,
+AML, screening, tickets, manual postings, journal entries, holds, transactions, audit, staff and
+roles, feature flags, cards, the P&L / balance-sheet / general-ledger / reconciliation reports, and
+all twelve `/admin/simulation/*` routes that the Operations Control screen (K-16) drives.
+
+### The front ends
+
+| App                    | Status     | Evidence                                                                                      |
+| ---------------------- | ---------- | --------------------------------------------------------------------------------------------- |
+| **WS-I** design system | ✅ DONE    | 49 components, 226 tests green, Outfit, light and dark                                        |
+| **WS-I** marketing     | ✅ DONE    | 22 pages, all render, all voice-clean against the rendered HTML                               |
+| **WS-J** client app    | 🟡 PARTIAL | 71 pages built. The screens for statements, standing orders, tickets and profile call nothing |
+| **WS-K** admin console | 🟡 PARTIAL | 28 pages built to a high standard, and not one of them can be opened (A-13)                   |
+
+### Quality
+
+| Task                     | Status  | Evidence                                                                                       |
+| ------------------------ | ------- | ---------------------------------------------------------------------------------------------- |
+| **M-01/M-02/M-03** tests | ✅ DONE | 2,276 API tests + ~1,000 across packages; ledger concurrency proven against a real replica set |
+| **M-04** Playwright      | ⬜ TODO | No `e2e/` directory, no Playwright dependency anywhere                                         |
+| **M-05** security tests  | ⬜ TODO | No authz matrix, no IDOR probes. The card-issuing defect in §0.2 is exactly what these catch   |
+| **M-06** CI              | ✅ DONE | Four-job pipeline; the integration job stands up a real replica set                            |
+| **M-07** performance     | ⬜ TODO | No k6 scripts                                                                                  |
+| **M-08** docs            | ✅ DONE | README, ARCHITECTURE, RUNBOOK, ONBOARDING, ADRs, glossary, handoffs                            |
+| **M-09/M-10** gates      | ⬜ TODO | **New.** Nothing checks that a declared route exists; coverage thresholds are never applied    |
+
+**`pnpm verify` is green at 44/44 tasks** — which is worth stating precisely, because it was green
+throughout everything §0.2 describes. It proves the code compiles, lints and passes its own tests.
+It does not prove a feature exists.
+
+### Critical path from here
+
+`A-13` admin auth → `/admin/approvals` (dual control) → `/admin/customers` + `/admin/simulation` →
+`M-09` route gate → `M-04` Playwright. A-13 first: it is a day's work and it unblocks 35 routes and
+28 screens that are already built and currently worthless.
+
+## 0.2 Integration audit — what composing the lanes actually revealed
+
+Every workstream was built and tested in isolation, and every lane reported green. Composing them
+surfaced a class of defect that no single lane could have seen. This section is kept because the
+_shapes_ below recurred, and recognising them again is worth more than the fixes.
+
+### The headline: a contract is not an implementation
+
+The three front ends were built against `@reliance/mocks`, which implements the **whole** contract.
+So every screen looked finished regardless of whether the API behind it existed. It was invisible
+while `NEXT_PUBLIC_USE_MOCKS=1`; turning it off is what exposed it.
+
+**Of 221 routes declared in `packages/contracts/src/common/routes.ts`, 77 have no controller.**
+Measured twice: by diffing the declared routes against what Nest actually maps at boot, and by
+resolving every route the 47 controllers declare — including those bound through local constants,
+which a naive scan misses and under-reports. The count was 85 before the disputes backend landed.
+
+The single worst consequence: **there is no `/admin/auth/login`.** `RbacModule` has no controller,
+the admin user schema has no password field, and the seed creates zero operators. Thirty-five admin
+routes exist, all behind an admin JWT that nothing can issue, so all 28 back-office screens are
+unreachable. Dual control is doubly unreachable — it needs two distinct operators and there are
+none.
+
+A "finished" UI lane and a "finished" API lane can both be honestly green while the feature between
+them does not exist. Nothing in the Definition of Done (§4.2) catches that, because each lane
+satisfied its own acceptance criteria.
+
+### Defects found and fixed
+
+| Shape                                              | What it was                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Why it survived testing                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Two providers, one token**                       | `LedgerModule` bound `AccountBalancePort` in-memory and `AccountsModule` bound it to Mongo; both exported a `PostingService` built on their own binding. Nest resolves a token from the **first** module in an importer's `imports` array, so which posting service a caller received depended on the order two lines happened to be written in. The showcase wrote every balance to a map that died with the process.                                                                                                 | Each module's own tests wired their own binding, so both passed. Fixed by `AccountBalanceModule` — one binding, no import order can change it.                                                                                                                                                                                                                                                                                         |
+| **A placeholder left in the production graph**     | `AccountOwnerPort` was still the in-memory stub, whose map is empty in any process that did not register an account by hand. Every transaction projection was therefore skipped. The dataset had 3,033 journal entries, correct balances, a verified ledger — and an empty activity feed for every customer.                                                                                                                                                                                                           | The stub was scrupulously honest: it logged an error each time. Being honest 3,033 times is indistinguishable from noise. If a port has no real implementation, refusing to boot beats booting with a stub in the money path.                                                                                                                                                                                                          |
+| **Retry that could replay a committed transfer**   | `TransactionRunner` treated `UnknownTransactionCommitResult` like a transient abort and re-ran the whole callback. That label means the commit _may already have landed_. A single-use quote was the only thing standing between this and a customer being debited twice.                                                                                                                                                                                                                                              | Only reachable under load. Fixed: the commit retries, never the callback — MongoDB makes `commitTransaction` idempotent, which is exactly why replaying the callback is not.                                                                                                                                                                                                                                                           |
+| **Read-your-own-write across a snapshot boundary** | Quotes were written at the default write concern and then read inside a `readConcern: 'snapshot'` transaction, which only sees majority-committed data. Under load the customer was told `QUOTE_NOT_FOUND` for a quote issued a second earlier.                                                                                                                                                                                                                                                                        | Fixed by making `w: 'majority'` the default in `BASE_SCHEMA_OPTIONS`. The rule: anything written outside a transaction and read inside one must be majority-committed first.                                                                                                                                                                                                                                                           |
+| **Lost updates on a counter**                      | Twenty concurrent limit increments landed as one. The unique index that would have forced contention was never created in the test database, and concurrent upserts each inserted their own document.                                                                                                                                                                                                                                                                                                                  | The arithmetic was already atomic; the _index_ was the missing part. Also added the `E11000` retry a concurrent first-write needs.                                                                                                                                                                                                                                                                                                     |
+| **An argument order only a human can get wrong**   | `AccountService.requireOwned(accountId, userId)` was the lone account-first implementation among ten ownership helpers; the other nine take the user first. Both parameters are `string`, so the compiler cannot object to a transposition. **One had already happened.** `CardIssuingService.issue` passed `(userId, accountId)`, and `findById` queries `{ id }` — so it looked up an account whose id was a `usr_…` value and threw `ACCOUNT_NOT_FOUND` for every customer. Card issuance was broken in production. | The test fake was written in the **same transposed order** and discarded the user id, so it neither failed on the swap nor enforced ownership — and no test wired the service to a real `AccountService`. A fake that drifts from its interface does not just miss a bug; it manufactures the evidence that there isn't one. Fixed across 20 call sites by taking a named object, per the `TransactionService.requireOwned` precedent. |
+| **Tooling that was never wired up**                | `.prettierrc.json` declared `prettier-plugin-tailwindcss`, which was in no `package.json`. `pnpm format` had therefore never once run.                                                                                                                                                                                                                                                                                                                                                                                 | Nothing failed — Prettier exits non-zero only when asked to check. Installing it immediately surfaced ~40 latent lint errors that formatting had been hiding.                                                                                                                                                                                                                                                                          |
+
+### Standing lessons
+
+1. **Ports need a real binding or a hard failure.** Every defect above except the last began as a
+   placeholder or a duplicate binding that no test exercised.
+2. **A green lane says nothing about the seam.** Add an integration check that a route the contract
+   declares is actually mapped at boot — see the new **M-09**.
+3. **Mocks that implement the whole contract hide a missing API.** Default local development to
+   `NEXT_PUBLIC_USE_MOCKS=0` so the gap is visible; opt in to mocks deliberately.
+4. **Uniformity is the defence, not the named object.** Ten ownership helpers still take
+   `(userId, id)` — two strings, still transposable in principle. They are left that way
+   deliberately. `AccountService` was dangerous precisely because it was the one exception, so
+   muscle memory produced the wrong call; the others are safe by being identical to each other.
+   Converting one of the ten to an object would recreate the anomaly. Convert all ten, or none.
 
 ---
 
@@ -443,20 +555,21 @@ workstreams unblock. They then run fully in parallel.
 
 ### WS-A · API Platform (backend core)
 
-| ID       | Task                                                                                                                                                                                                                                        | Depends    | Owns                                                                           | Acceptance                                                                                               |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **A-01** | Nest bootstrap: `main.ts`, `AppModule`, zod-validated `ConfigModule`, pino logger, helmet, CORS, compression, global `ZodValidationPipe`, versioned `/v1` prefix, graceful shutdown                                                         | F-04, F-05 | `apps/api/src/main.ts`, `apps/api/src/app.module.ts`, `apps/api/src/config/**` | Boots; `/v1/health` 200; bad env aborts startup with a readable message                                  |
-| **A-02** | `common/`: `AppError`, global exception filter, response-shape interceptor, `traceId` middleware, `ClockService`, `IdGenerator` (ULID), cursor-pagination helper                                                                            | A-01       | `apps/api/src/common/**`                                                       | Thrown `AppError` renders the contract envelope; `ClockService` is injectable + fake-able                |
-| **A-03** | `database/`: Mongoose connection factory, transaction runner (`withTransaction` + retry on `TransientTransactionError`), base repository, soft-delete plugin, index sync command                                                            | A-01       | `apps/api/src/database/**`                                                     | Retry proven by a forced write-conflict test                                                             |
-| **A-04** | Auth: register, verify email, login, refresh rotation, logout, forgot/reset, Argon2id, account lockout, `JwtAuthGuard`, `@CurrentUser()`, httpOnly cookies + CSRF double-submit                                                             | A-02, A-03 | `apps/api/src/modules/auth/**`                                                 | Refresh-token reuse detection revokes the whole family                                                   |
-| **A-05** | MFA & devices: TOTP enrol/verify/disable, recovery codes, WebAuthn passkeys, device fingerprint + trust, session list, remote revoke, step-up guard for high-value ops                                                                      | A-04       | `apps/api/src/modules/mfa/**`, `.../devices/**`                                | `@StepUp()` on an endpoint forces re-auth within a 5-min window                                          |
-| **A-06** | RBAC: roles, granular permissions, `@RequirePermission()` guard, admin scope separation, IP allowlist guard                                                                                                                                 | A-04       | `apps/api/src/modules/rbac/**`                                                 | A support agent cannot reach a treasury endpoint; test proves 403                                        |
-| **A-07** | Audit: append-only writer, hash chain (`prevHash`→`hash`), `@Audited()` decorator, before/after diff, tamper-verify command                                                                                                                 | A-03       | `apps/api/src/modules/audit/**`                                                | Mutating one historical record makes `pnpm audit:verify` fail                                            |
-| **A-08** | Idempotency: `@Idempotent()` interceptor, key storage, in-flight lock, stored-response replay, conflict on payload mismatch                                                                                                                 | A-03       | `apps/api/src/modules/idempotency/**`                                          | Two concurrent identical transfers → one journal entry                                                   |
-| **A-09** | Rate limiting + abuse: Redis sliding window per IP/user/endpoint class, login throttle, CAPTCHA hook, suspicious-velocity signal to AML                                                                                                     | A-03       | `apps/api/src/modules/throttle/**`                                             | Burst of 100 logins → 429 with `Retry-After`                                                             |
-| **A-10** | Jobs: BullMQ setup, queues (`ledger`, `notifications`, `documents`, `rails`, `scheduler`), base processor, retry/backoff/DLQ, Bull Board mounted behind admin auth                                                                          | A-03       | `apps/api/src/modules/jobs/**`                                                 | A failing job lands in the DLQ after N attempts and is replayable                                        |
-| **A-11** | Files: upload (multipart, magic-byte sniffing, size/type allowlist), **Cloudinary** adapter behind a `MediaStoragePort` (signed uploads, private delivery for KYC docs, on-the-fly transforms), virus-scan port (sim), expiring signed URLs | A-03       | `apps/api/src/modules/files/**`                                                | A `.exe` renamed `.pdf` is rejected on content, not extension; KYC assets are never publicly addressable |
-| **A-12** | Observability: `/health` (liveness, readiness, Mongo, Redis), Prometheus metrics, request timing, OpenAPI/Swagger generated from contracts                                                                                                  | A-02       | `apps/api/src/modules/health/**`, `apps/api/src/openapi/**`                    | `/docs` renders the full spec; readiness fails when Mongo is down                                        |
+| ID       | Task                                                                                                                                                                                                                                                                                                                                                                | Depends    | Owns                                                                           | Acceptance                                                                                                                                                                                                                                                                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A-01** | Nest bootstrap: `main.ts`, `AppModule`, zod-validated `ConfigModule`, pino logger, helmet, CORS, compression, global `ZodValidationPipe`, versioned `/v1` prefix, graceful shutdown                                                                                                                                                                                 | F-04, F-05 | `apps/api/src/main.ts`, `apps/api/src/app.module.ts`, `apps/api/src/config/**` | Boots; `/v1/health` 200; bad env aborts startup with a readable message                                                                                                                                                                                                                                                                         |
+| **A-02** | `common/`: `AppError`, global exception filter, response-shape interceptor, `traceId` middleware, `ClockService`, `IdGenerator` (ULID), cursor-pagination helper                                                                                                                                                                                                    | A-01       | `apps/api/src/common/**`                                                       | Thrown `AppError` renders the contract envelope; `ClockService` is injectable + fake-able                                                                                                                                                                                                                                                       |
+| **A-03** | `database/`: Mongoose connection factory, transaction runner (`withTransaction` + retry on `TransientTransactionError`), base repository, soft-delete plugin, index sync command                                                                                                                                                                                    | A-01       | `apps/api/src/database/**`                                                     | Retry proven by a forced write-conflict test                                                                                                                                                                                                                                                                                                    |
+| **A-04** | Auth: register, verify email, login, refresh rotation, logout, forgot/reset, Argon2id, account lockout, `JwtAuthGuard`, `@CurrentUser()`, httpOnly cookies + CSRF double-submit                                                                                                                                                                                     | A-02, A-03 | `apps/api/src/modules/auth/**`                                                 | Refresh-token reuse detection revokes the whole family                                                                                                                                                                                                                                                                                          |
+| **A-05** | MFA & devices: TOTP enrol/verify/disable, recovery codes, WebAuthn passkeys, device fingerprint + trust, session list, remote revoke, step-up guard for high-value ops                                                                                                                                                                                              | A-04       | `apps/api/src/modules/mfa/**`, `.../devices/**`                                | `@StepUp()` on an endpoint forces re-auth within a 5-min window                                                                                                                                                                                                                                                                                 |
+| **A-06** | RBAC: roles, granular permissions, `@RequirePermission()` guard, admin scope separation, IP allowlist guard                                                                                                                                                                                                                                                         | A-04       | `apps/api/src/modules/rbac/**`                                                 | A support agent cannot reach a treasury endpoint; test proves 403                                                                                                                                                                                                                                                                               |
+| **A-07** | Audit: append-only writer, hash chain (`prevHash`→`hash`), `@Audited()` decorator, before/after diff, tamper-verify command                                                                                                                                                                                                                                         | A-03       | `apps/api/src/modules/audit/**`                                                | Mutating one historical record makes `pnpm audit:verify` fail                                                                                                                                                                                                                                                                                   |
+| **A-08** | Idempotency: `@Idempotent()` interceptor, key storage, in-flight lock, stored-response replay, conflict on payload mismatch                                                                                                                                                                                                                                         | A-03       | `apps/api/src/modules/idempotency/**`                                          | Two concurrent identical transfers → one journal entry                                                                                                                                                                                                                                                                                          |
+| **A-09** | Rate limiting + abuse: Redis sliding window per IP/user/endpoint class, login throttle, CAPTCHA hook, suspicious-velocity signal to AML                                                                                                                                                                                                                             | A-03       | `apps/api/src/modules/throttle/**`                                             | Burst of 100 logins → 429 with `Retry-After`                                                                                                                                                                                                                                                                                                    |
+| **A-10** | Jobs: BullMQ setup, queues (`ledger`, `notifications`, `documents`, `rails`, `scheduler`), base processor, retry/backoff/DLQ, Bull Board mounted behind admin auth                                                                                                                                                                                                  | A-03       | `apps/api/src/modules/jobs/**`                                                 | A failing job lands in the DLQ after N attempts and is replayable                                                                                                                                                                                                                                                                               |
+| **A-11** | Files: upload (multipart, magic-byte sniffing, size/type allowlist), **Cloudinary** adapter behind a `MediaStoragePort` (signed uploads, private delivery for KYC docs, on-the-fly transforms), virus-scan port (sim), expiring signed URLs                                                                                                                         | A-03       | `apps/api/src/modules/files/**`                                                | A `.exe` renamed `.pdf` is rejected on content, not extension; KYC assets are never publicly addressable                                                                                                                                                                                                                                        |
+| **A-12** | Observability: `/health` (liveness, readiness, Mongo, Redis), Prometheus metrics, request timing, OpenAPI/Swagger generated from contracts                                                                                                                                                                                                                          | A-02       | `apps/api/src/modules/health/**`, `apps/api/src/openapi/**`                    | `/docs` renders the full spec; readiness fails when Mongo is down                                                                                                                                                                                                                                                                               |
+| **A-13** | **Admin authentication — the console's front door.** `POST /admin/auth/login` (password + mandatory TOTP → bearer token), `GET /admin/auth/me`, logout. Add `passwordHash` to the admin user schema and a way to set it. Seed **at least two** operators with distinct roles, because dual control (K-05) needs two people and one cannot approve their own posting | A-06       | `apps/api/src/modules/rbac/**`, `apps/api/src/seed/foundation/**`              | An operator signs in and reaches an `@AdminEndpoint()` route; a second, distinct operator can approve the first one's manual posting. **Was never in the plan**: `RbacModule` has no controller, the schema has no password field, and the seed creates no operators — so all 35 admin routes and all 28 console screens are unreachable (§0.2) |
 
 ### WS-B · Ledger & Accounts (the core; highest bar)
 
@@ -610,16 +723,18 @@ workstreams unblock. They then run fully in parallel.
 
 ### WS-M · Quality, CI & Delivery
 
-| ID       | Task                                                                                                                                                                        | Depends        | Owns                                               | Acceptance                                                            |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------- | --------------------------------------------------------------------- |
-| **M-01** | Unit test infrastructure + domain coverage gate at 100% for `domain/` and `packages/money`                                                                                  | F-07           | `apps/api/jest.config.ts`, `apps/api/test/unit/**` | CI fails if domain coverage drops below 100%                          |
-| **M-02** | API integration suite: supertest + real Mongo RS per suite, auth fixtures, every endpoint in §7 has a happy path + auth failure + validation failure + idempotency test     | A-_, B-_, D-\* | `apps/api/test/integration/**`                     | ≥ 80% overall line coverage                                           |
-| **M-03** | Ledger property & invariant tests: fast-check property tests, concurrency stress (500 parallel transfers), invariant verifier in CI                                         | B-02           | `apps/api/test/ledger/**`                          | 500 concurrent transfers leave the book balanced with no lost updates |
-| **M-04** | E2E (Playwright): customer journeys — signup→KYC→open account→fund→transfer→card→statement; admin journeys — KYC approval, manual posting dual-approval, dispute resolution | J-_, K-_       | `e2e/**`                                           | Runs against the seeded demo DB in CI on every PR                     |
-| **M-05** | Security testing: authz matrix test (every role × every endpoint), IDOR probes, rate-limit tests, PII/secret leak scan, dependency audit, OWASP-ASVS checklist              | A-06, M-02     | `apps/api/test/security/**`, `docs/SECURITY.md`    | No role can read another customer's data via any route                |
-| **M-06** | CI/CD: GitHub Actions — install/cache, lint, typecheck, unit, integration (Mongo service), build, e2e, Sonar-equivalent quality gate, preview deploy                        | F-01           | `infra/ci/**`, `.github/workflows/**`              | PR is blocked on any red check                                        |
-| **M-07** | Performance: k6 load scripts (transfer, dashboard, transaction list), index audit, N+1 detection, p95 budgets                                                               | M-02           | `perf/**`                                          | Transfer p95 < 250ms at 100 rps locally                               |
-| **M-08** | Docs: README, ARCHITECTURE, DOMAIN-GLOSSARY, API guide, RUNBOOK, ONBOARDING, ADR log, CHANGELOG-AGENTS                                                                      | — (any time)   | `docs/**`, `README.md`                             | A new agent can go from clone to first PR using docs alone            |
+| ID       | Task                                                                                                                                                                                                                                                                                                                    | Depends        | Owns                                               | Acceptance                                                                                                                                                  |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **M-01** | Unit test infrastructure + domain coverage gate at 100% for `domain/` and `packages/money`                                                                                                                                                                                                                              | F-07           | `apps/api/jest.config.ts`, `apps/api/test/unit/**` | CI fails if domain coverage drops below 100%                                                                                                                |
+| **M-02** | API integration suite: supertest + real Mongo RS per suite, auth fixtures, every endpoint in §7 has a happy path + auth failure + validation failure + idempotency test                                                                                                                                                 | A-_, B-_, D-\* | `apps/api/test/integration/**`                     | ≥ 80% overall line coverage                                                                                                                                 |
+| **M-03** | Ledger property & invariant tests: fast-check property tests, concurrency stress (500 parallel transfers), invariant verifier in CI                                                                                                                                                                                     | B-02           | `apps/api/test/ledger/**`                          | 500 concurrent transfers leave the book balanced with no lost updates                                                                                       |
+| **M-04** | E2E (Playwright): customer journeys — signup→KYC→open account→fund→transfer→card→statement; admin journeys — KYC approval, manual posting dual-approval, dispute resolution                                                                                                                                             | J-_, K-_       | `e2e/**`                                           | Runs against the seeded demo DB in CI on every PR                                                                                                           |
+| **M-05** | Security testing: authz matrix test (every role × every endpoint), IDOR probes, rate-limit tests, PII/secret leak scan, dependency audit, OWASP-ASVS checklist                                                                                                                                                          | A-06, M-02     | `apps/api/test/security/**`, `docs/SECURITY.md`    | No role can read another customer's data via any route                                                                                                      |
+| **M-06** | CI/CD: GitHub Actions — install/cache, lint, typecheck, unit, integration (Mongo service), build, e2e, Sonar-equivalent quality gate, preview deploy                                                                                                                                                                    | F-01           | `infra/ci/**`, `.github/workflows/**`              | PR is blocked on any red check                                                                                                                              |
+| **M-07** | Performance: k6 load scripts (transfer, dashboard, transaction list), index audit, N+1 detection, p95 budgets                                                                                                                                                                                                           | M-02           | `perf/**`                                          | Transfer p95 < 250ms at 100 rps locally                                                                                                                     |
+| **M-08** | Docs: README, ARCHITECTURE, DOMAIN-GLOSSARY, API guide, RUNBOOK, ONBOARDING, ADR log, CHANGELOG-AGENTS                                                                                                                                                                                                                  | — (any time)   | `docs/**`, `README.md`                             | A new agent can go from clone to first PR using docs alone                                                                                                  |
+| **M-09** | **Contract-coverage gate.** Boot the API, collect every route Nest maps, diff against every route declared in `packages/contracts/src/common/routes.ts`, fail on any declared route with no implementation. Allow an explicit, dated waiver list so a deliberately-deferred route is a decision rather than an omission | F-04, A-01     | `scripts/check-route-coverage.mjs`, `.github/**`   | Deleting a controller method fails CI naming the orphaned route. Added because 83 declared routes had no implementation and every lane was green — see §0.2 |
+| **M-10** | **Enforce the coverage gate that already exists.** `pnpm verify` runs `turbo run test`, which calls each package's `test` script, so the `coverageThreshold` in every jest config is never applied. Make the gate run coverage, and set `packages/contracts` to a real threshold rather than the current zeros          | M-01           | `package.json`, `turbo.json`, `*/jest.config.mjs`  | Dropping a tested branch fails `pnpm verify`; §11's "coverage ≥ 80%" becomes true rather than aspirational                                                  |
 
 ---
 
@@ -627,6 +742,10 @@ workstreams unblock. They then run fully in parallel.
 
 All routes prefixed `/v1`. `🔒` = authenticated, `👑` = admin + permission, `⚡` = requires
 `Idempotency-Key`, `🔐` = requires step-up auth.
+
+> **This table is the specification, not an inventory.** 77 of these routes have no implementation —
+> see §0.1 for which. Read it as the target; read §0.1 for the state. `M-09` exists to stop the two
+> drifting apart again.
 
 | Area              | Endpoints                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -681,18 +800,22 @@ active in this repo and will block you.
 
 ## 9. Risk register (Kessler's list)
 
-| #   | Risk                                                                    | Mitigation                                                                                         | Owner task |
-| --- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------- |
-| 1   | **Balance drift** — projections diverge from postings                   | Rebuild-and-diff verifier in CI + nightly; balances only ever written by `PostingService`          | B-02, M-03 |
-| 2   | **Lost update under concurrency** — two transfers read the same balance | All money paths run in a Mongo transaction with the retry runner; optimistic version on `accounts` | A-03, M-03 |
-| 3   | **Float contamination**                                                 | `Money` VO + ESLint `no-float-money` + `bigint` at rest; zero `number` money fields                | F-03, F-02 |
-| 4   | **Mongo without a replica set** — transactions silently unavailable     | Compose auto-inits `rs0`; boot check refuses to start otherwise                                    | F-05, A-01 |
-| 5   | **Contract churn stalls frontends**                                     | Contracts frozen in Phase 0; additive-only; mocks regenerate with the contract                     | F-04, §4.3 |
-| 6   | **Agents colliding on files**                                           | Exclusive `Owns:` globs; Handoff Notes instead of cross-edits                                      | §4         |
-| 7   | **Idempotency gaps** → duplicate money                                  | `@Idempotent()` mandatory on every ⚡ route; integration test per route                            | A-08, M-02 |
-| 8   | **Someone "just uses `new Date()`"** and time-travel breaks             | `ClockService` only; ESLint bans `new Date()` in `apps/api/src`                                    | A-02, F-02 |
-| 9   | **A simulated bank still holds real PII**                               | Field-level AES-GCM on PII, redacted logs, synthetic-only seed data                                | A-11, L-03 |
-| 10  | **Admin power without accountability**                                  | Every admin read of customer data is audited; dual approval on manual postings                     | A-07, K-05 |
+| #   | Risk                                                                                                                                       | Mitigation                                                                                                                                                  | Owner task |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| 1   | **Balance drift** — projections diverge from postings                                                                                      | Rebuild-and-diff verifier in CI + nightly; balances only ever written by `PostingService`                                                                   | B-02, M-03 |
+| 2   | **Lost update under concurrency** — two transfers read the same balance                                                                    | All money paths run in a Mongo transaction with the retry runner; optimistic version on `accounts`                                                          | A-03, M-03 |
+| 3   | **Float contamination**                                                                                                                    | `Money` VO + ESLint `no-float-money` + `bigint` at rest; zero `number` money fields                                                                         | F-03, F-02 |
+| 4   | **Mongo without a replica set** — transactions silently unavailable                                                                        | Compose auto-inits `rs0`; boot check refuses to start otherwise                                                                                             | F-05, A-01 |
+| 5   | **Contract churn stalls frontends**                                                                                                        | Contracts frozen in Phase 0; additive-only; mocks regenerate with the contract                                                                              | F-04, §4.3 |
+| 6   | **Agents colliding on files**                                                                                                              | Exclusive `Owns:` globs; Handoff Notes instead of cross-edits                                                                                               | §4         |
+| 7   | **Idempotency gaps** → duplicate money                                                                                                     | `@Idempotent()` mandatory on every ⚡ route; integration test per route                                                                                     | A-08, M-02 |
+| 8   | **Someone "just uses `new Date()`"** and time-travel breaks                                                                                | `ClockService` only; ESLint bans `new Date()` in `apps/api/src`                                                                                             | A-02, F-02 |
+| 9   | **A simulated bank still holds real PII**                                                                                                  | Field-level AES-GCM on PII, redacted logs, synthetic-only seed data                                                                                         | A-11, L-03 |
+| 10  | **Admin power without accountability**                                                                                                     | Every admin read of customer data is audited; dual approval on manual postings                                                                              | A-07, K-05 |
+| 11  | **A declared route with no implementation** — the contract says it exists, nothing serves it                                               | `M-09` boots the API and fails CI on any declared route Nest does not map. Found the hard way: 77 of 221                                                    | M-09, F-04 |
+| 12  | **A placeholder port left in the production graph** — a stub answers `null` forever and the feature silently does nothing                  | A port with no real adapter should stop the app booting, not degrade quietly. Two shipped this way; both were honest at error level and both were invisible | §0.2       |
+| 13  | **A test fake that drifts from the interface it doubles** — the fake takes different arguments than the real thing and hides a live defect | Fakes implement the exported interface, so a signature change breaks them at compile time. A hand-rolled object literal cannot be trusted                   | M-02, §0.2 |
+| 14  | **Mocks that implement the whole contract** — every screen looks finished regardless of the API                                            | Local development defaults to `NEXT_PUBLIC_USE_MOCKS=0`; mocks are opt-in per session, never the resting state                                              | F-06       |
 
 ---
 
@@ -716,26 +839,61 @@ Once Phase 0 lands, these lanes have no shared files and can all run at once:
 | 12 · Data/Sim     | WS-L        | Needs B + D to generate history; L-01 can start early        |
 | 13 · Quality      | WS-M        | M-08 immediately; the rest trails each lane                  |
 
-**Critical path:** `F-01 → F-02 → F-04 → A-01 → A-03 → B-01 → B-02 → B-04 → D-02 → L-03 → M-04`.
-Everything else is slack. Protect that path.
+**Original critical path** (complete through `L-03`):
+`F-01 → F-02 → F-04 → A-01 → A-03 → B-01 → B-02 → B-04 → D-02 → L-03 → M-04`.
+
+**Current critical path** — the plan above assumed the API and the front ends would meet. They did
+not (§0.2), so the remaining path is the seam between them:
+
+`A-13 → /admin/approvals → /admin/customers + /admin/simulation → M-09 → M-04`
+
+`A-13` goes first and alone. It is roughly a day's work — a login controller, a password field on
+the admin schema, and two seeded operators — and until it lands, 35 working admin routes and 28
+finished console screens are worth nothing. Nothing else in the back office can even be tested.
+
+The lanes that can run beside it, with no shared files: the customer gaps (`/tickets`, `/profile`,
+`/transfer-orders`, `/accounts/:id/statements`), `A-09` rate limiting, `M-09`/`M-10` gates, and
+`M-05` security tests — which would have caught the card-issuing defect in §0.2.
 
 ---
 
 ## 11. Definition of "the platform is finished"
 
-- [ ] `git clone && pnpm i && pnpm demo` → a fully populated bank in under 5 minutes
-- [ ] A customer can sign up, pass KYC, open an account, receive salary, spend on a card, transfer
+Status as at the integration audit (see §0.2). Three of eight met.
+
+- [ ] **`git clone && pnpm i && pnpm demo` → a fully populated bank in under 5 minutes**
+      `pnpm demo:reset` builds the dataset in 14–23s and is reliable. Not yet proven from a clean
+      clone: the run depends on a root `.env` that only `.env.example` documents, and on
+      `pnpm db:up` having brought `rs0` to primary first.
+- [ ] **A customer can sign up, pass KYC, open an account, receive salary, spend on a card, transfer
       internationally, take a loan, save into a goal, dispute a charge and download a statement —
-      end to end, in the browser
-- [ ] An operator can approve KYC, investigate an AML alert, resolve a dispute, make a dual-approved
-      manual posting, publish a marketing page and run a month-end close — end to end
-- [ ] The trial balance is zero-sum, and `pnpm ledger:verify` reproduces every balance from postings
-- [ ] Advancing the simulated clock by a year produces correct interest, statements, arrears and
-      fees
-- [ ] `pnpm verify` green · coverage ≥ 80% (100% domain) · Playwright suites green · zero criticals
-- [ ] No real money has moved, and no real PII exists in the database
-- [ ] **No rendered page, email or error message anywhere discloses that this is a simulation**
-      (§4.6). Verified by an automated copy scan in CI, not by eye
+      end to end, in the browser** Verified over HTTP, not in a browser: login → accounts →
+      statement → quote → transfer → both legs → ledger reconciles. Blocked on the API gaps in §0.2
+      — statements, standing orders, profile and bulk transfers have no controller. Disputes now do.
+- [ ] **An operator can approve KYC, investigate an AML alert, resolve a dispute, make a
+      dual-approved manual posting, publish a marketing page and run a month-end close** Not
+      reachable at all. There is no `/admin/auth/login`, the admin user schema has no password
+      field, and no operator is seeded — so none of the 35 existing admin routes can be called and
+      none of the 28 console screens can be opened. See §0.2.
+- [x] **The trial balance is zero-sum, and `pnpm ledger:verify` reproduces every balance from
+      postings** Verified on the generated dataset and again after a live transfer: no unbalanced
+      entries, no GL or customer drift, control totals matched in GBP and USD.
+- [ ] **Advancing the simulated clock by a year produces correct interest, statements, arrears and
+      fees** Unverified. The parts have unit coverage (interest engine, day count, amortisation,
+      arrears sweep); nothing exercises them together across a year, and the simulation controller
+      that would drive the clock does not exist.
+- [ ] **`pnpm verify` green · coverage ≥ 80% (100% domain) · Playwright suites green · zero
+      criticals** `pnpm verify` is green at 44/44 tasks. Coverage is **not** enforced by it —
+      `verify` runs `turbo run test`, which calls each package's `test` script, not `test:cov`; the
+      thresholds in the jest configs are therefore never applied. No Playwright suite exists (M-04).
+- [x] **No real money has moved, and no real PII exists in the database** Every generated identity
+      uses an `@example.com` address and a `+447700900xxx` number from the UK drama range. Value
+      entering the bank is drawn from the nostro, so both legs post.
+- [x] **No rendered page, email or error message anywhere discloses that this is a simulation**
+      (§4.6). Verified by an automated copy scan in CI, not by eye 1,908 files clean, plus a check
+      against the _rendered_ HTML of all 20 marketing pages and the dashboard entry points — which
+      is the stronger test, since it covers what a browser actually paints rather than what the
+      source contains.
 
 ---
 

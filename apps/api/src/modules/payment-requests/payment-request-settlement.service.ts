@@ -50,7 +50,10 @@ export class PaymentRequestSettlementService {
     sourceAccountId: string;
   }): Promise<PaymentRequestRecord> {
     const request = await this.require(input.requestId);
-    const account = await this.accounts.requireOwned(input.sourceAccountId, input.payerUserId);
+    const account = await this.accounts.requireOwned({
+      userId: input.payerUserId,
+      accountId: input.sourceAccountId,
+    });
     assertAccountUsable(account);
     assertPayable(request, account.id, account.currency, this.poster.now());
 

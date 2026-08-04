@@ -18,6 +18,12 @@ import { ACCOUNT_TRANSACTION_LABEL } from './account.constants.js';
 import { toContractAccount, toContractBalance } from './account.mapper.js';
 import { AccountStore, type AccountPatchFields, type AccountRecord } from './account.store.js';
 
+/** Identifies one account and the customer claiming it. */
+export interface OwnedAccountRef {
+  readonly userId: string;
+  readonly accountId: string;
+}
+
 /**
  * Reading a customer's accounts, and the two things they may change about one.
  *
@@ -47,13 +53,13 @@ export class AccountService {
   }
 
   async get(userId: string, accountId: string): Promise<Account> {
-    const record = await this.requireOwned(accountId, userId);
+    const record = await this.requireOwned({ userId, accountId });
     return toContractAccount(record, this.clock.now());
   }
 
   /** The balance block on its own — the poll a dashboard makes every few seconds. */
   async balance(userId: string, accountId: string): Promise<Balance> {
-    const record = await this.requireOwned(accountId, userId);
+    const record = await this.requireOwned({ userId, accountId });
     return toContractBalance(record, this.clock.now());
   }
 
@@ -66,7 +72,7 @@ export class AccountService {
   async update(userId: string, accountId: string, request: UpdateAccountRequest): Promise<Account> {
     return this.runner.run(
       async (session) => {
-        const record = await this.requireOwned(accountId, userId, session);
+        const record = await this.requireOwned({ userId, accountId }, session);
         const fields = await this.resolveUpdate(record, request, session);
         const updated = await this.accounts.patch({ accountId, fields, session });
 
@@ -82,12 +88,14 @@ export class AccountService {
    *
    * A joint holder counts as an owner: they are on `holderIds` and the money is as much
    * theirs as the primary holder's.
+   *
+   * The pair is named rather than positional because an account id and a user id are both
+   * `string`: swapping them compiles, and resolves one customer's account against another
+   * customer's id — a cross-customer read that no type would have caught. Property names
+   * are checked, so the transposition stops being expressible.
    */
-  async requireOwned(
-    accountId: string,
-    userId: string,
-    session?: ClientSession,
-  ): Promise<AccountRecord> {
+  async requireOwned(reference: OwnedAccountRef, session?: ClientSession): Promise<AccountRecord> {
+    const { accountId, userId } = reference;
     const record = await this.accounts.findById(accountId, session);
     if (!record || !isHeldBy(record, userId)) throw accountNotFound(accountId);
     return record;

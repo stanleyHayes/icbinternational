@@ -7,7 +7,11 @@ import { AppError } from '../../../common/errors/app-error.js';
 import { IdGenerator } from '../../../common/ids/id-generator.js';
 import { toStored } from '../../../common/money/money.codec.js';
 import { type TransactionRunner } from '../../../database/transaction.runner.js';
-import { type AccountRecord, type AccountService } from '../../accounts/index.js';
+import {
+  type AccountRecord,
+  type AccountService,
+  type OwnedAccountRef,
+} from '../../accounts/index.js';
 import { InMemoryMandateStore } from '../in-memory-mandate.store.js';
 import { MandateFrequency } from '../mandate.constants.js';
 import { type MandatePoster } from '../mandate.poster.js';
@@ -100,7 +104,8 @@ export class RecordingMandatePoster {
 
 /** An account service that owns exactly one usable account. */
 export class StubAccounts {
-  async requireOwned(accountId: string, userId: string): Promise<AccountRecord> {
+  async requireOwned(reference: OwnedAccountRef): Promise<AccountRecord> {
+    const { accountId, userId } = reference;
     if (accountId !== ACCOUNT || userId !== CUSTOMER) {
       throw new AppError({ code: 'ACCOUNT_NOT_FOUND', message: 'No such account.' });
     }

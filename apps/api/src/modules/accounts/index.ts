@@ -9,7 +9,12 @@
 
 export { AccountsModule } from './accounts.module.js';
 
-export { AccountService, accountNotFound, isHeldBy } from './account.service.js';
+export {
+  AccountService,
+  accountNotFound,
+  isHeldBy,
+  type OwnedAccountRef,
+} from './account.service.js';
 export { AccountOpeningService } from './account-opening.service.js';
 export { AccountStatusService } from './account-status.service.js';
 export { AccountClosureService } from './account-closure.service.js';

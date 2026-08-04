@@ -60,7 +60,10 @@ export class PaymentRequestFactory {
    *   `CURRENCY_MISMATCH` when the amount is not in the account's currency.
    */
   async build(draft: RequestDraft): Promise<NewPaymentRequest> {
-    const account = await this.accounts.requireOwned(draft.destinationAccountId, draft.userId);
+    const account = await this.accounts.requireOwned({
+      userId: draft.userId,
+      accountId: draft.destinationAccountId,
+    });
     assertAccountUsable(account);
 
     if (account.currency !== draft.amount.currency) {

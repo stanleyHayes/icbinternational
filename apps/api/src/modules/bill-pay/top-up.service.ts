@@ -55,7 +55,10 @@ export class TopUpService {
     assertWithinGatewayLimits(amount);
     assertBundleIdentified(request);
 
-    const account = await this.accounts.requireOwned(request.sourceAccountId, input.userId);
+    const account = await this.accounts.requireOwned({
+      userId: input.userId,
+      accountId: request.sourceAccountId,
+    });
     assertAccountUsable(account);
 
     const now = this.booking.now();

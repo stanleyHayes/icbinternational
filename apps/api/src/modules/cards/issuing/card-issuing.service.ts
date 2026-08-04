@@ -63,7 +63,10 @@ export class CardIssuingService {
    *   the account-usability check refuses; `LIMIT_EXCEEDED` when the account is full.
    */
   async issue(input: IssueCardInput): Promise<CardRecord> {
-    const account = await this.accounts.requireOwned(input.userId, input.request.accountId);
+    const account = await this.accounts.requireOwned({
+      userId: input.userId,
+      accountId: input.request.accountId,
+    });
     assertAccountUsable(account);
 
     const card = await this.runner.runIn(

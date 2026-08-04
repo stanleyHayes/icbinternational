@@ -86,8 +86,11 @@ export class FxQuoteService {
       });
     }
 
-    const from = await this.accounts.requireOwned(fromAccountId, input.userId);
-    const to = await this.accounts.requireOwned(toAccountId, input.userId);
+    const from = await this.accounts.requireOwned({
+      userId: input.userId,
+      accountId: fromAccountId,
+    });
+    const to = await this.accounts.requireOwned({ userId: input.userId, accountId: toAccountId });
     assertAccountUsable(from);
     assertAccountUsable(to);
 

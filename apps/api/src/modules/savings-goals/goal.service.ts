@@ -60,7 +60,10 @@ export class GoalService {
    * money the moment it was created would be a transfer disguised as a form.
    */
   async create(userId: string, request: CreateGoalRequest): Promise<Goal> {
-    const account = await this.accounts.requireOwned(request.linkedAccountId, userId);
+    const account = await this.accounts.requireOwned({
+      userId,
+      accountId: request.linkedAccountId,
+    });
     const target = fromWire(request.targetAmount);
     this.assertSameCurrency(target, account.currency);
 

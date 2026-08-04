@@ -19,3 +19,20 @@ export function formatDeadline(date: Date): string {
     timeZone: 'UTC',
   }).format(date);
 }
+
+/**
+ * The customer's own account of the problem, shortened to fit a statement line.
+ *
+ * The projector copies a journal entry's description onto the transaction row, and the
+ * contract caps that at 120 characters — a dispute description may run to five thousand.
+ * Trimming keeps the customer's own words next to the credit on their statement rather
+ * than replacing them with a case number they would not recognise.
+ */
+export function ledgerLabel(description: string): string {
+  const collapsed = description.replace(/\s+/g, ' ').trim();
+  if (collapsed.length <= LEDGER_LABEL_MAX) return collapsed;
+  return `${collapsed.slice(0, LEDGER_LABEL_MAX - 1).trimEnd()}…`;
+}
+
+/** Leaves room for the longest prefix a dispute entry description carries. */
+const LEDGER_LABEL_MAX = 80;

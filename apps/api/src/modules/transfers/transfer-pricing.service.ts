@@ -69,7 +69,10 @@ export class TransferPricingService {
     accountId: string;
     session?: ClientSession;
   }): Promise<AccountRecord> {
-    const account = await this.accounts.requireOwned(input.accountId, input.userId, input.session);
+    const account = await this.accounts.requireOwned(
+      { userId: input.userId, accountId: input.accountId },
+      input.session,
+    );
     assertAccountUsable(account);
     return account;
   }

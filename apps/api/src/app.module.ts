@@ -17,6 +17,7 @@ import { CardsModule } from './modules/cards/cards.module.js';
 import { CmsModule } from './modules/cms/cms.module.js';
 import { DepositsModule } from './modules/deposits/deposits.module.js';
 import { DevicesModule } from './modules/devices/devices.module.js';
+import { DisputesModule } from './modules/disputes/disputes.module.js';
 import { FeesModule } from './modules/fees/fees.module.js';
 import { FilesModule } from './modules/files/files.module.js';
 import { FxModule } from './modules/fx/fx.module.js';
@@ -98,6 +99,8 @@ import { WalletsModule } from './modules/wallets/wallets.module.js';
     PaymentRequestsModule,
     MandatesModule,
     CardsModule,
+    // After cards: a dispute contests a card payment and reverses it through the ledger.
+    DisputesModule,
 
     // --- Credit and saving ------------------------------------------------
     LoansModule,

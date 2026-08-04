@@ -138,8 +138,7 @@ export class LoanRepaymentService {
 
     this.assertCollectable(loan);
     const account = await this.accounts.requireOwned(
-      input.request.fromAccountId,
-      input.userId,
+      { userId: input.userId, accountId: input.request.fromAccountId },
       session,
     );
     const payment = fromWire(input.request.amount);

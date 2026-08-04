@@ -16,7 +16,12 @@ import {
   TEST_USER,
 } from '../../accounts/__tests__/accounts-harness.js';
 import { type AccountService } from '../../accounts/account.service.js';
-import { type InMemoryAccountStore } from '../../accounts/index.js';
+import {
+  accountNotFound,
+  isHeldBy,
+  type InMemoryAccountStore,
+  type OwnedAccountRef,
+} from '../../accounts/index.js';
 import { type PasswordService } from '../../auth/password.service.js';
 import { type UsersService } from '../../auth/users/index.js';
 import { holdsRig, type HoldsRig } from '../../holds/__tests__/holds-harness.js';
@@ -267,9 +272,13 @@ function fakeAccountService(_cards: CardService, accounts: InMemoryAccountStore)
       if (!account) throw new Error(`Fixture account ${accountId} is missing`);
       return account;
     },
-    requireOwned: async (_userId: string, accountId: string) => {
+    // Holds the real ownership rule, not just the real shape. A fake that returns any
+    // account it is handed cannot fail the test that catches a caller reading someone
+    // else's account, which is the only reason this method exists.
+    requireOwned: async ({ accountId, userId }: OwnedAccountRef) => {
       const account = await accounts.findById(accountId);
       if (!account) throw new Error(`Fixture account ${accountId} is missing`);
+      if (!isHeldBy(account, userId)) throw accountNotFound(accountId);
       return account;
     },
   } as unknown as AccountService;

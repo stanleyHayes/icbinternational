@@ -183,8 +183,7 @@ export class DepositService {
   private async placeWithin(input: PlacementInput): Promise<DepositRecord> {
     const { amount, request, session } = input;
     const account = await this.accounts.requireOwned(
-      request.sourceAccountId,
-      input.userId,
+      { userId: input.userId, accountId: request.sourceAccountId },
       session,
     );
     await this.balances.assertSufficientFunds(account.id, amount, session);

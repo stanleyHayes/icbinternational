@@ -70,7 +70,10 @@ export class BillPayService {
     assertReferenceMatches(biller, request.customerReference);
     assertAmountAccepted(biller, amount);
 
-    const account = await this.accounts.requireOwned(request.sourceAccountId, userId);
+    const account = await this.accounts.requireOwned({
+      userId,
+      accountId: request.sourceAccountId,
+    });
     assertAccountUsable(account);
 
     await this.confirmWithBiller(biller, request.customerReference);

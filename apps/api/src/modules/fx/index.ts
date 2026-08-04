@@ -5,9 +5,14 @@
  * execution services; the accounts lane needs the rate adapter; the simulation lane needs
  * the provider port to move the market. None of them has any business knowing how a quote
  * document is shaped.
+ *
+ * `AccountsModule` is the one exception, and it has to be: reading this file loads
+ * `FxModule`, which imports `AccountsModule`, so the accounts lane reaches
+ * `FxExchangeRateModule` by its own path rather than through here.
  */
 
 export { FxModule } from './fx.module.js';
+export { FxExchangeRateModule } from './fx-exchange-rate.module.js';
 
 export { FxRateService, rateUnavailable } from './fx-rate.service.js';
 export { FxQuoteService } from './fx-quote.service.js';

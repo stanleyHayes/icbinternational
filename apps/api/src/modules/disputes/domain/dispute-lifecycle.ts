@@ -63,9 +63,18 @@ export function isMerchantResponseDue(input: {
  * @param windowDays The window length — {@link DISPUTE_WINDOW_DAYS} in production.
  */
 export function isWithinDisputeWindow(bookedAt: Date, now: Date, windowDays: number): boolean {
-  const windowMs =
-    windowDays * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
-  return now.getTime() - bookedAt.getTime() <= windowMs;
+  return now.getTime() - bookedAt.getTime() <= windowDays * MS_PER_DAY;
+}
+
+/**
+ * A scheme deadline, `days` of simulated clock after `from`.
+ *
+ * Plain millisecond arithmetic rather than calendar arithmetic: the scheme counts elapsed
+ * days, not business days, and advancing the simulated clock has to move every deadline
+ * with it by exactly the amount it moved.
+ */
+export function deadlineFrom(from: Date, days: number): Date {
+  return new Date(from.getTime() + days * MS_PER_DAY);
 }
 
 /**
@@ -99,3 +108,4 @@ const HOURS_PER_DAY = 24;
 const MINUTES_PER_HOUR = 60;
 const SECONDS_PER_MINUTE = 60;
 const MS_PER_SECOND = 1000;
+const MS_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;

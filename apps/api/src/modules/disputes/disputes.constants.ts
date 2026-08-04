@@ -58,3 +58,9 @@ export const DISPUTE_AUDIT_CAPTURE_FIELDS = Object.freeze([
 
 /** Locale used when rendering dates and amounts for customer notifications. */
 export const NOTIFICATION_LOCALE = 'en-GB';
+
+/** Labels the transaction runner logs a retry against. */
+export const DISPUTE_TRANSACTION_LABEL = Object.freeze({
+  RAISE: 'dispute.raise',
+  RESOLVE: 'dispute.resolve',
+});

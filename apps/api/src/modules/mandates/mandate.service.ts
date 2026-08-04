@@ -62,7 +62,10 @@ export class MandateService {
    *   `ACCOUNT_FROZEN` / `ACCOUNT_CLOSED` when it cannot support collections.
    */
   async setUp(setup: MandateSetup): Promise<MandateRecord> {
-    const account = await this.accounts.requireOwned(setup.accountId, setup.userId);
+    const account = await this.accounts.requireOwned({
+      userId: setup.userId,
+      accountId: setup.accountId,
+    });
     assertAccountUsable(account);
 
     return this.mandates.insert({

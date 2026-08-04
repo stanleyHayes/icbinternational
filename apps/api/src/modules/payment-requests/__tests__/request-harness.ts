@@ -7,7 +7,11 @@ import { AppError } from '../../../common/errors/app-error.js';
 import { IdGenerator } from '../../../common/ids/id-generator.js';
 import { toStored } from '../../../common/money/money.codec.js';
 import { type TransactionRunner } from '../../../database/transaction.runner.js';
-import { type AccountService, type AccountRecord } from '../../accounts/index.js';
+import {
+  type AccountService,
+  type AccountRecord,
+  type OwnedAccountRef,
+} from '../../accounts/index.js';
 import { InMemoryPaymentRequestStore } from '../in-memory-payment-request.store.js';
 import { PaymentRequestNotifierPort, type RequestEvent } from '../payment-request-notifier.port.js';
 import { type PaymentRequestFactory } from '../payment-request.factory.js';
@@ -126,7 +130,8 @@ export class RecordingRequestPoster {
 
 /** An account service that owns two accounts and refuses everything else. */
 export class StubAccounts {
-  async requireOwned(accountId: string, userId: string): Promise<AccountRecord> {
+  async requireOwned(reference: OwnedAccountRef): Promise<AccountRecord> {
+    const { accountId, userId } = reference;
     const owner = accountId === DESTINATION ? REQUESTER : PAYER;
     if (owner !== userId) {
       throw new AppError({ code: 'ACCOUNT_NOT_FOUND', message: 'No such account.' });
