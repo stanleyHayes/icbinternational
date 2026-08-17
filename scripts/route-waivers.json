@@ -1,3 +1,9 @@
 {
-  "waived": []
+  "waived": [
+    {
+      "route": "/chat/stream",
+      "since": "2026-08-17",
+      "reason": "WebSocket endpoint served by ChatGateway (@WebSocketGateway) in apps/api/src/modules/chat — no HTTP controller can answer it, and the gate only scans controllers."
+    }
+  ]
 }

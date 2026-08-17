@@ -28,6 +28,7 @@ import {
 } from '@reliance/api-client';
 import {
   accountSchema,
+  adminChatConversationSchema,
   adminUserSchema,
   amlAlertSchema,
   amlCaseSchema,
@@ -107,6 +108,11 @@ const COLLECTIONS: readonly CollectionCase[] = [
   { name: 'fxRates', schema: fxRateSchema, select: (d) => d.fxRates },
   { name: 'notifications', schema: notificationSchema, select: (d) => d.notifications },
   { name: 'tickets', schema: ticketSchema, select: (d) => d.tickets },
+  {
+    name: 'chatConversations',
+    schema: adminChatConversationSchema,
+    select: (d) => d.chatConversations,
+  },
   { name: 'disputes', schema: disputeSchema, select: (d) => d.disputes },
   { name: 'pages', schema: cmsPageSchema, select: (d) => d.pages },
   { name: 'articles', schema: articleSchema, select: (d) => d.articles },

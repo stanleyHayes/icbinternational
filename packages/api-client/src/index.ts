@@ -82,6 +82,7 @@ export * from './resources/borrow.js';
 export * from './resources/bulk-transfers.js';
 export * from './resources/business.js';
 export * from './resources/cards.js';
+export * from './resources/chat.js';
 export * from './resources/devices.js';
 export * from './resources/files.js';
 export * from './resources/fx.js';

@@ -1,6 +1,6 @@
 {
   "name": "@reliance/contracts",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Frozen API contract: enums, Zod schemas, DTO types, route paths and error codes shared by the API and all three front ends.",
   "main": "./dist/index.js",

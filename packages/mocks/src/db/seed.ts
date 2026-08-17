@@ -12,6 +12,7 @@ import { AccountType, type Account, type Transaction, type User } from '@relianc
 
 import { makeAccount, makeBalance, makeStatements, makeTransaction } from '../factories/banking.js';
 import {
+  makeChatConversation,
   makeDispute,
   makeNotificationPreferences,
   makeNotifications,
@@ -257,6 +258,18 @@ function buildEngagement(clock: MockClock, currentUser: User, transactions: Tran
     notifications: makeNotifications(clock, VOLUMES.notifications),
     notificationPreferences: makeNotificationPreferences(),
     tickets: [makeTicket({ clock, customerName })],
+    chatConversations: [
+      makeChatConversation({ clock, customerName, overrides: { customerUserId: currentUser.id } }),
+      makeChatConversation({
+        clock,
+        customerName: 'Website visitor',
+        overrides: {
+          guest: { name: 'Alex Morgan', email: 'alex.morgan@example.com' },
+          assignedAgentName: null,
+        },
+      }),
+    ],
+    chatGuestTokens: {},
     disputes:
       disputed === undefined
         ? []

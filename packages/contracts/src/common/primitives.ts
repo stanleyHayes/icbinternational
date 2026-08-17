@@ -67,6 +67,8 @@ export const ID_PREFIX = {
   billPayment: 'bil',
   paymentRequest: 'prq',
   mandate: 'mdt',
+  chatConversation: 'cnv',
+  chatMessage: 'cmsg',
 } as const;
 
 // --- Time -----------------------------------------------------------------

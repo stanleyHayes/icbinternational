@@ -3,6 +3,8 @@
  */
 
 import {
+  ChatAuthorType,
+  ChatConversationStatus,
   DisputeReason,
   DisputeStatus,
   LocationKind,
@@ -12,6 +14,7 @@ import {
   TicketPriority,
   TicketStatus,
   TicketTopic,
+  type AdminChatConversation,
   type Article,
   type BankLocation,
   type CmsPage,
@@ -139,6 +142,52 @@ export function makeTicket(options: FactoryOptions<Ticket> & { customerName: str
     createdAt,
     updatedAt: createdAt,
     resolvedAt: null,
+    ...overrides,
+  };
+}
+
+/** A live chat conversation with a short thread on it, in the agent-facing shape. */
+export function makeChatConversation(
+  options: FactoryOptions<AdminChatConversation> & { customerName: string },
+): AdminChatConversation {
+  const { clock, customerName, overrides } = options;
+  const createdAt = clock.daysAgo(faker.number.int({ min: 0, max: 5 }));
+  // A conversation opened from the marketing site has a guest behind it, not a customer;
+  // the opening message has to agree with that or the inbox shows an impossible thread.
+  const guest = overrides?.guest ?? null;
+
+  return {
+    id: mockId('cnv'),
+    status: ChatConversationStatus.OPEN,
+    subject: pickOne([
+      'Question about my balance',
+      'Card has not arrived yet',
+      'Help with a pending payment',
+    ]),
+    messages: [
+      {
+        id: mockId('cmsg'),
+        authorType: guest ? ChatAuthorType.GUEST : ChatAuthorType.CUSTOMER,
+        authorName: guest?.name ?? customerName,
+        body: 'Hi — could someone take a look at this for me, please?',
+        sentAt: createdAt,
+      },
+      {
+        id: mockId('cmsg'),
+        authorType: ChatAuthorType.AGENT,
+        authorName: faker.person.firstName(),
+        body: 'Of course — give me a moment while I open your account.',
+        sentAt: createdAt,
+      },
+    ],
+    unreadCount: 1,
+    createdAt,
+    updatedAt: createdAt,
+    closedAt: null,
+    customerUserId: null,
+    guest: null,
+    assignedAgentName: faker.person.fullName(),
+    agentUnreadCount: 1,
     ...overrides,
   };
 }

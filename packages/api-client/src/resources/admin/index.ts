@@ -1,7 +1,7 @@
 /**
  * The `client.admin` group.
  *
- * The contract's `routes.admin` holds fifty-six routes, which is far too many for one
+ * The contract's `routes.admin` holds sixty-one routes, which is far too many for one
  * file under the repo's size budget. They are split by the console screen that uses
  * them — customers, finance, risk, platform — and flattened back into a single object
  * here, so a caller still writes `client.admin.trialBalance()` and never has to know

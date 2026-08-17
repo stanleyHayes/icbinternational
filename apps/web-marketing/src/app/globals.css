@@ -12,6 +12,15 @@
   --rb-font-display: var(--font-outfit), system-ui, sans-serif;
   --rb-font-body: var(--font-outfit), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --rb-font-numeric: var(--font-outfit), system-ui, sans-serif;
+  /* Strong ease-out for entrances: fast off the mark, settles hard. The brand tokens have
+     no equivalent, and `packages/ui` styles are generated — so this one lives here. */
+  --rb-ease-emphasized: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@theme {
+  /* Page enter on route change: the shared slide-up keyframe with the stronger entrance
+     easing. Defined here because it needs `--rb-ease-emphasized`, which lives in this file. */
+  --animate-page-enter: rb-slide-up var(--rb-duration-base) var(--rb-ease-emphasized);
 }
 
 @layer base {

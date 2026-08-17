@@ -209,6 +209,11 @@ Non-default host ports so this stack runs alongside others on the same machine.
 | Redis            | 6579  | appendonly, noeviction                 |
 | mongo-express    | 8481  | optional, `tools` compose profile      |
 
+The live chat stream (`WS /v1/chat/stream`) is a long-held socket on the API's port, which
+settles the deployment target: the Render web service (`render.yaml`) holds it fine, the
+`apps/api/vercel.json` serverless variant cannot — deploy chat on Render, or the stream
+never connects.
+
 ## Testing strategy
 
 - **Domain and `packages/money`: 100% coverage**, property-tested (allocation never loses a minor

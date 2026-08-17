@@ -18,6 +18,7 @@ against them, so an unannounced change breaks work that is already in flight.
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------------- | ------ |
 | 2026-08-02 | 1.0.0   | Initial contract — 20 modules, full route map, error vocabulary                                                                                                                                                                                                                             | —         | all            | claude |
 | 2026-08-02 | 1.0.1   | `mintFundsRequestSchema.narrative` default changed from `'Simulated inbound settlement'` to `'Credit transfer received'`. That string renders as the transaction description on a customer's statement and disclosed the nature of the project (§4.6). Default value only — no shape change | Yes       | none           | claude |
+| 2026-08-17 | 1.1.0   | New module `chat.ts`: live support chat — conversation/message schemas, guest session, `chatStreamEventSchema` (WebSocket frames), and `routes.chat` / `routes.public.chat` / `routes.admin.chat` route maps. New id prefixes `cnv` / `cmsg`. Client and mocks regenerated in the same commit | Yes       | none           | kimi   |
 
 ## Open proposals
 

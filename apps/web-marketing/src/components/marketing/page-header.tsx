@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { cn, FOCUS_RING } from '@reliance/ui';
 
+import { FadeIn, LINE_STAGGER_MS, TextReveal } from '@/components/motion/text-reveal';
 import type { SiteHref } from '@/lib/routes';
 
 /** One step in the trail above a page title. */
@@ -58,9 +59,11 @@ export function PageHeader(props: PageHeaderProps) {
         ) : null}
 
         <h1 className="font-display text-fg mt-3 max-w-3xl text-4xl font-semibold md:text-5xl">
-          {title}
+          <TextReveal lines={[title]} />
         </h1>
-        <p className="text-fg-muted mt-5 max-w-2xl text-lg leading-relaxed">{description}</p>
+        <FadeIn delay={LINE_STAGGER_MS}>
+          <p className="text-fg-muted mt-5 max-w-2xl text-lg leading-relaxed">{description}</p>
+        </FadeIn>
 
         {children ? <div className="mt-8">{children}</div> : null}
       </div>

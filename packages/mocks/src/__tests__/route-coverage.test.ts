@@ -36,15 +36,24 @@ interface ContractRoute {
  *
  * Function-valued entries are invoked with a sample per parameter. `Function.length`
  * gives the arity, so a two-parameter route such as `accounts.statement` gets two
- * samples rather than one and an `undefined`.
+ * samples rather than one and an `undefined`. Nested groups — `public.chat`,
+ * `admin.chat` — are walked recursively, with the path reflected in the group label.
  */
 function contractRoutes(): ContractRoute[] {
   const flattened: ContractRoute[] = [];
 
-  for (const [group, entries] of Object.entries(routes)) {
-    for (const [name, value] of Object.entries(entries as Record<string, unknown>)) {
+  const walk = (group: string, entries: Record<string, unknown>): void => {
+    for (const [name, value] of Object.entries(entries)) {
+      if (typeof value === 'object' && value !== null) {
+        walk(`${group}.${name}`, value as Record<string, unknown>);
+        continue;
+      }
       flattened.push({ group, name, path: resolvePath(name, value) });
     }
+  };
+
+  for (const [group, entries] of Object.entries(routes)) {
+    walk(group, entries as Record<string, unknown>);
   }
 
   return flattened;

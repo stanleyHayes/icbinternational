@@ -49,3 +49,6 @@ tmp/
 .raven/state/
 .raven/.model-session.json
 .claude/
+
+# local demo credentials — never commit
+credentials.txt

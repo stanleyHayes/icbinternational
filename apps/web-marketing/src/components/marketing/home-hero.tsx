@@ -2,12 +2,16 @@ import { ShieldCheck, Zap } from 'lucide-react';
 
 import { MoneyText } from '@reliance/ui';
 
+import { FadeIn, LINE_STAGGER_MS, TextReveal } from '@/components/motion/text-reveal';
 import { DEPOSIT_PROTECTION } from '@/content/site';
 import { formatAer } from '@/lib/format';
 
 import { LinkButton } from './link-button';
 
 const ICON_SIZE = 16;
+
+/** The hero headline, as authored — one line, revealed out of its mask on mount. */
+const HEADLINE_LINES = ['Banking you can stand on.'];
 
 /** The example balance in the phone mock-up, in integer minor units. */
 const EXAMPLE_BALANCE_MINOR = '482350';
@@ -32,22 +36,25 @@ export function HomeHero({ savingsRateBps }: { readonly savingsRateBps: number }
           </p>
 
           <h1 className="font-display text-fg mt-6 max-w-2xl text-4xl leading-[1.05] font-semibold md:text-6xl">
-            Banking you can stand on.
+            <TextReveal lines={HEADLINE_LINES} />
           </h1>
 
-          <p className="text-fg-muted mt-6 max-w-xl text-lg leading-relaxed md:text-xl">
-            A current account with no monthly fee, savings that pay interest every month, and
-            lending that tells you the total cost before you apply. Open one in about five minutes.
-          </p>
+          <FadeIn delay={HEADLINE_LINES.length * LINE_STAGGER_MS}>
+            <p className="text-fg-muted mt-6 max-w-xl text-lg leading-relaxed md:text-xl">
+              A current account with no monthly fee, savings that pay interest every month, and
+              lending that tells you the total cost before you apply. Open one in about five
+              minutes.
+            </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <LinkButton href="/open-an-account" size="lg">
-              Open an account
-            </LinkButton>
-            <LinkButton href="/rates-and-fees" size="lg" variant="secondary">
-              See every rate and fee
-            </LinkButton>
-          </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <LinkButton href="/open-an-account" size="lg">
+                Open an account
+              </LinkButton>
+              <LinkButton href="/rates-and-fees" size="lg" variant="secondary">
+                See every rate and fee
+              </LinkButton>
+            </div>
+          </FadeIn>
 
           <p className="text-fg-muted mt-6 flex items-center gap-2 text-sm">
             <ShieldCheck size={ICON_SIZE} aria-hidden className="text-accent" />

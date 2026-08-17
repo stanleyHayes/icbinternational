@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
+import { ChatWidget } from '@/components/chat/chat-widget';
 import { CookieBanner } from '@/components/layout/cookie-banner';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -75,6 +76,7 @@ export default function RootLayout({ children }: { readonly children: ReactNode 
           </main>
           <SiteFooter />
           <CookieBanner />
+          <ChatWidget />
         </ThemeProvider>
 
         <JsonLdScript data={organisationJsonLd()} />

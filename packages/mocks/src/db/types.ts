@@ -27,6 +27,7 @@ import type {
 } from '@reliance/api-client';
 import type {
   Account,
+  AdminChatConversation,
   AdminUser,
   AmlAlert,
   AmlCase,
@@ -161,6 +162,10 @@ export interface MockDatabase {
   tickets: Ticket[];
   disputes: Dispute[];
   fraudReports: MockFraudReport[];
+  /** Live chat threads, in the agent-facing shape; participant views are projected. */
+  chatConversations: AdminChatConversation[];
+  /** Guest stream tokens, mapped to the conversation they authorise. */
+  chatGuestTokens: Record<string, string>;
 
   // --- Content ------------------------------------------------------------
   pages: CmsPage[];

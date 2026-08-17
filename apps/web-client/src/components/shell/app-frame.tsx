@@ -22,6 +22,7 @@ import { MobileNav } from './mobile-nav';
 import { Sidebar } from './sidebar';
 import { SkipLink, MAIN_CONTENT_ID } from './skip-link';
 import { StepUpProvider } from './step-up-provider';
+import { SupportChatWidget } from './support-chat-widget';
 import { TopBar } from './top-bar';
 
 /**
@@ -60,6 +61,7 @@ export function AppFrame({ children }: { readonly children: ReactNode }) {
             </div>
 
             <MobileNav />
+            <SupportChatWidget />
           </div>
         </CommandPaletteProvider>
       </StepUpProvider>

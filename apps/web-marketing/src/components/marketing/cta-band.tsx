@@ -1,3 +1,4 @@
+import { Reveal } from '@/components/motion/reveal';
 import type { SiteHref } from '@/lib/routes';
 
 import { LinkButton } from './link-button';
@@ -14,7 +15,7 @@ export interface CtaBandProps {
 export function CtaBand({ title, description, primary, secondary }: CtaBandProps) {
   return (
     <Section tone="inverse" spacing="tight" labelledBy="cta-band-heading">
-      <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
+      <Reveal className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-xl">
           <h2 id="cta-band-heading" className="font-display text-3xl font-semibold text-slate-50">
             {title}
@@ -37,7 +38,7 @@ export function CtaBand({ title, description, primary, secondary }: CtaBandProps
             </LinkButton>
           ) : null}
         </div>
-      </div>
+      </Reveal>
     </Section>
   );
 }

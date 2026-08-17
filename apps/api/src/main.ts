@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { type NestExpressApplication } from '@nestjs/platform-express';
+import { WsAdapter } from '@nestjs/platform-ws';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -56,6 +57,10 @@ async function bootstrap(): Promise<void> {
   });
 
   app.setGlobalPrefix(API_PREFIX.slice(1));
+  // The chat module's gateway speaks raw WebSocket; without this adapter the upgrade
+  // request falls through to Express and the stream never opens. The global prefix
+  // above does not apply to gateways — the gateway declares its own `/v1` path.
+  app.useWebSocketAdapter(new WsAdapter(app.getHttpServer()));
   // No global ValidationPipe: validation is Zod, applied per-argument from the shared
   // contract schemas, so the API and the browser enforce the identical rule.
   app.enableShutdownHooks();

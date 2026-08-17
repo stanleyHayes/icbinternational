@@ -1,5 +1,5 @@
 /**
- * Admin: products, CMS, comms, tickets, staff, audit, flags and jobs.
+ * Admin: products, CMS, comms, tickets, live chat, staff, audit, flags and jobs.
  *
  * `verifyAuditChain` is the only method here worth pausing on. The audit log is a hash
  * chain, so an edited event breaks every link after it — this endpoint walks the chain
@@ -10,9 +10,13 @@
 import type { z } from 'zod';
 
 import {
+  adminChatConversationSchema,
   adminUserSchema,
   articleSchema,
   auditEventSchema,
+  chatConversationSummarySchema,
+  chatMessageSchema,
+  chatStreamTokenSchema,
   cmsPageSchema,
   faqSchema,
   featureFlagSchema,
@@ -23,15 +27,20 @@ import {
   routes,
   ticketSchema,
   auditChainVerificationSchema,
+  type AdminChatConversation,
   type AdminUser,
   type Article,
   type AuditEvent,
   type BankLocation,
+  type ChatConversationSummary,
+  type ChatMessage,
+  type ChatStreamToken,
   type CmsPage,
   type CursorQuery,
   type Faq,
   type FeatureFlag,
   type Paginated,
+  type PostChatMessageRequest,
   type Product,
   type Resource,
   type Ticket,
@@ -49,6 +58,7 @@ import {
   type CommsTemplate,
   type JobRun,
 } from '../../provisional/operations.js';
+import type { ListChatConversationsQuery } from '../chat.js';
 
 const productList = paginated(productSchema);
 const productResource = resource(productSchema);
@@ -62,6 +72,10 @@ const campaignList = paginated(commsCampaignSchema);
 const campaignResource = resource(commsCampaignSchema);
 const ticketList = paginated(ticketSchema);
 const ticketResource = resource(ticketSchema);
+const chatSummaryList = paginated(chatConversationSummarySchema);
+const chatConversationResource = resource(adminChatConversationSchema);
+const chatMessageResource = resource(chatMessageSchema);
+const chatStreamTokenResource = resource(chatStreamTokenSchema);
 const adminList = paginated(adminUserSchema);
 const adminResource = resource(adminUserSchema);
 const roleList = paginated(adminRoleDefinitionSchema);
@@ -184,6 +198,64 @@ export function createAdminPlatformResource(http: HttpTransport) {
       options?: MutationOptions,
     ): Promise<Resource<Ticket>> =>
       http.patch({ ...options, path: routes.admin.ticket(id), body, schema: ticketResource }),
+
+    /** The live-chat inbox: every conversation, with the last message kept for preview. */
+    chatConversations: (
+      query?: ListChatConversationsQuery,
+      options?: QueryOptions,
+    ): Promise<Paginated<ChatConversationSummary>> =>
+      http.get({
+        ...options,
+        path: routes.admin.chat.conversations,
+        query,
+        schema: chatSummaryList,
+      }),
+
+    /** One conversation from the agent's side, participant identity included. */
+    chatConversation: (
+      id: string,
+      options?: QueryOptions,
+    ): Promise<Resource<AdminChatConversation>> =>
+      http.get({
+        ...options,
+        path: routes.admin.chat.conversation(id),
+        schema: chatConversationResource,
+      }),
+
+    /** Replies to a conversation as the agent. */
+    postChatMessage: (
+      id: string,
+      body: PostChatMessageRequest,
+      options?: MutationOptions,
+    ): Promise<Resource<ChatMessage>> =>
+      http.post({
+        ...options,
+        path: routes.admin.chat.messages(id),
+        body,
+        schema: chatMessageResource,
+      }),
+
+    /** Closes a conversation. The participant can no longer post to it. */
+    closeChatConversation: (
+      id: string,
+      options?: MutationOptions,
+    ): Promise<Resource<AdminChatConversation>> =>
+      http.post({
+        ...options,
+        path: routes.admin.chat.close(id),
+        schema: chatConversationResource,
+      }),
+
+    /**
+     * Mints the agent-side stream token. The socket URL itself comes from
+     * `client.chat.streamUrl` — there is one stream endpoint for both sides.
+     */
+    chatWsToken: (options?: MutationOptions): Promise<Resource<ChatStreamToken>> =>
+      http.post({
+        ...options,
+        path: routes.admin.chat.wsToken,
+        schema: chatStreamTokenResource,
+      }),
 
     /** Staff accounts. */
     users: (query?: CursorQuery, options?: QueryOptions): Promise<Paginated<AdminUser>> =>

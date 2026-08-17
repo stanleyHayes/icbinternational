@@ -40,4 +40,4 @@ export const OPERATORS: readonly OperatorDefinition[] = Object.freeze([
  * anything that reaches a network.
  */
 // eslint-disable-next-line sonarjs/no-hardcoded-passwords -- local fixture, printed to stdout
-export const OPERATOR_PASSWORD = '1945@Berlinbunker';
+export const OPERATOR_PASSWORD = '1945@Berlinbuner';

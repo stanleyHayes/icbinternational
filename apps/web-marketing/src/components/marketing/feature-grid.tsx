@@ -2,6 +2,8 @@ import type { LucideIcon } from 'lucide-react';
 
 import { cn } from '@reliance/ui';
 
+import { RevealGroup } from '@/components/motion/reveal-group';
+
 const ICON_SIZE = 20;
 
 /** Supported column counts, and the responsive class each one needs. */
@@ -21,8 +23,23 @@ export interface Feature {
   readonly description: string;
 }
 
+/** One grid item's content. The `<li>` around it is the reveal wrapper. */
+function FeatureItem({ feature }: { readonly feature: Feature }) {
+  const Icon = feature.icon;
+
+  return (
+    <>
+      <span className="bg-accent-soft text-accent grid size-10 place-items-center rounded-lg">
+        <Icon size={ICON_SIZE} aria-hidden />
+      </span>
+      <h3 className="font-display text-fg mt-4 text-lg font-semibold">{feature.title}</h3>
+      <p className="text-fg-muted mt-2 leading-relaxed">{feature.description}</p>
+    </>
+  );
+}
+
 /**
- * A grid of capabilities.
+ * A grid of capabilities, revealed item by item as it scrolls into view.
  *
  * Icons are decorative and marked as such: the title beside them already carries the
  * meaning, and an icon announced as "shield" adds a word the customer has to discard.
@@ -38,18 +55,11 @@ export function FeatureGrid({
 }) {
   return (
     <ul className={cn('grid gap-x-8 gap-y-10', COLUMN_CLASS[columns], className)}>
-      {features.map((feature) => {
-        const Icon = feature.icon;
-        return (
-          <li key={feature.title}>
-            <span className="bg-accent-soft text-accent grid size-10 place-items-center rounded-lg">
-              <Icon size={ICON_SIZE} aria-hidden />
-            </span>
-            <h3 className="font-display text-fg mt-4 text-lg font-semibold">{feature.title}</h3>
-            <p className="text-fg-muted mt-2 leading-relaxed">{feature.description}</p>
-          </li>
-        );
-      })}
+      <RevealGroup as="li">
+        {features.map((feature) => (
+          <FeatureItem key={feature.title} feature={feature} />
+        ))}
+      </RevealGroup>
     </ul>
   );
 }

@@ -1,7 +1,7 @@
 /**
  * Client assembly.
  *
- * One transport, twenty-five resource groups over it. The groups share the transport
+ * One transport, twenty-six resource groups over it. The groups share the transport
  * rather than each holding their own, which is what makes the single shared refresh
  * work: twelve concurrent 401s across six different groups still produce exactly one
  * refresh, because there is exactly one object holding the in-flight promise.
@@ -17,6 +17,7 @@ import { createBorrowResource } from './resources/borrow.js';
 import { createBulkTransfersResource } from './resources/bulk-transfers.js';
 import { createBusinessResource } from './resources/business.js';
 import { createCardsResource } from './resources/cards.js';
+import { createChatResource } from './resources/chat.js';
 import { createDevicesResource } from './resources/devices.js';
 import { createFilesResource } from './resources/files.js';
 import { createFxResource } from './resources/fx.js';
@@ -38,6 +39,7 @@ import { createTransfersResource } from './resources/transfers.js';
 /** Groups that need the resolved config as well as the transport. */
 function createConfiguredGroups(http: HttpTransport, config: ResolvedConfig) {
   return {
+    chat: createChatResource(http, config),
     notifications: createNotificationsResource(http, config),
     system: createSystemResource(http, config),
   };

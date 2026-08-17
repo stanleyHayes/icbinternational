@@ -220,6 +220,16 @@ export const routes = {
     fraudReports: '/fraud-reports',
   },
 
+  chat: {
+    conversations: '/chat/conversations',
+    conversation: (id: string) => `/chat/conversations/${id}`,
+    messages: (id: string) => `/chat/conversations/${id}/messages`,
+    /** Mints the short-lived token that authorises a `stream` connection. */
+    wsToken: '/chat/ws-token',
+    /** WebSocket endpoint. Receive-only; connect with `?token=` from `wsToken`. */
+    stream: '/chat/stream',
+  },
+
   business: {
     members: '/business/members',
     member: (id: string) => `/business/members/${id}`,
@@ -249,6 +259,12 @@ export const routes = {
     newsletter: '/public/newsletter',
     loanCalculator: '/public/calculators/loan',
     savingsCalculator: '/public/calculators/savings',
+    chat: {
+      /** POST starts a guest conversation; response includes the guest stream token. */
+      conversations: '/public/chat/conversations',
+      conversation: (id: string) => `/public/chat/conversations/${id}`,
+      messages: (id: string) => `/public/chat/conversations/${id}/messages`,
+    },
   },
 
   admin: {
@@ -294,6 +310,13 @@ export const routes = {
     campaigns: '/admin/comms/campaigns',
     tickets: '/admin/tickets',
     ticket: (id: string) => `/admin/tickets/${id}`,
+    chat: {
+      conversations: '/admin/chat/conversations',
+      conversation: (id: string) => `/admin/chat/conversations/${id}`,
+      messages: (id: string) => `/admin/chat/conversations/${id}/messages`,
+      close: (id: string) => `/admin/chat/conversations/${id}/close`,
+      wsToken: '/admin/chat/ws-token',
+    },
     trialBalance: '/admin/reports/trial-balance',
     generalLedger: '/admin/reports/general-ledger',
     profitAndLoss: '/admin/reports/profit-and-loss',

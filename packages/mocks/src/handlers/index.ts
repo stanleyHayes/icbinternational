@@ -21,6 +21,7 @@ import { authHandlers } from './auth.js';
 import { borrowHandlers } from './borrow.js';
 import { businessHandlers } from './business.js';
 import { cardHandlers } from './cards.js';
+import { adminChatHandlers, chatHandlers, guestChatHandlers } from './chat.js';
 import { notificationHandlers, supportHandlers } from './engagement.js';
 import { fxHandlers } from './fx.js';
 import type { MockRoute } from './kit.js';
@@ -54,6 +55,8 @@ export const mockRoutes: readonly MockRoute[] = [
   ...fxHandlers,
   ...notificationHandlers,
   ...supportHandlers,
+  ...chatHandlers,
+  ...guestChatHandlers,
   ...businessHandlers,
   ...publicHandlers,
   ...simulationHandlers,
@@ -61,6 +64,7 @@ export const mockRoutes: readonly MockRoute[] = [
   ...adminFinanceHandlers,
   ...adminRiskHandlers,
   ...adminPlatformHandlers,
+  ...adminChatHandlers,
   ...systemHandlers,
 ];
 

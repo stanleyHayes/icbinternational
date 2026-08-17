@@ -18,6 +18,7 @@ import { BillPayModule } from './modules/bill-pay/bill-pay.module.js';
 import { BulkTransfersModule } from './modules/bulk-transfers/bulk-transfers.module.js';
 import { BusinessModule } from './modules/business/business.module.js';
 import { CardsModule } from './modules/cards/cards.module.js';
+import { ChatModule } from './modules/chat/chat.module.js';
 import { CmsModule } from './modules/cms/cms.module.js';
 import { DepositsModule } from './modules/deposits/deposits.module.js';
 import { DevicesModule } from './modules/devices/devices.module.js';
@@ -130,6 +131,7 @@ import { WalletsModule } from './modules/wallets/wallets.module.js';
     InsightsModule,
     NotificationsModule,
     TicketsModule,
+    ChatModule,
     CmsModule,
     PublicModule,
 

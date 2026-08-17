@@ -39,6 +39,7 @@ export * from './modules/products.js';
 // --- Engagement -----------------------------------------------------------
 export * from './modules/notifications.js';
 export * from './modules/support.js';
+export * from './modules/chat.js';
 export * from './modules/content.js';
 
 // --- Operations -----------------------------------------------------------

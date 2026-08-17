@@ -1,6 +1,7 @@
 import type { Product } from '@reliance/contracts';
 import { AccountType } from '@reliance/contracts';
 
+import { RevealGroup } from '@/components/motion/reveal-group';
 import { formatAer, formatBps } from '@/lib/format';
 import type { SiteHref } from '@/lib/routes';
 
@@ -53,24 +54,26 @@ export function ProductShowcase({ products }: { readonly products: readonly Prod
       />
 
       <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {listed.map((product) => {
-          const headline = headlineFor(product);
-          const href = PRODUCT_PAGE[product.code];
-          if (!href) return null;
+        <RevealGroup as="li" itemClassName="h-full">
+          {listed.map((product) => {
+            const headline = headlineFor(product);
+            const href = PRODUCT_PAGE[product.code];
+            if (!href) return null;
 
-          return (
-            <ProductCard
-              key={product.code}
-              name={product.name}
-              tagline={product.tagline}
-              href={href}
-              headline={headline.value}
-              headlineLabel={headline.label}
-              features={product.features.slice(0, FEATURE_LIMIT)}
-              badge={product.code === FEATURED_CODE ? 'Most opened' : undefined}
-            />
-          );
-        })}
+            return (
+              <ProductCard
+                key={product.code}
+                name={product.name}
+                tagline={product.tagline}
+                href={href}
+                headline={headline.value}
+                headlineLabel={headline.label}
+                features={product.features.slice(0, FEATURE_LIMIT)}
+                badge={product.code === FEATURED_CODE ? 'Most opened' : undefined}
+              />
+            );
+          })}
+        </RevealGroup>
       </ul>
     </Section>
   );

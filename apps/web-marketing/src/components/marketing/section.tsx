@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 
 import { cn } from '@reliance/ui';
 
+import { Reveal } from '@/components/motion/reveal';
+
 /** Vertical rhythm. Three densities, so the page has a shape rather than a uniform stripe. */
 const SPACING = {
   tight: 'py-12 md:py-16',
@@ -58,14 +60,14 @@ export interface SectionHeadingProps {
   readonly level?: HeadingLevel;
 }
 
-/** The heading block that opens a section. */
+/** The heading block that opens a section. Reveals itself as it scrolls into view. */
 export function SectionHeading(props: SectionHeadingProps) {
   const { title, id, eyebrow, description, align = 'start', level = 'section' } = props;
   const isSection = level === 'section';
   const Tag = isSection ? 'h2' : 'h3';
 
   return (
-    <div className={cn('max-w-2xl', align === 'center' && 'mx-auto text-center')}>
+    <Reveal className={cn('max-w-2xl', align === 'center' && 'mx-auto text-center')}>
       {eyebrow ? (
         <p className="text-accent text-xs font-semibold tracking-widest uppercase">{eyebrow}</p>
       ) : null}
@@ -82,6 +84,6 @@ export function SectionHeading(props: SectionHeadingProps) {
       {description ? (
         <p className="text-fg-muted mt-4 text-lg leading-relaxed">{description}</p>
       ) : null}
-    </div>
+    </Reveal>
   );
 }

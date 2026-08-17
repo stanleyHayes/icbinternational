@@ -42,22 +42,34 @@ function normalise(path) {
  * Both forms matter: `disputes: '/disputes'` and `dispute: (id) => `/disputes/${id}``. The
  * template form is what a parameterised route looks like, and skipping it would let every
  * `/:id` route go unchecked — which is most of the write surface.
+ *
+ * Groups nest (`admin.chat.conversations`), so the group is a stack keyed on indent, not a
+ * single variable: a flat variable silently re-keys every route after a nested group, which
+ * is how `admin.chat` once swallowed the whole back half of the admin surface.
  */
 function declaredRoutes() {
   const source = readFileSync(ROUTES_FILE, 'utf8');
   const routes = new Map();
-  let group = null;
+  const stack = [];
 
   for (const line of source.split('\n')) {
-    const opening = /^\s*(\w+):\s*\{/.exec(line);
+    const closing = /^(\s*)\}/.exec(line);
+    if (closing) {
+      while (stack.length > 0 && stack[stack.length - 1].indent >= closing[1].length) {
+        stack.pop();
+      }
+    }
+
+    const opening = /^(\s*)(\w+):\s*\{/.exec(line);
     if (opening) {
-      group = opening[1];
+      stack.push({ name: opening[2], indent: opening[1].length });
       continue;
     }
 
-    const entry = /^\s*(\w+):\s*(?:\([^)]*\)\s*=>\s*)?[`']([^`']+)[`']/.exec(line);
-    if (entry && entry[2].startsWith('/')) {
-      routes.set(`${group}.${entry[1]}`, normalise(entry[2]));
+    const entry = /^(\s*)(\w+):\s*(?:\([^)]*\)\s*=>\s*)?[`']([^`']+)[`']/.exec(line);
+    if (entry && entry[3].startsWith('/')) {
+      const key = [...stack.map((frame) => frame.name), entry[2]].join('.');
+      routes.set(key, normalise(entry[3]));
     }
   }
 
@@ -126,8 +138,8 @@ function implementedRoutes(declared, unregistered) {
     }
 
     const local = new Map();
-    for (const match of source.matchAll(/const\s+(\w+)\s*=\s*routes\.(\w+)\.(\w+)/g)) {
-      const path = declared.get(`${match[2]}.${match[3]}`);
+    for (const match of source.matchAll(/const\s+(\w+)\s*=\s*routes\.([\w.]+)/g)) {
+      const path = declared.get(match[2]);
       if (path) local.set(match[1], path);
     }
 
@@ -138,9 +150,9 @@ function implementedRoutes(declared, unregistered) {
       const argument = match[1].trim();
       const identifier = argument.replace(/[`'"]/g, '').split('(')[0];
 
-      const viaContract = /^routes\.(\w+)\.(\w+)/.exec(argument);
+      const viaContract = /^routes\.([\w.]+)/.exec(argument);
       if (viaContract) {
-        const path = declared.get(`${viaContract[1]}.${viaContract[2]}`);
+        const path = declared.get(viaContract[1]);
         if (path) served.add(path);
         continue;
       }
