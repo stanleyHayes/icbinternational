@@ -23,10 +23,20 @@
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 
+import { createApiClient, noCookieReader } from '@reliance/api-client';
 import { chatStreamEventSchema, type ChatStreamEvent } from '@reliance/contracts';
 
 import { browserApi } from './api';
+import { API_ORIGIN } from './env';
 import { queryKeys } from './query-keys';
+
+/**
+ * The stream address is built against the API origin directly, not the BFF: the session
+ * cookie authorises the token mint over the same-origin proxy, but a WebSocket cannot pass
+ * through a Next route handler, so the socket itself goes straight to the platform. The
+ * token — not the cookie — is what authorises it.
+ */
+const streamClient = createApiClient({ baseUrl: API_ORIGIN, cookieReader: noCookieReader });
 
 const INITIAL_DELAY_MS = 1000;
 const MAX_DELAY_MS = 30_000;
@@ -86,7 +96,7 @@ async function mintStreamUrl(): Promise<string | null> {
   try {
     const api = browserApi();
     const { data: token } = await api.chat.wsToken();
-    return api.chat.streamUrl(token.token);
+    return streamClient.chat.streamUrl(token.token);
   } catch {
     return null;
   }

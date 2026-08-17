@@ -19,12 +19,21 @@ import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 
 import type { ApiClient } from '@reliance/api-client';
+import { createApiClient, noCookieReader } from '@reliance/api-client';
 import { chatStreamEventSchema, type ChatStreamEvent } from '@reliance/contracts';
 
 import type { FeedTransport } from '@/components/ops/use-event-stream';
 import { useApiClient } from '@/lib/api-client';
+import { API_ORIGIN } from '@/lib/env';
 
 import { appendThreadMessage, chatKeys, noteInboxMessage, upsertInboxSummary } from './use-chat';
+
+/**
+ * The stream address is built against the API origin directly, not the BFF: a WebSocket
+ * cannot pass through a Next route handler, so the socket goes straight to the platform,
+ * authorised by the short-lived token rather than the session cookie.
+ */
+const streamClient = createApiClient({ baseUrl: API_ORIGIN, cookieReader: noCookieReader });
 
 /** The slice of the WebSocket the stream needs. The native socket satisfies it. */
 export interface ChatSocketLike {
@@ -97,7 +106,7 @@ async function connect(options: ConnectOptions): Promise<ChatSocketLike | undefi
   try {
     const token = await options.client.admin.chatWsToken();
     if (options.isCancelled()) return undefined;
-    url = options.client.chat.streamUrl(token.data.token);
+    url = streamClient.chat.streamUrl(token.data.token);
   } catch {
     options.onFailure();
     return undefined;

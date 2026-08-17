@@ -6,6 +6,8 @@
  * rest of the console a single place to look when a value turns out to be wrong.
  */
 
+import { API_PREFIX } from '@reliance/contracts';
+
 /** The value `NEXT_PUBLIC_USE_MOCKS` must hold for the in-browser API to be used. */
 const MOCK_FLAG = '1';
 
@@ -40,6 +42,20 @@ export const CONSOLE_URL = (
  * the API's hostname out of the client bundle and keeps the cookies first-party.
  */
 export const API_BASE_PATH = '/api/bff';
+
+/**
+ * Origin of the core banking API, without the version segment.
+ *
+ * Used solely to address the chat WebSocket (`/v1/chat/stream`): a socket cannot pass
+ * through the BFF route handlers, so the stream connects directly, authorised by a
+ * short-lived token rather than the session cookie. Every other call still goes through
+ * {@link API_BASE_PATH}. `NEXT_PUBLIC_API_URL` carries the `/v1` suffix a human pastes;
+ * the client adds the prefix itself, so it is stripped here.
+ */
+export const API_ORIGIN = (() => {
+  const raw = (process.env.NEXT_PUBLIC_API_URL ?? '').trim().replace(/\/$/, '');
+  return raw.endsWith(API_PREFIX) ? raw.slice(0, -API_PREFIX.length) : raw;
+})();
 
 /** Where an operator is sent when they have no session. */
 export const SIGN_IN_PATH = '/sign-in';
