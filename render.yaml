@@ -20,6 +20,9 @@ services:
     name: reliance-redis
     plan: free
     maxmemoryPolicy: noeviction
+    # Required for Key Value instances. Empty list = block all public-internet
+    # connections; the API reaches Redis over Render's private network.
+    ipAllowList: []
 
   - type: web
     name: reliance-api
@@ -32,14 +35,6 @@ services:
     startCommand: cd apps/api && node --enable-source-maps dist/main.js
 
     healthCheckPath: /v1/health/ready
-
-    # Public API — allow traffic from anywhere. Restrict to specific CIDRs
-    # (e.g. office IPs or a CDN's ranges) if this should not be public.
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: Allow all IPv4 traffic
-      - source: ::/0
-        description: Allow all IPv6 traffic
 
     # Scale down to one instance; the ledger uses Mongo transactions for safety
     # not Redis locking, so horizontal scale is safe but not needed at start.
