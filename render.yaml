@@ -25,7 +25,7 @@ services:
     name: reliance-api
     runtime: node
     region: oregon          # Change to your preferred region
-    plan: starter           # Upgrade to standard for always-on (no spin-down)
+    plan: free           # Upgrade to standard for always-on (no spin-down)
     branch: main
 
     buildCommand: pnpm install --frozen-lockfile && pnpm --filter @reliance/contracts... build && pnpm --filter @reliance/money... build && pnpm --filter @reliance/api build
