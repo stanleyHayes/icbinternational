@@ -5,7 +5,14 @@
 #
 #  External services:
 #    • MongoDB Atlas — must be a replica set; standalone disables transactions
-#    • Redis         — provisioned automatically as a Render Key Value service by this blueprint
+#    • Redis         — create a free Render Key Value instance manually:
+#                        Dashboard → New → Key Value → name: reliance-redis,
+#                        plan: free, eviction: noeviction
+#                      Then paste its Internal Connection String into REDIS_URL
+#                      when the Blueprint prompts for it. (Redis is not managed
+#                      by this blueprint: Render requires ipAllowList on
+#                      blueprint-managed Key Value but gates it behind an
+#                      Enterprise workspace plan.)
 #
 #  Quick start:
 #    1. Fork/push this repo to GitHub
@@ -16,15 +23,6 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
-  - type: keyvalue
-    name: reliance-redis
-    plan: free
-    maxmemoryPolicy: noeviction
-    # Render requires an explicit allow list for Key Value instances.
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: everywhere
-
   - type: web
     name: reliance-api
     runtime: node
@@ -80,13 +78,10 @@ services:
       - key: MONGODB_DB
         value: reliancebank
 
-      # Redis — Render's managed Redis service is provisioned by this blueprint.
-      # The connection string is injected automatically after the service is created.
+      # Redis — use the Internal Connection String (redis://red-...:6379) of the
+      # manually created reliance-redis Key Value instance (see header above).
       - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: reliance-redis
-          property: connectionString
+        sync: false
 
       # ── Auth ─────────────────────────────────────────────────────────────────
       # Generate each with:  openssl rand -base64 48
