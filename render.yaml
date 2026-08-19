@@ -20,13 +20,15 @@ services:
     name: reliance-redis
     plan: free
     maxmemoryPolicy: noeviction
-    # Required for Key Value instances. Empty list = block all public-internet
-    # connections; the API reaches Redis over Render's private network.
-    ipAllowList: []
+    # Render requires an explicit allow list for Key Value instances.
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
 
   - type: web
     name: reliance-api
     runtime: node
+    repo: https://github.com/stanleyHayes/icbinternational
     region: oregon          # Change to your preferred region
     plan: free           # Upgrade to standard for always-on (no spin-down)
     branch: main
