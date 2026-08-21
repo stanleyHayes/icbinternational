@@ -28,7 +28,7 @@ Four deployables talk to one API. Only the API touches the database.
                         └───┬───────────────┬───────────────┬──────────────────┘
                             │               │               │
               ┌───────▼──────┐   ┌──────────▼─────┐   ┌─────▼──────────┐
-              │ MongoDB (RS) │   │ Redis + BullMQ │   │ Providers      │
+              │ MongoDB (RS) │   │ Scheduled tasks│   │ Providers      │
               │ ledger, docs │   │ jobs, cache,   │   │ simulated rails│
               │ port 27317   │   │ rate limiting  │   │ + Resend /     │
               └──────────────┘   │ port 6579      │   │ Cloudinary     │
@@ -72,7 +72,7 @@ packages/
   mocks/              MSW handlers + fixture factories for the whole API surface
   testing/            Test harness, builders, custom matchers
   config/             Shared tsconfig bases, ESLint flat presets, Jest/SWC preset
-infra/docker/         MongoDB single-node replica set + Redis (+ mongo-express under a profile)
+infra/docker/         MongoDB single-node replica set (+ mongo-express under a profile)
 brand/                Logo system and design tokens (delivered)
 docs/                 This documentation set
 agent_plan.md         The build plan: task board, ownership globs, acceptance criteria
@@ -188,9 +188,12 @@ Rates are integer basis points, so no percentage is ever a float. Stored in Mong
   compose file auto-initiates the set and the API _refuses to become ready_ without a writable
   primary (`GET /v1/health/ready` checks it explicitly). Majority write/read concerns;
   `TransactionRunner` retries on transient transaction errors.
-- **Redis 8 + BullMQ** (planned — A-10). Queues: `ledger`, `notifications`, `documents`, `rails`,
-  `scheduler`. Bank behaviour is clock-driven — interest, standing orders, statements, hold expiry
-  all arrive via jobs.
+- **In-process scheduled tasks.** Bank behaviour is clock-driven — maintenance fees, mandate
+  collection, FX alerts, payment-request expiry, bill submission and refunds all arrive on a
+  timer. Each is a `BaseScheduledTask` sweeping its own due set out of MongoDB on a fixed
+  interval. This replaced Redis + BullMQ; the trade is no retry/backoff, no dead-letter queue,
+  and one sweep per process, so the deployment is single-instance. Every sweep is idempotent
+  against its own claim state, which is what makes that safe.
 - **Provider boundary.** Resend (email) and Cloudinary (media) are the only real third parties, both
   behind ports (`EmailSenderPort`, `MediaStoragePort`) with in-memory fakes. With keys unset the API
   logs emails and fakes uploads — no test, seed or CI run may reach either provider.
@@ -206,7 +209,6 @@ Non-default host ports so this stack runs alongside others on the same machine.
 | Client dashboard | 3001  | planned                                |
 | Admin console    | 3002  | planned                                |
 | MongoDB          | 27317 | replica set `rs0`                      |
-| Redis            | 6579  | appendonly, noeviction                 |
 | mongo-express    | 8481  | optional, `tools` compose profile      |
 
 The live chat stream (`WS /v1/chat/stream`) is a long-held socket on the API's port, which

@@ -63,5 +63,3 @@ export {
   INTEREST_REFERENCE_PREFIX,
   MONTHLY_CAPITALISATION_JOB,
 } from './interest.constants.js';
-export { type AccrualJobData } from './interest-accrual.processor.js';
-export { type CapitalisationJobData } from './interest-capitalisation.processor.js';

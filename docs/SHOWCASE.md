@@ -4,7 +4,7 @@
 one and two years of history each.
 
 ```bash
-pnpm db:up          # MongoDB replica set + Redis
+pnpm db:up          # MongoDB replica set
 pnpm build          # the API must be compiled; the command runs from dist/
 pnpm demo:reset
 ```

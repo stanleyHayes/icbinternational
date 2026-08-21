@@ -18,9 +18,9 @@ export { MandateCollectionService } from './mandate-collection.service.js';
 export { MandateDisputeService } from './mandate-dispute.service.js';
 export { MandatePoster, type CollectedEntries } from './mandate.poster.js';
 export {
-  MandateCollectionProcessor,
+  MandateCollectionTask,
   type CollectionSweepResult,
-} from './mandate-collection.processor.js';
+} from './mandate-collection.task.js';
 
 export {
   MandateStore,

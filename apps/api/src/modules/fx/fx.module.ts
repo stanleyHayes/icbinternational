@@ -9,14 +9,13 @@ import { AuthModule } from '../auth/auth.module.js';
 import { UsersModule } from '../auth/users/index.js';
 import { HoldsModule } from '../holds/index.js';
 import { IdempotencyModule } from '../idempotency/index.js';
-import { JobsModule } from '../jobs/jobs.module.js';
 import { TransactionsModule } from '../transactions/transactions.module.js';
 
-import { FxAlertProcessor } from './fx-alert.processor.js';
 import { FxAlertRepository } from './fx-alert.repository.js';
 import { FxAlertSchema } from './fx-alert.schema.js';
 import { FxAlertService } from './fx-alert.service.js';
 import { FxAlertStore } from './fx-alert.store.js';
+import { FxAlertTask } from './fx-alert.task.js';
 import { FxConversionPoster } from './fx-conversion.poster.js';
 import { FxExchangeRateAdapter } from './fx-exchange-rate.adapter.js';
 import { FxExecutionService } from './fx-execution.service.js';
@@ -57,7 +56,6 @@ import { SimulatedRateProvider } from './rate-feed/simulated-rate.provider.js';
  */
 @Module({
   imports: [
-    JobsModule,
     MongooseModule.forFeature([
       { name: FX_QUOTE_MODEL, schema: FxQuoteSchema },
       { name: FX_ALERT_MODEL, schema: FxAlertSchema },
@@ -81,7 +79,7 @@ import { SimulatedRateProvider } from './rate-feed/simulated-rate.provider.js';
     FxConversionPoster,
     FxExecutionService,
     FxAlertService,
-    FxAlertProcessor,
+    FxAlertTask,
     FxExchangeRateAdapter,
     // Provided locally, as the ledger and accounts lanes do, so the module stands up in a
     // test that wires only a Mongoose connection rather than the whole application root.

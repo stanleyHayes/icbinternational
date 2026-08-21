@@ -2,7 +2,7 @@
   "name": "@reliance/api",
   "version": "1.0.0",
   "private": true,
-  "description": "Reliance Bank core banking API — NestJS, MongoDB, double-entry ledger.",
+  "description": "Reliance Bank core banking API \u2014 NestJS, MongoDB, double-entry ledger.",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -22,8 +22,6 @@
     "start:prod": "node --enable-source-maps dist/main.js"
   },
   "dependencies": {
-    "@bull-board/api": "8.5.0",
-    "@bull-board/express": "8.5.0",
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",
     "@nestjs/core": "catalog:",
@@ -39,13 +37,11 @@
     "@reliance/money": "workspace:*",
     "@simplewebauthn/server": "13.3.2",
     "argon2": "0.45.1",
-    "bullmq": "catalog:",
     "cloudinary": "catalog:",
     "compression": "1.8.1",
     "cookie-parser": "1.4.7",
     "date-fns": "catalog:",
     "helmet": "8.3.0",
-    "ioredis": "catalog:",
     "mongoose": "catalog:",
     "otplib": "13.4.1",
     "pdfkit": "0.19.1",

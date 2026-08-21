@@ -29,7 +29,6 @@ const PNG = Buffer.concat([Buffer.from('89504e470d0a1a0a', 'hex'), Buffer.alloc(
 function buildConfig(): AppConfigService {
   const environment = loadEnvironment({
     MONGODB_URI: 'mongodb://localhost:27017/reliancebank?replicaSet=rs0',
-    REDIS_URL: 'redis://localhost:6379',
     JWT_ACCESS_SECRET: 'a'.repeat(48),
     JWT_REFRESH_SECRET: 'b'.repeat(48),
     CSRF_SECRET: 'c'.repeat(32),

@@ -64,14 +64,21 @@ const trustProxySchema = z
 /**
  * Mongo without a replica set silently disables multi-document transactions, which would
  * make every "atomic" ledger write a lie. Refuse to start rather than allow that.
+ *
+ * How the replica set is declared depends on the scheme, and only `mongodb://` states it in
+ * the URI. An `mongodb+srv://` seed list carries `replicaSet` in the DNS TXT record instead —
+ * it is one of only two options permitted there — so the driver learns the set name by lookup
+ * and a correct Atlas URI never contains the string. Demanding it of every scheme rejects
+ * exactly the connection strings Atlas issues, which is a false negative, not a safety check.
  */
 const mongoUriSchema = z
   .string()
   .startsWith('mongodb', 'must be a MongoDB connection string')
-  .refine((uri) => uri.includes('replicaSet='), {
+  .refine((uri) => uri.startsWith('mongodb+srv://') || uri.includes('replicaSet='), {
     message:
-      'MONGODB_URI must target a replica set (add ?replicaSet=rs0). Multi-document transactions ' +
-      'are unavailable on a standalone server, and the ledger requires them.',
+      'MONGODB_URI must target a replica set: add ?replicaSet=rs0 to a mongodb:// URI, or use a ' +
+      'mongodb+srv:// seed list (Atlas), which carries the set name in DNS. Multi-document ' +
+      'transactions are unavailable on a standalone server, and the ledger requires them.',
   });
 
 export const environmentSchema = z.object({
@@ -87,7 +94,6 @@ export const environmentSchema = z.object({
 
   MONGODB_URI: mongoUriSchema,
   MONGODB_DB: z.string().min(1).default('reliancebank'),
-  REDIS_URL: z.string().startsWith('redis'),
 
   JWT_ACCESS_SECRET: z.string().min(32, 'needs at least 32 characters of entropy'),
   JWT_REFRESH_SECRET: z.string().min(32, 'needs at least 32 characters of entropy'),

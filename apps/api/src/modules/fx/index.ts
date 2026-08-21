@@ -24,7 +24,7 @@ export {
 } from './fx-execution.service.js';
 export { FxConversionPoster, type BookedConversion } from './fx-conversion.poster.js';
 export { FxAlertService, hasCrossed, toContractAlert } from './fx-alert.service.js';
-export { FxAlertProcessor, type AlertSweepResult } from './fx-alert.processor.js';
+export { FxAlertTask, type AlertSweepResult } from './fx-alert.task.js';
 export { FxExchangeRateAdapter } from './fx-exchange-rate.adapter.js';
 export {
   LoggingRateAlertNotifier,

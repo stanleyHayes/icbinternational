@@ -55,9 +55,6 @@ export class AppConfigService {
     return { uri: this.env.MONGODB_URI, name: this.env.MONGODB_DB } as const;
   }
 
-  get redisUrl(): string {
-    return this.env.REDIS_URL;
-  }
 
   get jwt() {
     return {

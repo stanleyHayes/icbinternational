@@ -8,11 +8,10 @@ import { AuditModule } from '../audit/index.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { HoldsModule } from '../holds/index.js';
 import { IdempotencyModule } from '../idempotency/index.js';
-import { JobsModule } from '../jobs/jobs.module.js';
 import { TransactionsModule } from '../transactions/transactions.module.js';
 
-import { MandateCollectionProcessor } from './mandate-collection.processor.js';
 import { MandateCollectionService } from './mandate-collection.service.js';
+import { MandateCollectionTask } from './mandate-collection.task.js';
 import { MandateDisputeService } from './mandate-dispute.service.js';
 import { MANDATE_MODEL } from './mandate.constants.js';
 import { MandatePoster } from './mandate.poster.js';
@@ -44,7 +43,6 @@ import { MandatesController } from './mandates.controller.js';
  */
 @Module({
   imports: [
-    JobsModule,
     MongooseModule.forFeature([{ name: MANDATE_MODEL, schema: MandateSchema }]),
     AccountsModule,
     HoldsModule,
@@ -60,7 +58,7 @@ import { MandatesController } from './mandates.controller.js';
     MandatePoster,
     MandateCollectionService,
     MandateDisputeService,
-    MandateCollectionProcessor,
+    MandateCollectionTask,
     // Provided locally, as the ledger and accounts lanes do, so the module stands up in a
     // test that wires only a Mongoose connection rather than the whole application root.
     IdGenerator,

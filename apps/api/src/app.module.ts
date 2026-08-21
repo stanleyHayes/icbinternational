@@ -33,8 +33,6 @@ import { HoldsModule } from './modules/holds/holds.module.js';
 import { IdempotencyModule } from './modules/idempotency/idempotency.module.js';
 import { InsightsModule } from './modules/insights/insights.module.js';
 import { InterestModule } from './modules/interest/interest.module.js';
-import { JobsAdminModule } from './modules/jobs/jobs-admin.module.js';
-import { JobsModule } from './modules/jobs/jobs.module.js';
 import { KycModule } from './modules/kyc/kyc.module.js';
 import { LedgerModule } from './modules/ledger/ledger.module.js';
 import { LimitsModule } from './modules/limits/limits.module.js';
@@ -78,7 +76,6 @@ import { WalletsModule } from './modules/wallets/wallets.module.js';
     HealthModule,
     AuditModule,
     IdempotencyModule,
-    JobsModule,
 
     // --- Identity ---------------------------------------------------------
     AuthModule,
@@ -140,7 +137,6 @@ import { WalletsModule } from './modules/wallets/wallets.module.js';
     AmlModule,
     BulkTransfersModule,
     BusinessModule,
-    JobsAdminModule,
     SimulationModule,
   ],
   providers: [

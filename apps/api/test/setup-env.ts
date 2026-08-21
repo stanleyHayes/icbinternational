@@ -22,12 +22,10 @@
 
 /** Host ports match `infra/docker-compose.yml`, chosen not to collide with local stacks. */
 const MONGO = 'mongodb://127.0.0.1:27317/reliancebank_test?replicaSet=rs0';
-const REDIS = 'redis://127.0.0.1:6579';
 
 process.env.NODE_ENV ??= 'test';
 process.env.MONGODB_URI ??= MONGO;
 process.env.MONGODB_DB ??= 'reliancebank_test';
-process.env.REDIS_URL ??= REDIS;
 
 process.env.JWT_ACCESS_SECRET ??= 'test-access-secret-with-enough-length-0123456789';
 process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret-with-enough-length-9876543210';

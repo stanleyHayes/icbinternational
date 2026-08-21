@@ -217,7 +217,7 @@ function health() {
   const up = { status: 'up' };
   return {
     status: 'ok' as const,
-    info: { mongodb: up, redis: up },
-    details: { mongodb: up, redis: up },
+    info: { mongodb: up },
+    details: { mongodb: up },
   };
 }

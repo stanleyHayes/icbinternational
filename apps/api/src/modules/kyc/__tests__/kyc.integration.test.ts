@@ -41,7 +41,6 @@ import { KycModule } from '../kyc.module.js';
 process.env.NODE_ENV = 'test';
 const MONGO_URI = process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27317/?replicaSet=rs0';
 process.env.MONGODB_URI = MONGO_URI;
-process.env.REDIS_URL ??= 'redis://127.0.0.1:6579';
 process.env.JWT_ACCESS_SECRET = 'kyc-integration-access-secret-0123456789ab';
 process.env.JWT_REFRESH_SECRET = 'kyc-integration-refresh-secret-0123456789ab';
 process.env.CSRF_SECRET = 'kyc-integration-csrf';

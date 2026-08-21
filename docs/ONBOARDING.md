@@ -47,7 +47,7 @@ message naming the variable — that is deliberate, not a crash.
 ## 4. Infrastructure
 
 ```bash
-pnpm db:up      # MongoDB 8 single-node replica set (rs0, :27317) + Redis 8 (:6579)
+pnpm db:up      # MongoDB 8 single-node replica set (rs0, :27317)
 ```
 
 MongoDB **must** be a replica set — multi-document transactions do not exist without one, and every

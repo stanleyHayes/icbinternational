@@ -16,9 +16,8 @@ export { BillPaymentPoster, type SettlementEntries } from './bill-payment.poster
 export { BillSubmissionService } from './bill-submission.service.js';
 export { BillRefundService, type RefusalInput } from './bill-refund.service.js';
 export { BillRefundSweeperService, type RefundSweepResult } from './bill-refund-sweeper.service.js';
-export { BillRefundSweepProcessor } from './bill-refund-sweep.processor.js';
-export { BillSubmissionQueue, type BillSubmissionJob } from './bill-submission.queue.js';
-export { BillPaymentProcessor, type SubmissionResult } from './bill-payment.processor.js';
+export { BillRefundSweepTask } from './bill-refund-sweep.task.js';
+export { BillSubmissionTask, type SubmissionSweepResult } from './bill-submission.task.js';
 export { BillerDirectoryService, type ListBillersQuery } from './biller-directory.service.js';
 
 export {
@@ -53,7 +52,6 @@ export {
   BILL_PAYMENT_MODEL,
   BILL_REFUND_SWEEP_JOB,
   BILL_SUBMISSION_JOB,
-  MAX_SUBMISSION_ATTEMPTS,
   REFUND_STRANDED_AFTER_MS,
   REFUSAL_COPY,
   REJECTION_COPY,

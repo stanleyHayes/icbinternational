@@ -13,7 +13,7 @@ import { AccountService, assertAccountUsable } from '../accounts/index.js';
 
 import { BillPaymentBookingService } from './bill-payment-booking.service.js';
 import { PaymentKind, type BillPaymentRecord } from './bill-payment.store.js';
-import { BillSubmissionQueue } from './bill-submission.queue.js';
+import { BillSubmissionTask } from './bill-submission.task.js';
 import { BillerDirectoryService } from './biller-directory.service.js';
 import {
   assertAmountAccepted,
@@ -49,7 +49,7 @@ export class BillPayService {
     private readonly directory: BillerDirectoryService,
     private readonly accounts: AccountService,
     private readonly booking: BillPaymentBookingService,
-    private readonly submissions: BillSubmissionQueue,
+    private readonly submissions: BillSubmissionTask,
   ) {}
 
   /**
@@ -96,7 +96,10 @@ export class BillPayService {
       createdAt: scheduledFor,
     });
 
-    await this.submissions.enqueue(payment.id, draft.scheduledFor);
+    // The payment carries its own `scheduledFor`, so the sweep will find it when it falls
+    // due; this only shortens the wait for one booked to run now. Not awaited — the customer
+    // should not block on the biller answering.
+    this.submissions.kick();
     return payment;
   }
 

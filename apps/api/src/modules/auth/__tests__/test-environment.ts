@@ -15,7 +15,6 @@ export const TEST_MONGO_URI = 'mongodb://127.0.0.1:27317/?replicaSet=rs0';
 const REQUIRED_ENV: Record<string, string> = {
   NODE_ENV: 'test',
   MONGODB_URI: TEST_MONGO_URI,
-  REDIS_URL: 'redis://127.0.0.1:6579',
   JWT_ACCESS_SECRET: 'test-access-secret-with-32-bytes-minimum',
   JWT_REFRESH_SECRET: 'test-refresh-secret-with-32-bytes-minimum',
   JWT_ACCESS_TTL: '15m',

@@ -2,16 +2,13 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AccountSchema, AccountsModule } from '../accounts/index.js';
-import { JobsModule } from '../jobs/index.js';
 import { ProductsModule } from '../products/index.js';
 
 import { AccrualStateRepository } from './accrual-state.repository.js';
 import { AccrualStateSchema } from './accrual-state.schema.js';
 import { AccrualStateStore } from './accrual-state.store.js';
 import { InterestAccountSource } from './interest-account.source.js';
-import { InterestAccrualProcessor } from './interest-accrual.processor.js';
 import { InterestAccrualService } from './interest-accrual.service.js';
-import { InterestCapitalisationProcessor } from './interest-capitalisation.processor.js';
 import { InterestCapitalisationService } from './interest-capitalisation.service.js';
 import { InterestTermsSource, ProductInterestTermsSource } from './interest-terms.source.js';
 import { ACCRUAL_STATE_MODEL, INTEREST_ACCOUNT_VIEW_MODEL } from './interest.constants.js';
@@ -43,7 +40,6 @@ import { MongoInterestAccountSource } from './mongo-interest-account.source.js';
     ]),
     AccountsModule,
     ProductsModule,
-    JobsModule,
   ],
   providers: [
     { provide: AccrualStateStore, useClass: AccrualStateRepository },
@@ -51,8 +47,6 @@ import { MongoInterestAccountSource } from './mongo-interest-account.source.js';
     { provide: InterestTermsSource, useClass: ProductInterestTermsSource },
     InterestAccrualService,
     InterestCapitalisationService,
-    InterestAccrualProcessor,
-    InterestCapitalisationProcessor,
   ],
   exports: [
     AccrualStateStore,

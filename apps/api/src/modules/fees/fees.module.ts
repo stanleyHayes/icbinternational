@@ -3,7 +3,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { TransactionRunner } from '../../database/transaction.runner.js';
 import { AccountsModule } from '../accounts/index.js';
-import { JobsModule } from '../jobs/index.js';
 import { ProductsModule } from '../products/index.js';
 import { TransactionsModule } from '../transactions/transactions.module.js';
 
@@ -24,7 +23,7 @@ import {
   FEE_JOURNAL_READ_MODEL,
 } from './fees.constants.js';
 import { MaintenanceFeeService } from './maintenance-fee.service.js';
-import { MonthlyMaintenanceProcessor } from './monthly-maintenance.processor.js';
+import { MonthlyMaintenanceTask } from './monthly-maintenance.task.js';
 
 /**
  * The fees engine: when fees are assessed and how they land in the ledger.
@@ -52,7 +51,6 @@ import { MonthlyMaintenanceProcessor } from './monthly-maintenance.processor.js'
     AccountsModule,
     ProductsModule,
     TransactionsModule,
-    JobsModule,
   ],
   providers: [
     { provide: FeeChargeStore, useClass: FeeChargeRepository },
@@ -63,7 +61,7 @@ import { MonthlyMaintenanceProcessor } from './monthly-maintenance.processor.js'
     FeeChargingService,
     MaintenanceFeeService,
     FeeReconciliationService,
-    MonthlyMaintenanceProcessor,
+    MonthlyMaintenanceTask,
     // Provided locally, as the other modules do, so the module stands up in a test that
     // wires only a Mongoose connection rather than the whole application root.
     TransactionRunner,

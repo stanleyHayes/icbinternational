@@ -22,7 +22,6 @@ import { RoleSyncService } from '../role-sync.service.js';
 process.env.NODE_ENV = 'test';
 process.env.MONGODB_URI ??= 'mongodb://localhost:27317/?replicaSet=rs0';
 process.env.MONGODB_DB = 'reliancebank_rbac_test';
-process.env.REDIS_URL ??= 'redis://localhost:6579';
 process.env.JWT_ACCESS_SECRET = 'rbac-integration-access-secret-0123456789';
 process.env.JWT_REFRESH_SECRET = 'rbac-integration-refresh-secret-0123456789';
 process.env.CSRF_SECRET = 'rbac-integration-csrf';

@@ -11,7 +11,7 @@ export { PaymentRequestSettlementService } from './payment-request-settlement.se
 export { PaymentRequestFactory, type RequestDraft } from './payment-request.factory.js';
 export { PaymentRequestPoster } from './payment-request.poster.js';
 export { SplitBillService, sharesFor } from './split-bill.service.js';
-export { PaymentRequestProcessor, type ExpirySweepResult } from './payment-request.processor.js';
+export { PaymentRequestExpiryTask, type ExpirySweepResult } from './payment-request-expiry.task.js';
 export {
   LoggingPaymentRequestNotifier,
   PaymentRequestNotifierPort,

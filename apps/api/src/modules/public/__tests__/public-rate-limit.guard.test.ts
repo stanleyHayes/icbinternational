@@ -153,7 +153,6 @@ function environmentWith(trustProxy?: string): NodeJS.ProcessEnv {
   return {
     NODE_ENV: 'test',
     MONGODB_URI: 'mongodb://localhost:27017/?replicaSet=rs0',
-    REDIS_URL: 'redis://localhost:6379',
     JWT_ACCESS_SECRET: 'a'.repeat(32),
     JWT_REFRESH_SECRET: 'b'.repeat(32),
     CSRF_SECRET: 'c'.repeat(16),

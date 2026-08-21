@@ -52,3 +52,7 @@ tmp/
 
 # local demo credentials — never commit
 credentials.txt
+
+# Transient watchman probe files
+.watchman-cookie-*
+**/.watchman-cookie-*

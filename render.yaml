@@ -5,14 +5,9 @@
 #
 #  External services:
 #    • MongoDB Atlas — must be a replica set; standalone disables transactions
-#    • Redis         — create a free Render Key Value instance manually:
-#                        Dashboard → New → Key Value → name: reliance-redis,
-#                        plan: free, eviction: noeviction
-#                      Then paste its Internal Connection String into REDIS_URL
-#                      when the Blueprint prompts for it. (Redis is not managed
-#                      by this blueprint: Render requires ipAllowList on
-#                      blueprint-managed Key Value but gates it behind an
-#                      Enterprise workspace plan.)
+#
+#  The API has no Redis dependency: recurring work runs on in-process intervals
+#  (see BaseScheduledTask) rather than BullMQ. MongoDB is the only datastore.
 #
 #  Quick start:
 #    1. Fork/push this repo to GitHub
@@ -36,8 +31,11 @@ services:
 
     healthCheckPath: /v1/health/ready
 
-    # Scale down to one instance; the ledger uses Mongo transactions for safety
-    # not Redis locking, so horizontal scale is safe but not needed at start.
+    # Load-bearing, not a cost setting. Recurring work runs on in-process intervals
+    # now that BullMQ is gone, so every extra instance runs its own copy of every
+    # sweep. Each sweep is idempotent against its own claim state, so that is wasted
+    # work rather than double-charging — but do not scale this out without first
+    # moving the sweeps behind a leader election.
     numInstances: 1
     autoDeploy: true
 
@@ -69,19 +67,15 @@ services:
         sync: false   # e.g. https://operations.yourdomain.com
 
       # ── Database ─────────────────────────────────────────────────────────────
-      # MongoDB Atlas free tier (M0) does not support replica sets.
-      # Use M10 or above — or a free shared cluster on Atlas that enables replica sets.
-      # Format: mongodb+srv://<user>:<pass>@cluster.mongodb.net/reliancebank?replicaSet=rs0
+      # Must be a replica set — the ledger uses multi-document transactions.
+      # An Atlas mongodb+srv:// URI qualifies: Atlas clusters (M0 included) are
+      # replica sets, and the set name arrives via DNS rather than in the URI.
+      # Format: mongodb+srv://<user>:<pass>@cluster.mongodb.net/reliancebank
       - key: MONGODB_URI
         sync: false
 
       - key: MONGODB_DB
         value: reliancebank
-
-      # Redis — use the Internal Connection String (redis://red-...:6379) of the
-      # manually created reliance-redis Key Value instance (see header above).
-      - key: REDIS_URL
-        sync: false
 
       # ── Auth ─────────────────────────────────────────────────────────────────
       # Generate each with:  openssl rand -base64 48

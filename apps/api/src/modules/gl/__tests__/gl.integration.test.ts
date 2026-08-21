@@ -25,7 +25,6 @@ import { TrialBalanceService } from '../trial-balance.service.js';
 process.env.NODE_ENV = 'test';
 process.env.MONGODB_URI ??= 'mongodb://localhost:27317/?replicaSet=rs0';
 process.env.MONGODB_DB = 'reliancebank_gl_test';
-process.env.REDIS_URL ??= 'redis://localhost:6579';
 process.env.JWT_ACCESS_SECRET = 'integration-test-access-secret-0123456789';
 process.env.JWT_REFRESH_SECRET = 'integration-test-refresh-secret-0123456789';
 process.env.CSRF_SECRET = 'integration-test-csrf';

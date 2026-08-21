@@ -19,8 +19,6 @@ import { entries } from '../../domain/ledger/recipes/index.js';
 import { AccountService } from '../accounts/account.service.js';
 import { RateProviderPort } from '../fx/rate-feed/rate-provider.port.js';
 import { SimulatedRateProvider } from '../fx/rate-feed/simulated-rate.provider.js';
-import { JOB_QUEUE, type JobQueueName } from '../jobs/jobs.constants.js';
-import { JobQueueRegistry } from '../jobs/queue.registry.js';
 import { PostingService } from '../ledger/posting.service.js';
 
 import { type ClockSnapshot, SnapshotStore } from './snapshot.store.js';
@@ -54,11 +52,10 @@ let activeScenario: string | null = null;
 export class SimulationService {
   private readonly logger = new Logger(SimulationService.name);
 
-  // eslint-disable-next-line max-params
+   
   constructor(
     private readonly clock: ClockService,
     private readonly rateProvider: RateProviderPort,
-    private readonly jobRegistry: JobQueueRegistry,
     private readonly postings: PostingService,
     private readonly accounts: AccountService,
     private readonly ids: IdGenerator,
@@ -115,23 +112,40 @@ export class SimulationService {
 
   // --- Jobs -----------------------------------------------------------------
 
+  /**
+   * Runs a simulation job on demand.
+   *
+   * There is nothing to run. This used to enqueue onto a BullMQ queue, and it never worked:
+   * `ACCRUE_INTEREST` went onto the `ledger` queue under the name `accrue-interest`, while
+   * `InterestAccrualProcessor` consumed the `scheduler` queue and answered only to
+   * `interest.daily-accrual` — neither the queue nor the name matched, for any job in the
+   * map. Every call parked a payload no worker consumed and reported `processed: 1`, which is
+   * precisely the stranding `interest.constants.ts` warns about.
+   *
+   * Removing Redis removed the queue that was swallowing them. Rather than keep reporting
+   * success for work that does not happen, this now fails loudly. Wiring each `SimJob` to the
+   * service that performs it is the fix; the recurring sweeps (fees, mandates, FX alerts,
+   * bill submission and refunds) already run on their own schedule without this endpoint.
+   */
   async runJob(request: RunJobRequest): Promise<{ processed: number; log: string[] }> {
-    const queue = JOB_NAME_TO_QUEUE[request.job];
-    if (!queue) {
+    if (!RUNNABLE_SIM_JOBS.has(request.job)) {
       throw AppError.validation('Unknown job', [
-        { path: 'job', message: `No queue mapping for ${request.job}` },
+        { path: 'job', message: `No runner registered for ${request.job}` },
       ]);
     }
 
     if (request.dryRun) {
-      return { processed: 0, log: [`[dry-run] Would enqueue ${request.job} on ${queue}`] };
+      return { processed: 0, log: [`[dry-run] ${request.job} has no runner registered`] };
     }
 
-    const q = this.jobRegistry.getQueue(queue);
-    await q.add(request.job, { triggeredBy: 'simulation', at: this.clock.now().toISOString() });
-
-    this.logger.log(`Simulation: enqueued ${request.job} on ${queue}`);
-    return { processed: 1, log: [`Enqueued ${request.job} on queue ${queue}`] };
+    throw AppError.validation('Job has no runner', [
+      {
+        path: 'job',
+        message:
+          `${request.job} cannot be run on demand: the job queue was removed and no direct ` +
+          'runner has been wired for it yet.',
+      },
+    ]);
   }
 
   // --- FX -------------------------------------------------------------------
@@ -252,24 +266,24 @@ const DEFAULT_RAILS: RailBehaviour[] = [
 ];
 
 /**
- * Maps the `SimJob` vocabulary to the queue that runs it.
+ * The `SimJob` vocabulary the control room may name.
  *
- * Some jobs share a queue. The queue processes them by job name so the mapping is correct
- * but the runner does not need to know which queue it found itself on.
+ * Membership only means the name is recognised, not that anything runs — see `runJob`. Kept
+ * as the list to wire runners against.
  */
-const JOB_NAME_TO_QUEUE: Record<string, JobQueueName> = {
-  [SimJob.ACCRUE_INTEREST]: JOB_QUEUE.LEDGER,
-  [SimJob.CAPITALISE_INTEREST]: JOB_QUEUE.LEDGER,
-  [SimJob.RUN_STANDING_ORDERS]: JOB_QUEUE.RAILS,
-  [SimJob.SETTLE_CARD_BATCH]: JOB_QUEUE.RAILS,
-  [SimJob.SETTLE_TRANSFER_BATCH]: JOB_QUEUE.RAILS,
-  [SimJob.GENERATE_STATEMENTS]: JOB_QUEUE.DOCUMENTS,
-  [SimJob.CHARGE_MONTHLY_FEES]: JOB_QUEUE.LEDGER,
-  [SimJob.MATURE_DEPOSITS]: JOB_QUEUE.LEDGER,
-  [SimJob.ASSESS_ARREARS]: JOB_QUEUE.LEDGER,
-  [SimJob.EXPIRE_HOLDS]: JOB_QUEUE.LEDGER,
-  [SimJob.RESCREEN_CUSTOMERS]: JOB_QUEUE.NOTIFICATIONS,
-};
+const RUNNABLE_SIM_JOBS: ReadonlySet<string> = new Set([
+  SimJob.ACCRUE_INTEREST,
+  SimJob.CAPITALISE_INTEREST,
+  SimJob.RUN_STANDING_ORDERS,
+  SimJob.SETTLE_CARD_BATCH,
+  SimJob.SETTLE_TRANSFER_BATCH,
+  SimJob.GENERATE_STATEMENTS,
+  SimJob.CHARGE_MONTHLY_FEES,
+  SimJob.MATURE_DEPOSITS,
+  SimJob.ASSESS_ARREARS,
+  SimJob.EXPIRE_HOLDS,
+  SimJob.RESCREEN_CUSTOMERS,
+]);
 
 const MS_PER_SECOND = 1_000;
 const MINUTES_PER_HOUR = 60;

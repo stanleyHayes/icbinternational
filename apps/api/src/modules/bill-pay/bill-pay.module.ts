@@ -9,7 +9,6 @@ import { AuditModule } from '../audit/index.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { HoldsModule } from '../holds/index.js';
 import { IdempotencyModule } from '../idempotency/index.js';
-import { JobsModule } from '../jobs/jobs.module.js';
 import { TransactionsModule } from '../transactions/transactions.module.js';
 
 import { BILLER_MODEL, BILL_PAYMENT_MODEL } from './bill-pay.constants.js';
@@ -18,15 +17,14 @@ import { BillPayService } from './bill-pay.service.js';
 import { BillPaymentBookingService } from './bill-payment-booking.service.js';
 import { BillPaymentQueryService } from './bill-payment-query.service.js';
 import { BillPaymentPoster } from './bill-payment.poster.js';
-import { BillPaymentProcessor } from './bill-payment.processor.js';
 import { BillPaymentRepository } from './bill-payment.repository.js';
 import { BillPaymentSchema } from './bill-payment.schema.js';
 import { BillPaymentStore } from './bill-payment.store.js';
-import { BillRefundSweepProcessor } from './bill-refund-sweep.processor.js';
+import { BillRefundSweepTask } from './bill-refund-sweep.task.js';
 import { BillRefundSweeperService } from './bill-refund-sweeper.service.js';
 import { BillRefundService } from './bill-refund.service.js';
-import { BillSubmissionQueue } from './bill-submission.queue.js';
 import { BillSubmissionService } from './bill-submission.service.js';
+import { BillSubmissionTask } from './bill-submission.task.js';
 import { BillerDirectoryRepository } from './biller-directory.repository.js';
 import { BillerDirectoryService } from './biller-directory.service.js';
 import { BillerDirectoryStore } from './biller-directory.store.js';
@@ -57,7 +55,6 @@ import { TopUpService } from './top-up.service.js';
  */
 @Module({
   imports: [
-    JobsModule,
     MongooseModule.forFeature([
       { name: BILL_PAYMENT_MODEL, schema: BillPaymentSchema },
       { name: BILLER_MODEL, schema: BillerSchema },
@@ -78,12 +75,11 @@ import { TopUpService } from './top-up.service.js';
     BillPaymentPoster,
     BillPaymentBookingService,
     BillPaymentQueryService,
-    BillSubmissionQueue,
+    BillSubmissionTask,
     BillRefundService,
     BillSubmissionService,
-    BillPaymentProcessor,
     BillRefundSweeperService,
-    BillRefundSweepProcessor,
+    BillRefundSweepTask,
     BillPayService,
     TopUpService,
     // Provided locally, as the ledger and accounts lanes do, so the module stands up in a

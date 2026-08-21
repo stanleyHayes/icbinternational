@@ -9,7 +9,7 @@ import { AccountService, assertAccountUsable } from '../accounts/index.js';
 
 import { BillPaymentBookingService } from './bill-payment-booking.service.js';
 import { PaymentKind, type BillPaymentRecord } from './bill-payment.store.js';
-import { BillSubmissionQueue } from './bill-submission.queue.js';
+import { BillSubmissionTask } from './bill-submission.task.js';
 
 /** Smallest top-up the mobile gateways will process, in minor units. */
 const MINIMUM_TOP_UP_MINOR = 300n;
@@ -38,7 +38,7 @@ export class TopUpService {
   constructor(
     private readonly accounts: AccountService,
     private readonly booking: BillPaymentBookingService,
-    private readonly submissions: BillSubmissionQueue,
+    private readonly submissions: BillSubmissionTask,
   ) {}
 
   /**
@@ -84,7 +84,9 @@ export class TopUpService {
       createdAt: now,
     });
 
-    await this.submissions.enqueue(payment.id);
+    // Due immediately, so ask for a pass now rather than waiting for the tick. Not awaited:
+    // the top-up is booked, and the biller round-trip belongs off the request path.
+    this.submissions.kick();
     return payment;
   }
 }

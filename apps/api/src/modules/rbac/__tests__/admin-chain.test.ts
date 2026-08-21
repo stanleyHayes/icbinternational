@@ -36,7 +36,6 @@ function makeConfig(): AppConfigService {
   const env = loadEnvironment({
     NODE_ENV: 'test',
     MONGODB_URI: 'mongodb://localhost:27317/?replicaSet=rs0',
-    REDIS_URL: 'redis://localhost:6579',
     JWT_ACCESS_SECRET: ACCESS_SECRET,
     JWT_REFRESH_SECRET: 'admin-chain-test-refresh-secret-012345678',
     CSRF_SECRET: 'admin-chain-csrf',

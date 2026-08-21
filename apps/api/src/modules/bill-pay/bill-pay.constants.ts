@@ -37,6 +37,15 @@ export const BILL_REFUND_SWEEP_JOB = 'billpay.refund-sweep';
 export const REFUND_SWEEP_INTERVAL_MS = 300_000;
 
 /**
+ * How often due payments are swept onto the rails.
+ *
+ * Tighter than the refund sweep because it is the latency a customer feels on a payment
+ * booked for "now": the sweep is the backstop behind `BillSubmissionTask.kick()`, not the
+ * usual path.
+ */
+export const SUBMISSION_SWEEP_INTERVAL_MS = 15_000;
+
+/**
  * How long a payment may sit owing a refund before the sweep takes it over.
  *
  * Fifteen minutes, measured on the bank's clock against `submittedAt`. Long enough that no
@@ -49,15 +58,6 @@ export const REFUND_STRANDED_AFTER_MS = 900_000;
 /** Payments one sweep pass will take on. Bounded so a backlog cannot monopolise a worker. */
 export const REFUND_SWEEP_BATCH_SIZE = 100;
 
-/**
- * Attempts a submission gets before it is abandoned and reversed.
- *
- * Two, not five. Each attempt draws a fresh decision from the network, so a transient
- * silence is retried once — but a customer whose money is sitting in a suspense account
- * while the bank keeps knocking is worse off than a customer who has been refunded and
- * told. Beyond this the money goes back.
- */
-export const MAX_SUBMISSION_ATTEMPTS = 2;
 
 /** Delay before the retry, in milliseconds. */
 export const RETRY_DELAY_MS = 5_000;

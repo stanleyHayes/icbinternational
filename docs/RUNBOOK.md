@@ -11,7 +11,7 @@ unless stated otherwise.
 ### Start everything
 
 ```bash
-pnpm db:up                      # MongoDB replica set (rs0, :27317) + Redis (:6579)
+pnpm db:up                      # MongoDB replica set (rs0, :27317)
 pnpm --filter @reliance/api dev # API on :4400 with watch + source maps
 ```
 
@@ -53,7 +53,7 @@ Prints demo credentials on completion. Target: clone → working bank in under 5
 | `pnpm verify`        | lint + typecheck + test + build green across every package               | ✅ the CI gate                                                                               |
 | `pnpm ledger:verify` | Rebuilds every balance from postings and diffs — any drift is a defect   | verifier service built (B-02); CLI entry not yet wired to the script                         |
 | `pnpm audit:verify`  | Walks the audit hash chain; a tampered record breaks a link and is named | command built (A-07); script repoint to `dist/modules/audit/verify-audit.command.js` pending |
-| `pnpm db:logs`       | Follows Mongo + Redis container logs                                     | ✅                                                                                           |
+| `pnpm db:logs`       | Follows the Mongo container logs                                         | ✅                                                                                           |
 
 Run `pnpm ledger:verify` after any change to ledger persistence, seed generation, or rail
 simulators. Drift is never a rounding artefact — treat any diff as a bug in the write path.
@@ -123,7 +123,7 @@ demands real entropy. Generate with `openssl rand -base64 48`.
 ### Port already in use (27317 / 6579 / 4400)
 
 Another stack (or a previous run) holds the port. Ports are configurable via `MONGO_PORT`,
-`REDIS_PORT`, `PORT` in `.env`; find the squatter with `lsof -i :27317`. `pnpm db:down` does not
+`PORT` in `.env`; find the squatter with `lsof -i :27317`. `pnpm db:down` does not
 kill an API started in another terminal.
 
 ### Emails "not sending" / uploads "not uploading"

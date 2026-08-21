@@ -31,7 +31,7 @@ pnpm install
 cp .env.example .env          # fill in RESEND_API_KEY / CLOUDINARY_* if you want real
                               # email and uploads; both fall back to local fakes
 
-pnpm db:up                    # MongoDB replica set + Redis in Docker
+pnpm db:up                    # MongoDB replica set in Docker
 pnpm verify                   # lint · typecheck · test · build — must be green
 pnpm --filter @reliance/api dev
 ```
@@ -58,7 +58,6 @@ Non-default on purpose, so this stack can run alongside others on the same machi
 | Client dashboard | 3001  |
 | Admin console    | 3002  |
 | MongoDB          | 27317 |
-| Redis            | 6579  |
 
 ## Repository layout
 
@@ -75,7 +74,7 @@ packages/
   api-client/       Typed fetch client
   mocks/            MSW handlers, so front ends never wait for the backend
   config/           Shared TypeScript, ESLint and Jest configuration
-infra/docker/       MongoDB replica set + Redis
+infra/docker/       MongoDB replica set
 brand/              Logo system and design tokens
 agent_plan.md       The build plan — task board, ownership rules, acceptance criteria
 ```
@@ -133,7 +132,6 @@ commands, and every environment variable in one file.
    See `.env.example` for descriptions of each.
 4. Required external services — provision these before deploying:
    - **MongoDB** — [MongoDB Atlas](https://cloud.mongodb.com) M10 or above (replica set required).
-   - **Redis** — Render's Redis service is provisioned automatically by the blueprint. If you prefer a different provider, set `REDIS_URL` manually.
 5. After the first successful deploy, run the seed once to provision the admin account:
    ```
    render run --service reliance-api -- node apps/api/dist/seed/run-seed.js

@@ -19,7 +19,6 @@ const TEST_DB = 'reliancebank_showcase_test';
 process.env.NODE_ENV = 'test';
 process.env.MONGODB_URI ??= `mongodb://localhost:27317/${TEST_DB}?replicaSet=rs0`;
 process.env.MONGODB_DB = TEST_DB;
-process.env.REDIS_URL ??= 'redis://localhost:6579';
 process.env.JWT_ACCESS_SECRET = 'showcase-test-access-secret-0123456789';
 process.env.JWT_REFRESH_SECRET = 'showcase-test-refresh-secret-0123456789';
 process.env.CSRF_SECRET = 'showcase-test-csrf-secret';

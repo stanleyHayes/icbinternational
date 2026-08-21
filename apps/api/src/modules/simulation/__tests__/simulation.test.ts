@@ -27,10 +27,6 @@ describe('Simulation service and controller', () => {
       nudge: jest.fn(),
     } as unknown as { midFor: jest.Mock; nudge: jest.Mock };
 
-    const jobRegistry = {
-      getQueue: jest.fn(() => ({ add: jest.fn() })),
-    } as never;
-
     const postings = {
       post: jest.fn(async () => ({ id: 'entry_001' })),
     } as unknown as PostingService;
@@ -49,10 +45,10 @@ describe('Simulation service and controller', () => {
       find: jest.fn((id: string) => ({ id, label: 'baseline', offsetMs: 0, frozenAt: null, createdAt: '2026-03-01T09:00:00.000Z' })),
     } as unknown as SnapshotStore;
 
-    const service = new SimulationService(clock, rateProvider as never, jobRegistry as never, postings, accounts, ids, snapshots);
+    const service = new SimulationService(clock, rateProvider as never, postings, accounts, ids, snapshots);
     const controller = new SimulationController(service);
 
-    return { service, controller, clock, rateProvider, jobRegistry, postings, accounts, ids, snapshots };
+    return { service, controller, clock, rateProvider, postings, accounts, ids, snapshots };
   }
 
   it('exposes clock, state and job execution helpers', async () => {
@@ -66,11 +62,17 @@ describe('Simulation service and controller', () => {
     expect(state.snapshotCount).toBe(1);
     expect(state.activeScenario).toBeNull();
 
+    // The queue these jobs were enqueued onto is gone, and no direct runner has replaced it.
+    // A dry run says so; a real run refuses rather than reporting work that never happens.
     const dryRun = await service.runJob({ job: SimJob.ACCRUE_INTEREST, dryRun: true });
-    expect(dryRun).toEqual({ processed: 0, log: ['[dry-run] Would enqueue ACCRUE_INTEREST on ledger'] });
+    expect(dryRun).toEqual({
+      processed: 0,
+      log: ['[dry-run] ACCRUE_INTEREST has no runner registered'],
+    });
 
-    const queued = await service.runJob({ job: SimJob.ACCRUE_INTEREST, dryRun: false });
-    expect(queued.processed).toBe(1);
+    await expect(service.runJob({ job: SimJob.ACCRUE_INTEREST, dryRun: false })).rejects.toThrow(
+      /no runner/i,
+    );
     expect(clock.advance).toHaveBeenCalled();
   });
 
@@ -113,7 +115,7 @@ describe('Simulation service and controller', () => {
       data: {
         job: SimJob.GENERATE_STATEMENTS,
         processed: 0,
-        log: ['[dry-run] Would enqueue GENERATE_STATEMENTS on documents'],
+        log: ['[dry-run] GENERATE_STATEMENTS has no runner registered'],
       },
     });
 

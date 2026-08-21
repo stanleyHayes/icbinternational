@@ -9,9 +9,9 @@ import { AuthModule } from '../auth/auth.module.js';
 import { UsersModule } from '../auth/users/index.js';
 import { HoldsModule } from '../holds/index.js';
 import { IdempotencyModule } from '../idempotency/index.js';
-import { JobsModule } from '../jobs/jobs.module.js';
 import { TransactionsModule } from '../transactions/transactions.module.js';
 
+import { PaymentRequestExpiryTask } from './payment-request-expiry.task.js';
 import {
   LoggingPaymentRequestNotifier,
   PaymentRequestNotifierPort,
@@ -20,7 +20,6 @@ import { PaymentRequestSettlementService } from './payment-request-settlement.se
 import { PAYMENT_REQUEST_MODEL } from './payment-request.constants.js';
 import { PaymentRequestFactory } from './payment-request.factory.js';
 import { PaymentRequestPoster } from './payment-request.poster.js';
-import { PaymentRequestProcessor } from './payment-request.processor.js';
 import { PaymentRequestRepository } from './payment-request.repository.js';
 import { PaymentRequestSchema } from './payment-request.schema.js';
 import { PaymentRequestService } from './payment-request.service.js';
@@ -48,7 +47,6 @@ import { SplitBillService } from './split-bill.service.js';
  */
 @Module({
   imports: [
-    JobsModule,
     MongooseModule.forFeature([{ name: PAYMENT_REQUEST_MODEL, schema: PaymentRequestSchema }]),
     AccountsModule,
     HoldsModule,
@@ -67,7 +65,7 @@ import { SplitBillService } from './split-bill.service.js';
     PaymentRequestPoster,
     PaymentRequestSettlementService,
     SplitBillService,
-    PaymentRequestProcessor,
+    PaymentRequestExpiryTask,
     // Provided locally, as the ledger and accounts lanes do, so the module stands up in a
     // test that wires only a Mongoose connection rather than the whole application root.
     IdGenerator,
