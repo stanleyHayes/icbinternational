@@ -3,8 +3,6 @@ import Link from 'next/link';
 
 import { cn, EmptyState, FOCUS_RING, TRANSITION_STATE } from '@reliance/ui';
 
-import { href } from '@/lib/routes';
-
 /**
  * The console's 404.
  *
@@ -27,8 +25,11 @@ export default function NotFound() {
         title="This screen isn't available to you"
         description="Either it does not exist, the record has been closed, or your role does not open it. If a colleague sent you this link, ask them which queue it came from."
         action={
+          // A literal static route, so it needs no `href()` from `@/lib/routes` — that helper
+          // exists for runtime-assembled paths, and it lives in a `'use client'` module, so
+          // calling it from this server component fails the prerender.
           <Link
-            href={href('/')}
+            href="/"
             className={cn(
               'border-border bg-surface hover:border-border-strong hover:bg-surface-raised ' +
                 'text-fg font-body inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium',
