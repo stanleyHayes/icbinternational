@@ -21,7 +21,7 @@ services:
   - type: web
     name: reliance-api
     runtime: node
-    repo: https://github.com/stanleyHayes/icbinternational
+    repo: https://github.com/stanleyHayes/reliance-vault
     region: oregon          # Change to your preferred region
     plan: free           # Upgrade to standard for always-on (no spin-down)
     branch: main
