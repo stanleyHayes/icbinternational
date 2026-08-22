@@ -6,6 +6,8 @@ import { cn, FOCUS_RING } from '@reliance/ui';
 import { FadeIn, LINE_STAGGER_MS, TextReveal } from '@/components/motion/text-reveal';
 import type { SiteHref } from '@/lib/routes';
 
+import { Eyebrow } from './eyebrow';
+
 /** One step in the trail above a page title. */
 export interface Crumb {
   readonly href: SiteHref;
@@ -54,9 +56,7 @@ export function PageHeader(props: PageHeaderProps) {
           </nav>
         ) : null}
 
-        {eyebrow ? (
-          <p className="text-accent text-xs font-semibold tracking-widest uppercase">{eyebrow}</p>
-        ) : null}
+        {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
 
         <h1 className="font-display text-fg mt-3 max-w-3xl text-4xl font-semibold md:text-5xl">
           <TextReveal lines={[title]} />

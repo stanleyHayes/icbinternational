@@ -1,3 +1,4 @@
+import { Eyebrow } from '@/components/marketing/eyebrow';
 import { LinkButton } from '@/components/marketing/link-button';
 import { HELP_TOPICS } from '@/content/help-topics';
 import { BANK } from '@/content/site';
@@ -11,7 +12,7 @@ import { BANK } from '@/content/site';
 export default function NotFound() {
   return (
     <div className="rb-shell py-24 md:py-32">
-      <p className="text-accent text-xs font-semibold tracking-widest uppercase">Page not found</p>
+      <Eyebrow>Page not found</Eyebrow>
       <h1 className="font-display text-fg mt-3 max-w-2xl text-4xl font-semibold md:text-5xl">
         We could not find that page
       </h1>

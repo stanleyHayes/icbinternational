@@ -1,12 +1,12 @@
-import { ShieldCheck, Zap } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 import { MoneyText } from '@reliance/ui';
 
 import { FadeIn, LINE_STAGGER_MS, TextReveal } from '@/components/motion/text-reveal';
 import { DEPOSIT_PROTECTION } from '@/content/site';
-import { formatAer } from '@/lib/format';
 
 import { LinkButton } from './link-button';
+import { RateQuote } from './rate-quote';
 
 const ICON_SIZE = 16;
 
@@ -25,15 +25,23 @@ const EXAMPLE_GROCERIES_MINOR = '-4285';
  * The savings rate is passed in rather than hard-coded: it is the single most consequential
  * number on the site, and a stale one in a hero is a mis-selling problem, not a typo.
  */
-export function HomeHero({ savingsRateBps }: { readonly savingsRateBps: number }) {
+interface HomeHeroProps {
+  /** `null` when the build could not reach the bank — the hero then makes no rate claim. */
+  readonly savingsRateBps: number | null;
+  readonly rateEffectiveFrom?: string;
+}
+
+export function HomeHero({ savingsRateBps, rateEffectiveFrom }: HomeHeroProps) {
   return (
     <section className="border-border bg-surface relative overflow-hidden border-b">
       <div className="rb-shell grid items-center gap-12 py-16 md:py-24 lg:grid-cols-[1fr_22rem] lg:gap-16">
         <div>
-          <p className="rounded-pill bg-accent-soft text-accent inline-flex items-center gap-2 px-3 py-1 text-sm font-medium">
-            <Zap size={ICON_SIZE} aria-hidden />
-            {formatAer(savingsRateBps)} on easy-access savings
-          </p>
+          <RateQuote
+            basisPoints={savingsRateBps}
+            unit="AER"
+            basis="variable, on easy-access savings"
+            effectiveFrom={rateEffectiveFrom}
+          />
 
           <h1 className="font-display text-fg mt-6 max-w-2xl text-4xl leading-[1.05] font-semibold md:text-6xl">
             <TextReveal lines={HEADLINE_LINES} />

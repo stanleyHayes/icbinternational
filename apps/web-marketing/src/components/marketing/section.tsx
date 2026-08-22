@@ -4,6 +4,8 @@ import { cn } from '@reliance/ui';
 
 import { Reveal } from '@/components/motion/reveal';
 
+import { Eyebrow } from './eyebrow';
+
 /** Vertical rhythm. Three densities, so the page has a shape rather than a uniform stripe. */
 const SPACING = {
   tight: 'py-12 md:py-16',
@@ -68,9 +70,7 @@ export function SectionHeading(props: SectionHeadingProps) {
 
   return (
     <Reveal className={cn('max-w-2xl', align === 'center' && 'mx-auto text-center')}>
-      {eyebrow ? (
-        <p className="text-accent text-xs font-semibold tracking-widest uppercase">{eyebrow}</p>
-      ) : null}
+      {eyebrow ? <Eyebrow align={align}>{eyebrow}</Eyebrow> : null}
       <Tag
         id={id}
         className={cn(

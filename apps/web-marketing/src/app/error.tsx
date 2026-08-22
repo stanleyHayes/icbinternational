@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import { Button } from '@reliance/ui';
 
+import { Eyebrow } from '@/components/marketing/eyebrow';
 import { BANK } from '@/content/site';
 
 /**
@@ -28,9 +29,7 @@ export default function GlobalError({
 
   return (
     <div className="rb-shell py-24 md:py-32">
-      <p className="text-danger text-xs font-semibold tracking-widest uppercase">
-        Something went wrong
-      </p>
+      <Eyebrow>Something went wrong</Eyebrow>
       <h1 className="font-display text-fg mt-3 max-w-2xl text-4xl font-semibold md:text-5xl">
         This page did not load
       </h1>
