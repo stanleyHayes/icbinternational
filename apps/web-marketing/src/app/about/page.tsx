@@ -2,6 +2,7 @@ import { CtaBand } from '@/components/marketing/cta-band';
 import { PageHeader } from '@/components/marketing/page-header';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { TrustBand } from '@/components/marketing/trust-band';
+import { SCENES } from '@/content/photography';
 import { BANK, REGULATORY_STATEMENT } from '@/content/site';
 import { getCmsPage } from '@/lib/api/public-data';
 import { pageMetadata } from '@/lib/seo/metadata';
@@ -72,6 +73,7 @@ export default function AboutPage() {
         title={FALLBACK_TITLE}
         description={FALLBACK_DESCRIPTION}
         breadcrumbs={[{ href: '/', label: 'Home' }]}
+        image={SCENES.about}
       />
 
       <TrustBand />

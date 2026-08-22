@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 import { RevealGroup } from '@/components/motion/reveal-group';
 import { TESTIMONIALS } from '@/content/testimonials';
 import type { Testimonial } from '@/content/testimonials';
@@ -12,12 +14,16 @@ function TestimonialCard({ testimonial }: { readonly testimonial: Testimonial })
         <p>“{testimonial.quote}”</p>
       </blockquote>
       <figcaption className="mt-6 flex items-center gap-3">
-        <span
-          aria-hidden
-          className="rounded-pill bg-accent-soft text-accent grid size-9 shrink-0 place-items-center text-sm font-semibold"
-        >
-          {testimonial.initials}
-        </span>
+        {/* alt is empty on purpose: the name is announced from the caption directly beside
+            it, so describing the face again only makes a screen reader repeat it. */}
+        <Image
+          src={testimonial.portrait.src}
+          width={testimonial.portrait.width}
+          height={testimonial.portrait.height}
+          alt=""
+          sizes="48px"
+          className="rounded-pill size-12 shrink-0 object-cover"
+        />
         <span>
           <span className="text-fg block text-sm font-medium">{testimonial.name}</span>
           <span className="text-fg-muted block text-sm">{testimonial.context}</span>

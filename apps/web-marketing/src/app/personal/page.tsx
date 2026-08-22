@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/marketing/page-header';
 import { ProductShowcase } from '@/components/marketing/product-showcase';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { TrustBand } from '@/components/marketing/trust-band';
+import { SCENES } from '@/content/photography';
 import { getCmsPage, getProducts } from '@/lib/api/public-data';
 import { pageMetadata } from '@/lib/seo/metadata';
 
@@ -110,6 +111,7 @@ export default async function PersonalBankingPage() {
         title={FALLBACK_TITLE}
         description={FALLBACK_DESCRIPTION}
         breadcrumbs={[{ href: '/', label: 'Home' }]}
+        image={SCENES.personal}
       />
 
       <ProductShowcase products={products} />

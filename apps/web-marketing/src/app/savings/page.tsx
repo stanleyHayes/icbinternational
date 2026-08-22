@@ -9,6 +9,7 @@ import { RateQuote } from '@/components/marketing/rate-quote';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { SavingsRateTable } from '@/components/rates/savings-rate-table';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
+import { SCENES } from '@/content/photography';
 import { BANK, DEPOSIT_PROTECTION } from '@/content/site';
 import { getCmsPage, getRates } from '@/lib/api/public-data';
 import { highestRateBps } from '@/lib/rates';
@@ -112,6 +113,7 @@ export default async function SavingsPage() {
         title={FALLBACK_TITLE}
         description={FALLBACK_DESCRIPTION}
         breadcrumbs={[{ href: '/', label: 'Home' }]}
+        image={SCENES.savings}
       >
         <RateQuote
           basisPoints={headlineRate}

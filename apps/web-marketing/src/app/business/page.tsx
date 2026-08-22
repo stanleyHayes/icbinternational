@@ -6,6 +6,7 @@ import { FeatureGrid } from '@/components/marketing/feature-grid';
 import { PageHeader } from '@/components/marketing/page-header';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { LimitsTable } from '@/components/rates/limits-table';
+import { SCENES } from '@/content/photography';
 import { getCmsPage, getProduct } from '@/lib/api/public-data';
 import { pageMetadata } from '@/lib/seo/metadata';
 
@@ -109,6 +110,7 @@ export default async function BusinessBankingPage() {
         title={FALLBACK_TITLE}
         description={FALLBACK_DESCRIPTION}
         breadcrumbs={[{ href: '/', label: 'Home' }]}
+        image={SCENES.business}
       />
 
       <Section id="accounts" labelledBy="business-capabilities-heading">

@@ -1,9 +1,12 @@
+import { PORTRAITS, type Photograph } from './photography';
+
 /** What customers say, attributed. Each is a named person with a real product context. */
 export interface Testimonial {
   readonly quote: string;
   readonly name: string;
   readonly context: string;
-  readonly initials: string;
+  /** Their portrait. It replaced a coloured disc of initials, which stood in for a face. */
+  readonly portrait: Photograph;
 }
 
 export const TESTIMONIALS: readonly Testimonial[] = [
@@ -13,7 +16,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
       'still the shortest, and nothing has quietly appeared on it.',
     name: 'Helena Vaughan',
     context: 'Current Account Plus · Bristol',
-    initials: 'HV',
+    portrait: PORTRAITS.helenaVaughan,
   },
   {
     quote:
@@ -21,7 +24,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
       'phone calls. Now it is one upload and a second signature from my co-director.',
     name: 'Idris Bello',
     context: 'Business Pro · Manchester',
-    initials: 'IB',
+    portrait: PORTRAITS.idrisBello,
   },
   {
     quote:
@@ -29,7 +32,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
       'before I was, and the money was back the same week.',
     name: 'Ruth McAllister',
     context: 'Current Account Plus · Glasgow',
-    initials: 'RM',
+    portrait: PORTRAITS.ruthMcAllister,
   },
   {
     quote:
@@ -37,7 +40,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
       'single detail about myself. Nobody else did that.',
     name: 'Daniel Osei',
     context: 'Personal Loan · Leeds',
-    initials: 'DO',
+    portrait: PORTRAITS.danielOsei,
   },
 ];
 

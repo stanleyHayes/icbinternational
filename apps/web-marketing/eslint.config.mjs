@@ -12,4 +12,14 @@ export default [
     languageOptions: { parserOptions: { projectService: false } },
     rules: { 'import-x/no-default-export': 'off' },
   },
+  {
+    // The photography manifest is a list of files and the pixel dimensions they happen to
+    // have. A dimension is a measurement of the asset, not a tunable: naming each one
+    // would produce a dozen single-use constants that say `PORTRAIT_EDGE = 800` and then
+    // are never referred to again, which buries the shape of the manifest rather than
+    // clarifying it. `@reliance/contracts` and `@reliance/mocks` switch the rule off for
+    // the same reason — the literals are the data.
+    files: ['src/content/photography.ts'],
+    rules: { '@typescript-eslint/no-magic-numbers': 'off' },
+  },
 ];

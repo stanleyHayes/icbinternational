@@ -4,6 +4,7 @@ import { CtaBand } from '@/components/marketing/cta-band';
 import { PageHeader } from '@/components/marketing/page-header';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { BENEFITS, VACANCIES } from '@/content/careers';
+import { SCENES } from '@/content/photography';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = pageMetadata({
@@ -42,6 +43,7 @@ export default function CareersPage() {
         title="Work here"
         description="Six open roles, published salary bands, and a hiring process that fits in four steps and never asks you to build something we would ship."
         breadcrumbs={[{ href: '/', label: 'Home' }]}
+        image={SCENES.careers}
       />
 
       <Section labelledBy="vacancies-heading">

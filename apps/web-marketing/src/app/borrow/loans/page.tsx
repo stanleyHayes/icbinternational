@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/marketing/page-header';
 import { RateQuote } from '@/components/marketing/rate-quote';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { LendingRateTable } from '@/components/rates/lending-rate-table';
+import { SCENES } from '@/content/photography';
 import { getCmsPage, getRates } from '@/lib/api/public-data';
 import { lowestRateBps } from '@/lib/rates';
 import { pageMetadata } from '@/lib/seo/metadata';
@@ -101,6 +102,7 @@ export default async function LoansPage() {
         title={FALLBACK_TITLE}
         description={FALLBACK_DESCRIPTION}
         breadcrumbs={[{ href: '/', label: 'Home' }]}
+        image={SCENES.loans}
       >
         <RateQuote
           basisPoints={headlineApr}

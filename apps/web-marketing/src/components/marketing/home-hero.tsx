@@ -1,8 +1,10 @@
 import { ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
 
-import { MoneyText } from '@reliance/ui';
+import { cn, MoneyText } from '@reliance/ui';
 
 import { FadeIn, LINE_STAGGER_MS, TextReveal } from '@/components/motion/text-reveal';
+import { SCENES } from '@/content/photography';
 import { DEPOSIT_PROTECTION } from '@/content/site';
 
 import { LinkButton } from './link-button';
@@ -71,9 +73,34 @@ export function HomeHero({ savingsRateBps, rateEffectiveFrom }: HomeHeroProps) {
           </p>
         </div>
 
-        <AccountPreview />
+        <HeroShowcase />
       </div>
     </section>
+  );
+}
+
+/**
+ * The photograph, with the account screen sitting over its lower edge.
+ *
+ * The shot was framed with empty floor in the bottom third precisely so the card could
+ * land there without covering anyone. The card is pulled up over the photo rather than
+ * absolutely positioned, so it keeps its place at every width instead of needing a
+ * breakpoint per overlap.
+ */
+function HeroShowcase() {
+  return (
+    <div className="mx-auto w-full max-w-xs lg:max-w-none">
+      <Image
+        src={SCENES.home.src}
+        width={SCENES.home.width}
+        height={SCENES.home.height}
+        alt=""
+        priority
+        sizes="(min-width: 1024px) 22rem, 20rem"
+        className="border-border aspect-3/4 w-full rounded-2xl border object-cover"
+      />
+      <AccountPreview className="relative z-10 -mt-20 w-[88%]" />
+    </div>
   );
 }
 
@@ -83,11 +110,14 @@ export function HomeHero({ savingsRateBps, rateEffectiveFrom }: HomeHeroProps) {
  * Every figure goes through `MoneyText`, so even an illustration cannot invent a
  * formatting convention the real product does not use.
  */
-function AccountPreview() {
+function AccountPreview({ className }: { readonly className?: string }) {
   return (
     <div
       aria-hidden
-      className="border-border bg-canvas mx-auto w-full max-w-xs rounded-2xl border p-5 shadow-lg"
+      className={cn(
+        'border-border bg-canvas mx-auto w-full max-w-xs rounded-2xl border p-5 shadow-lg',
+        className,
+      )}
     >
       <p className="text-fg-subtle text-sm">Available balance</p>
       <MoneyText amount={EXAMPLE_BALANCE_MINOR} currency="GBP" size="display" muted />
