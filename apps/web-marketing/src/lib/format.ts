@@ -16,11 +16,25 @@ const TENTHS = 10;
 /**
  * Formats basis points as a percentage.
  *
+ * Throws on anything non-finite rather than formatting it. `Math.trunc(-Infinity)` is
+ * `-Infinity` and `-Infinity % 100` is `NaN`, so the arithmetic below happily renders
+ * `-Infinity.NaN%` — a published interest rate that no one at the bank ever approved.
+ * A build that dies here is a page that never shipped; the alternative is a mis-quoted
+ * rate on a live banking site. Callers with a genuinely absent rate pass `null` around
+ * instead — see `highestRateBps` and `lowestRateBps` in `lib/rates.ts`.
+ *
  * @example formatBps(425)  // "4.25%"
  * @example formatBps(400)  // "4%"
  * @example formatBps(899)  // "8.99%"
  */
 export function formatBps(basisPoints: number): string {
+  if (!Number.isFinite(basisPoints)) {
+    throw new TypeError(
+      `formatBps received ${String(basisPoints)}, which is not a rate. A rate that cannot ` +
+        'be resolved must be omitted, not formatted.',
+    );
+  }
+
   const whole = Math.trunc(basisPoints / BPS_PER_PERCENT);
   const remainder = Math.abs(basisPoints % BPS_PER_PERCENT);
 

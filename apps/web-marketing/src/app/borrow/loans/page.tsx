@@ -5,10 +5,11 @@ import { CtaBand } from '@/components/marketing/cta-band';
 import { FaqList } from '@/components/marketing/faq-list';
 import { FeatureGrid } from '@/components/marketing/feature-grid';
 import { PageHeader } from '@/components/marketing/page-header';
+import { RateQuote } from '@/components/marketing/rate-quote';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { LendingRateTable } from '@/components/rates/lending-rate-table';
 import { getCmsPage, getRates } from '@/lib/api/public-data';
-import { formatBps } from '@/lib/format';
+import { lowestRateBps } from '@/lib/rates';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 const FALLBACK_TITLE = 'Personal loans';
@@ -91,7 +92,7 @@ export default async function LoansPage() {
     code: entry.productCode,
     name: entry.productName,
   }));
-  const headlineApr = Math.min(...rates.lending.map((entry) => entry.representativeAprBps));
+  const headlineApr = lowestRateBps(rates.lending.map((entry) => entry.representativeAprBps));
 
   return (
     <>
@@ -101,12 +102,13 @@ export default async function LoansPage() {
         description={FALLBACK_DESCRIPTION}
         breadcrumbs={[{ href: '/', label: 'Home' }]}
       >
-        <p className="border-border bg-surface-sunken inline-flex items-baseline gap-3 rounded-xl border px-5 py-4">
-          <span className="font-display text-fg text-4xl font-semibold">
-            {formatBps(headlineApr)}
-          </span>
-          <span className="text-fg-muted text-sm">representative APR, fixed</span>
-        </p>
+        <RateQuote
+          basisPoints={headlineApr}
+          unit="APR"
+          basis="representative, fixed"
+          effectiveFrom={rates.effectiveFrom}
+          variant="display"
+        />
       </PageHeader>
 
       <Section id="calculator" labelledBy="loan-calculator-heading">

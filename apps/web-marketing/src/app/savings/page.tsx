@@ -5,12 +5,13 @@ import { CtaBand } from '@/components/marketing/cta-band';
 import { FaqList } from '@/components/marketing/faq-list';
 import { FeatureGrid } from '@/components/marketing/feature-grid';
 import { PageHeader } from '@/components/marketing/page-header';
+import { RateQuote } from '@/components/marketing/rate-quote';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { SavingsRateTable } from '@/components/rates/savings-rate-table';
 import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { BANK, DEPOSIT_PROTECTION } from '@/content/site';
 import { getCmsPage, getRates } from '@/lib/api/public-data';
-import { formatAer } from '@/lib/format';
+import { highestRateBps } from '@/lib/rates';
 import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo/json-ld';
 import { pageMetadata } from '@/lib/seo/metadata';
 
@@ -24,7 +25,9 @@ export async function generateMetadata() {
 
   return pageMetadata({
     title: page?.seo.title ?? 'Savings accounts with monthly interest',
-    description: page?.seo.description ?? 'Open a savings account with monthly interest, same-day withdrawals and FSCS protection up to £85,000.',
+    description:
+      page?.seo.description ??
+      'Open a savings account with monthly interest, same-day withdrawals and FSCS protection up to £85,000.',
     path: '/savings',
     keywords: [
       'savings account',
@@ -96,8 +99,11 @@ const QUESTIONS = [
 /** The savings page, including the growth projection. */
 export default async function SavingsPage() {
   const rates = await getRates();
-  const headlineRate = Math.max(...rates.savings.map((entry) => entry.annualRateBps));
-  const breadcrumbTrail = [{ name: 'Home', path: '/' }, { name: 'Savings', path: '/savings' }];
+  const headlineRate = highestRateBps(rates.savings.map((entry) => entry.annualRateBps));
+  const breadcrumbTrail = [
+    { name: 'Home', path: '/' },
+    { name: 'Savings', path: '/savings' },
+  ];
 
   return (
     <>
@@ -107,12 +113,13 @@ export default async function SavingsPage() {
         description={FALLBACK_DESCRIPTION}
         breadcrumbs={[{ href: '/', label: 'Home' }]}
       >
-        <p className="border-accent bg-accent-soft inline-flex items-baseline gap-3 rounded-xl border px-5 py-4">
-          <span className="font-display text-accent text-4xl font-semibold">
-            {formatAer(headlineRate)}
-          </span>
-          <span className="text-fg-muted text-sm">on the Easy Access Saver, variable</span>
-        </p>
+        <RateQuote
+          basisPoints={headlineRate}
+          unit="AER"
+          basis="variable, on the Easy Access Saver"
+          effectiveFrom={rates.effectiveFrom}
+          variant="display"
+        />
       </PageHeader>
 
       <Section labelledBy="savings-rates-heading">
@@ -127,17 +134,22 @@ export default async function SavingsPage() {
         </div>
       </Section>
 
-      <Section id="calculator" tone="surface" labelledBy="savings-calculator-heading">
-        <SectionHeading
-          id="savings-calculator-heading"
-          eyebrow="Calculator"
-          title="See what regular saving adds up to"
-          description="Compounded monthly at today’s rate, using the same arithmetic the account itself runs on."
-        />
-        <div className="mt-8">
-          <SavingsCalculator annualRateBps={headlineRate} />
-        </div>
-      </Section>
+      {/* No published rate means nothing to project at. The calculator quotes the rate in
+          its own intro and compounds against it, so rendering it without one would put a
+          made-up growth figure in front of a saver. */}
+      {headlineRate === null ? null : (
+        <Section id="calculator" tone="surface" labelledBy="savings-calculator-heading">
+          <SectionHeading
+            id="savings-calculator-heading"
+            eyebrow="Calculator"
+            title="See what regular saving adds up to"
+            description="Compounded monthly at today’s rate, using the same arithmetic the account itself runs on."
+          />
+          <div className="mt-8">
+            <SavingsCalculator annualRateBps={headlineRate} />
+          </div>
+        </Section>
+      )}
 
       <Section labelledBy="savings-benefits-heading">
         <SectionHeading

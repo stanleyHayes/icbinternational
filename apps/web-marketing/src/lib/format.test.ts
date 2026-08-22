@@ -34,6 +34,14 @@ describe('formatBps', () => {
     expect(formatBps(815)).toBe('8.15%');
     expect(formatBps(1015)).toBe('10.15%');
   });
+
+  it('refuses a non-finite value instead of publishing one', () => {
+    // `Math.max()` over an empty rate list is `-Infinity`, and the arithmetic here used to
+    // render it as the string `-Infinity.NaN%` — which shipped to the home page hero.
+    expect(() => formatBps(-Infinity)).toThrow(TypeError);
+    expect(() => formatBps(Infinity)).toThrow(TypeError);
+    expect(() => formatBps(NaN)).toThrow(TypeError);
+  });
 });
 
 describe('formatAer', () => {
