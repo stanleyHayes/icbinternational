@@ -14,15 +14,25 @@ import { LocationService, parsePoint } from '../cms/index.js';
 import { PublicCache, PublicCacheInterceptor } from './public-cache.interceptor.js';
 import { PublicRateLimitGuard } from './public-rate-limit.guard.js';
 import { DIRECTORY_MAX_AGE_SECONDS, RATES_MAX_AGE_SECONDS } from './public.constants.js';
-import { type FeeSchedule, type RateTable } from './public.dto.js';
 import { RatesService } from './rates.service.js';
 
 /**
- * Reference data: what the bank charges, what it pays, and where its branches are.
+ * Reference data: the FX board and the branch directory.
  *
  * Like the content controller, this has no authentication and no dependency capable of
  * reaching customer data. `RatesService` and `LocationService` both read published CMS
  * documents and nothing else.
+ *
+ * This class used to serve `/public/rates` and `/public/fees` as well, out of the CMS.
+ * `ProductsController` binds those same two paths, and Nest resolves a duplicate binding
+ * by module registration order — so the products lane answered every request and the
+ * handlers here were unreachable. They were also untested, while the products versions
+ * are covered by `products-api.integration.test.ts`, which is the better evidence of which
+ * lane was meant to own them. Their `@PublicCache` never applied either, which is why the
+ * live `/public/rates` carried no `cache-control` header.
+ *
+ * The CMS rate tables themselves are still read — `RatesService.representativeRate` backs
+ * both calculators — they are simply no longer published as their own endpoint.
  */
 @Controller()
 @UseGuards(PublicRateLimitGuard)
@@ -32,18 +42,6 @@ export class PublicReferenceController {
     private readonly rates: RatesService,
     private readonly locations: LocationService,
   ) {}
-
-  @Get(routes.public.rates)
-  @PublicCache({ maxAgeSeconds: RATES_MAX_AGE_SECONDS })
-  async rateTables(): Promise<RateTable[]> {
-    return this.rates.tables();
-  }
-
-  @Get(routes.public.fees)
-  @PublicCache({ maxAgeSeconds: RATES_MAX_AGE_SECONDS })
-  async fees(): Promise<FeeSchedule[]> {
-    return this.rates.fees();
-  }
 
   @Get(routes.public.fxBoard)
   @PublicCache({ maxAgeSeconds: RATES_MAX_AGE_SECONDS })
