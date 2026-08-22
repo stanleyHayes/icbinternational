@@ -1,41 +1,53 @@
-import type { PublicRates } from '@reliance/api-client';
 import { MoneyText } from '@reliance/ui';
 
 import { DataCell, DataRow, DataTable, RowHeader } from '@/components/marketing/data-table';
 import { formatAer, formatDate } from '@/lib/format';
+import type { SavingsRateRow } from '@/lib/rates';
 
 const COLUMNS = [
   { key: 'product', label: 'Account' },
   { key: 'rate', label: 'Interest rate', numeric: true },
-  { key: 'minimum', label: 'Minimum balance', numeric: true },
+  { key: 'minimum', label: 'Balance from', numeric: true },
 ] as const;
 
-/** The savings side of the published rate board. */
-export function SavingsRateTable({ rates }: { readonly rates: PublicRates }) {
+/**
+ * The savings side of the published rate board.
+ *
+ * Takes rows rather than the raw response: a product pays in bands, and deciding which
+ * band to quote is a judgement about what the bank is claiming, not a rendering detail.
+ * `savingsRows` makes it once — see the note there on why it is the top band.
+ */
+export function SavingsRateTable({
+  rows,
+  effectiveFrom,
+}: {
+  readonly rows: readonly SavingsRateRow[];
+  readonly effectiveFrom: string;
+}) {
   return (
     <DataTable
-      caption="Savings interest rates by account, with the minimum balance each requires"
+      caption="Savings interest rates by account, with the balance each rate starts at"
       columns={COLUMNS}
       footnote={
         <>
-          Rates are variable and paid monthly. Effective from {formatDate(rates.effectiveFrom)}. AER
+          Rates are variable and paid monthly. Effective from {formatDate(effectiveFrom)}. AER
           stands for Annual Equivalent Rate and shows what the interest would be if it were paid and
           compounded once a year.
         </>
       }
     >
-      {rates.savings.map((entry) => (
-        <DataRow key={entry.productCode}>
-          <RowHeader detail={entry.productCode}>{entry.productName}</RowHeader>
+      {rows.map((row) => (
+        <DataRow key={row.code}>
+          <RowHeader detail={row.code}>{row.name}</RowHeader>
           <DataCell numeric>
-            <span className="text-fg font-medium">{formatAer(entry.annualRateBps)}</span>
+            <span className="text-fg font-medium">{formatAer(row.annualRateBps)}</span>
           </DataCell>
           <DataCell numeric>
             <MoneyText
-              amount={entry.minBalance.amount}
-              currency={entry.minBalance.currency}
+              amount={row.minBalance.amount}
+              currency={row.minBalance.currency}
               muted
-              srLabel="Minimum balance"
+              srLabel="Balance from"
             />
           </DataCell>
         </DataRow>

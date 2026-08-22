@@ -3,7 +3,7 @@ import { Accessibility, Banknote, MapPin, Phone } from 'lucide-react';
 import { LocationKind, type BankLocation } from '@reliance/contracts';
 import { Badge } from '@reliance/ui';
 
-import { formatDistance } from '@/lib/format';
+import { formatDistance, formatPhone } from '@/lib/format';
 
 const ICON_SIZE = 15;
 
@@ -77,7 +77,9 @@ function BranchDetails({ location }: { readonly location: BankLocation }) {
               className="text-fg hover:text-accent inline-flex items-center gap-1.5"
             >
               <Phone size={ICON_SIZE} aria-hidden />
-              {location.phone}
+              {/* href keeps E.164 so the dialler gets an unambiguous number; the text is
+                  the form printed on the branch door. */}
+              {formatPhone(location.phone)}
             </a>
           </dd>
         </div>

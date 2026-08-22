@@ -7,6 +7,7 @@ import {
   formatAer,
   formatBps,
   formatDate,
+  formatPhone,
   formatDistance,
   formatShortDate,
   formatTerm,
@@ -95,5 +96,21 @@ describe('formatTerm', () => {
   it('names the remainder', () => {
     expect(formatTerm(18)).toBe('1 year 6 months');
     expect(formatTerm(30)).toBe('2 years 6 months');
+  });
+});
+
+describe('formatPhone', () => {
+  it('prints a two-digit area code the way the branch does', () => {
+    expect(formatPhone('+442079464400')).toBe('020 7946 4400');
+    expect(formatPhone('+442895964400')).toBe('028 9596 4400');
+  });
+
+  it('prints a three-digit area code the way the branch does', () => {
+    expect(formatPhone('+441614964400')).toBe('0161 496 4400');
+    expect(formatPhone('+441174964400')).toBe('0117 496 4400');
+  });
+
+  it('leaves a number it cannot claim to understand alone', () => {
+    expect(formatPhone('+13125550142')).toBe('+13125550142');
   });
 });

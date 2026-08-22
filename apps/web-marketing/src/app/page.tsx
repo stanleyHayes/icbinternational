@@ -9,7 +9,7 @@ import { Section, SectionHeading } from '@/components/marketing/section';
 import { Testimonials } from '@/components/marketing/testimonials';
 import { TrustBand } from '@/components/marketing/trust-band';
 import { getProducts, getRates } from '@/lib/api/public-data';
-import { highestRateBps } from '@/lib/rates';
+import { highestRateBps, latestEffectiveFrom, savingsRows } from '@/lib/rates';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = pageMetadata({
@@ -72,11 +72,15 @@ const PROMISES = [
 /** The home page. Static: every figure on it is resolved at build time. */
 export default async function HomePage() {
   const [rates, products] = await Promise.all([getRates(), getProducts()]);
-  const headlineSavingsRate = highestRateBps(rates.savings.map((entry) => entry.annualRateBps));
+  const savings = savingsRows(rates);
+  const headlineSavingsRate = highestRateBps(savings.map((row) => row.annualRateBps));
 
   return (
     <>
-      <HomeHero savingsRateBps={headlineSavingsRate} rateEffectiveFrom={rates.effectiveFrom} />
+      <HomeHero
+        savingsRateBps={headlineSavingsRate}
+        rateEffectiveFrom={latestEffectiveFrom(rates) ?? undefined}
+      />
       <TrustBand />
       <ProductShowcase products={products} />
 

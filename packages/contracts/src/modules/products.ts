@@ -102,6 +102,52 @@ export const productSchema = z.object({
 });
 export type Product = z.infer<typeof productSchema>;
 
+/**
+ * One product's interest rates, as the public rates page renders them.
+ *
+ * A projection of `productSchema`, not a second source: the API derives it from the same
+ * catalogue read that serves `/public/products`, so a rate cannot differ between the two
+ * endpoints. It lives here rather than beside the controller because the marketing site
+ * parses this exact shape, and the last time it did not, the two sides drifted — the site
+ * validated against a hand-written schema of savings/lending arrays that the API has never
+ * returned, so every response failed validation and the page silently fell back to showing
+ * no rate at all.
+ */
+export const productRatesSchema = z.object({
+  code: shortTextSchema,
+  name: shortTextSchema,
+  accountType: z.enum(AccountType),
+  /** Credit bands, ordered by `fromAmount` ascending. Empty on products that pay nothing. */
+  creditInterestTiers: z.array(interestTierSchema),
+  /** Arranged overdraft rate. Null on products that cannot go overdrawn. */
+  debitInterestBps: basisPointsSchema.nullable(),
+  /**
+   * The date this version of the product's rates took effect.
+   *
+   * Carried on the projection rather than looked up separately because a published rate
+   * has to be shown with the date it came into force — the rate tables print it, and a
+   * figure without one is not a quotation a customer can check against their statement.
+   */
+  effectiveFrom: isoDateSchema,
+});
+export type ProductRates = z.infer<typeof productRatesSchema>;
+
+/**
+ * One product's charges, as the public fees page renders them.
+ *
+ * The regulator expects the fee schedule to be a single document rather than something a
+ * customer assembles by opening five product pages, so the endpoint groups every charge
+ * under the product that levies it. Like `productRatesSchema`, this is a projection of the
+ * same catalogue read, declared here so the API and the site cannot disagree about it.
+ */
+export const productFeesSchema = z.object({
+  code: shortTextSchema,
+  name: shortTextSchema,
+  monthlyFee: moneySchema,
+  fees: z.array(feeScheduleEntrySchema),
+});
+export type ProductFees = z.infer<typeof productFeesSchema>;
+
 /** What the customer has left of a limit right now — surfaced before they hit it. */
 export const limitUsageSchema = z.object({
   scope: shortTextSchema,

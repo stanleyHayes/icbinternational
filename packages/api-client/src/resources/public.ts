@@ -13,11 +13,12 @@ import {
   articleSchema,
   cmsPageSchema,
   faqSchema,
-  feeScheduleEntrySchema,
   fxBoardSchema,
   loanQuoteSchema,
   locationSchema,
   paginated,
+  productFeesSchema,
+  productRatesSchema,
   productSchema,
   resource,
   routes,
@@ -27,7 +28,6 @@ import {
   type CmsPage,
   type CursorQuery,
   type Faq,
-  type FeeScheduleEntry,
   type FxBoard,
   type LeadRequest,
   type LoanCalculationRequest,
@@ -35,22 +35,22 @@ import {
   type LocationSearchQuery,
   type Paginated,
   type Product,
+  type ProductFees,
+  type ProductRates,
   type Resource,
 } from '@reliance/contracts';
 
 import type { HttpTransport } from '../core/transport.js';
 import type { MutationOptions, QueryOptions } from '../core/types.js';
 import {
-  publicRatesSchema,
   savingsProjectionSchema,
-  type PublicRates,
   type SavingsCalculationRequest,
   type SavingsProjection,
 } from '../provisional/operations.js';
 
-const ratesResource = resource(publicRatesSchema);
+const rateList = paginated(productRatesSchema);
 const boardResource = resource(fxBoardSchema);
-const feeList = paginated(feeScheduleEntrySchema);
+const feeList = paginated(productFeesSchema);
 const productList = paginated(productSchema);
 const locationList = paginated(locationSchema);
 const pageResource = resource(cmsPageSchema);
@@ -74,15 +74,15 @@ export type ListPostsQuery = {
 export function createPublicResource(http: HttpTransport) {
   return {
     /** Headline savings and lending rates. */
-    rates: (options?: QueryOptions): Promise<Resource<PublicRates>> =>
-      http.get({ ...options, path: routes.public.rates, schema: ratesResource }),
+    rates: (query?: CursorQuery, options?: QueryOptions): Promise<Paginated<ProductRates>> =>
+      http.get({ ...options, path: routes.public.rates, query, schema: rateList }),
 
     /** The public FX board. */
     fxBoard: (options?: QueryOptions): Promise<Resource<FxBoard>> =>
       http.get({ ...options, path: routes.public.fxBoard, schema: boardResource }),
 
     /** The published fee schedule. */
-    fees: (query?: CursorQuery, options?: QueryOptions): Promise<Paginated<FeeScheduleEntry>> =>
+    fees: (query?: CursorQuery, options?: QueryOptions): Promise<Paginated<ProductFees>> =>
       http.get({ ...options, path: routes.public.fees, query, schema: feeList }),
 
     /** The product catalogue as the marketing site shows it. */

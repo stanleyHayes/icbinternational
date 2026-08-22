@@ -7,7 +7,7 @@ import { type Connection } from 'mongoose';
 import request from 'supertest';
 import { type App } from 'supertest/types.js';
 
-import { AccountType, ErrorCode, type Product } from '@reliance/contracts';
+import { AccountType, ErrorCode, type Product, type ProductRates } from '@reliance/contracts';
 
 import { ClockModule } from '../../../common/clock/clock.module.js';
 import { ClockService } from '../../../common/clock/clock.service.js';
@@ -17,7 +17,6 @@ import { EVERYDAY_CURRENT } from '../../../seed/foundation/catalogue/everyday-cu
 import { AdminAuthGuard } from '../../rbac/admin-auth.guard.js';
 import { IpAllowlistGuard } from '../../rbac/ip-allowlist.guard.js';
 import { PermissionGuard } from '../../rbac/permission.guard.js';
-import { type ProductRates } from '../products.controller.js';
 import { ProductsModule } from '../products.module.js';
 
 /**

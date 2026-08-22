@@ -2,12 +2,13 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 
 import {
   routes,
-  type AccountType,
-  type FeeScheduleEntry,
-  type InterestTier,
+  type Paginated,
   type Product,
+  type ProductFees,
+  type ProductRates,
 } from '@reliance/contracts';
 
+import { wholeList } from '../../common/pagination/cursor.js';
 import { zodBody } from '../../common/pipes/zod-validation.pipe.js';
 
 import { ProductService } from './product.service.js';
@@ -38,8 +39,8 @@ export class ProductsController {
   @Get(routes.public.products)
   async list(
     @Query(zodBody(productCatalogueQuerySchema)) query: ProductCatalogueQuery,
-  ): Promise<Product[]> {
-    return this.products.listCatalogue(query.asOf);
+  ): Promise<Paginated<Product>> {
+    return wholeList(await this.products.listCatalogue(query.asOf));
   }
 
   /**
@@ -51,15 +52,17 @@ export class ProductsController {
   @Get(routes.public.fees)
   async fees(
     @Query(zodBody(productCatalogueQuerySchema)) query: ProductCatalogueQuery,
-  ): Promise<ProductFees[]> {
+  ): Promise<Paginated<ProductFees>> {
     const products = await this.products.listCatalogue(query.asOf);
 
-    return products.map((product) => ({
-      code: product.code,
-      name: product.name,
-      monthlyFee: product.monthlyFee,
-      fees: product.fees,
-    }));
+    return wholeList(
+      products.map((product) => ({
+        code: product.code,
+        name: product.name,
+        monthlyFee: product.monthlyFee,
+        fees: product.fees,
+      })),
+    );
   }
 
   /**
@@ -72,16 +75,19 @@ export class ProductsController {
   @Get(routes.public.rates)
   async rates(
     @Query(zodBody(productCatalogueQuerySchema)) query: ProductCatalogueQuery,
-  ): Promise<ProductRates[]> {
+  ): Promise<Paginated<ProductRates>> {
     const products = await this.products.listCatalogue(query.asOf);
 
-    return products.map((product) => ({
-      code: product.code,
-      name: product.name,
-      accountType: product.accountType,
-      creditInterestTiers: product.creditInterestTiers,
-      debitInterestBps: product.debitInterestBps,
-    }));
+    return wholeList(
+      products.map((product) => ({
+        code: product.code,
+        name: product.name,
+        accountType: product.accountType,
+        creditInterestTiers: product.creditInterestTiers,
+        debitInterestBps: product.debitInterestBps,
+        effectiveFrom: product.effectiveFrom,
+      })),
+    );
   }
 
   /** One product, resolved for the requested date. */
@@ -92,23 +98,4 @@ export class ProductsController {
   ): Promise<Product> {
     return this.products.requireActive(code, query.asOf);
   }
-}
-
-/** One product's charges, as rendered on the public fees page. */
-export interface ProductFees {
-  code: string;
-  name: string;
-  monthlyFee: Product['monthlyFee'];
-  fees: FeeScheduleEntry[];
-}
-
-/** One product's interest rates, as rendered on the public rates page. */
-export interface ProductRates {
-  code: string;
-  name: string;
-  accountType: AccountType;
-  /** Credit bands, ordered by `fromAmount` ascending. Empty on products that pay nothing. */
-  creditInterestTiers: InterestTier[];
-  /** Arranged overdraft rate. Null on products that cannot go overdrawn. */
-  debitInterestBps: number | null;
 }

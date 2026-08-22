@@ -66,7 +66,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'EC3V 3ND',
     latitudeMicro: 51_513_200,
     longitudeMicro: -87_400,
-    phone: '020 7946 4400',
+    phone: '+442079464400',
     kind: LocationKind.BOTH,
   },
   {
@@ -77,7 +77,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'N1C 4AG',
     latitudeMicro: 51_534_100,
     longitudeMicro: -125_100,
-    phone: '020 7946 4408',
+    phone: '+442079464408',
     kind: LocationKind.BOTH,
   },
   {
@@ -88,7 +88,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'M3 3EB',
     latitudeMicro: 53_479_800,
     longitudeMicro: -2_252_100,
-    phone: '0161 496 4400',
+    phone: '+441614964400',
     kind: LocationKind.BOTH,
   },
   {
@@ -99,7 +99,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'B3 2AA',
     latitudeMicro: 52_481_200,
     longitudeMicro: -1_902_300,
-    phone: '0121 496 4400',
+    phone: '+441214964400',
     kind: LocationKind.BRANCH,
   },
   {
@@ -110,7 +110,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'LS1 5HR',
     latitudeMicro: 53_798_100,
     longitudeMicro: -1_547_900,
-    phone: '0113 496 4400',
+    phone: '+441134964400',
     kind: LocationKind.BOTH,
   },
   {
@@ -121,7 +121,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'EH2 4LH',
     latitudeMicro: 55_953_200,
     longitudeMicro: -3_201_400,
-    phone: '0131 496 4400',
+    phone: '+441314964400',
     kind: LocationKind.BOTH,
   },
   {
@@ -132,7 +132,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'CF10 1AD',
     latitudeMicro: 51_478_200,
     longitudeMicro: -3_178_100,
-    phone: '029 2196 4400',
+    phone: '+442921964400',
     kind: LocationKind.BRANCH,
   },
   {
@@ -143,7 +143,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'BS1 1HQ',
     latitudeMicro: 51_454_100,
     longitudeMicro: -2_594_500,
-    phone: '0117 496 4400',
+    phone: '+441174964400',
     kind: LocationKind.BOTH,
   },
   {
@@ -154,7 +154,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'G1 3BA',
     latitudeMicro: 55_860_900,
     longitudeMicro: -4_253_800,
-    phone: '0141 496 4400',
+    phone: '+441414964400',
     kind: LocationKind.BOTH,
   },
   {
@@ -165,7 +165,7 @@ const BRANCHES: readonly BranchSeed[] = Object.freeze([
     postalCode: 'BT1 5AB',
     latitudeMicro: 54_599_100,
     longitudeMicro: -5_930_800,
-    phone: '028 9596 4400',
+    phone: '+442895964400',
     kind: LocationKind.BRANCH,
   },
   {

@@ -1,16 +1,14 @@
 import { BadgeCheck, CalendarCheck, Coins, Search } from 'lucide-react';
 
-import { LoanCalculator } from '@/components/calculators/loan-calculator';
 import { CtaBand } from '@/components/marketing/cta-band';
 import { FaqList } from '@/components/marketing/faq-list';
 import { FeatureGrid } from '@/components/marketing/feature-grid';
 import { PageHeader } from '@/components/marketing/page-header';
-import { RateQuote } from '@/components/marketing/rate-quote';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { LendingRateTable } from '@/components/rates/lending-rate-table';
 import { SCENES } from '@/content/photography';
 import { getCmsPage, getRates } from '@/lib/api/public-data';
-import { lowestRateBps } from '@/lib/rates';
+import { latestEffectiveFrom, overdraftRows } from '@/lib/rates';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 const FALLBACK_TITLE = 'Personal loans';
@@ -89,11 +87,8 @@ const QUESTIONS = [
 /** The personal loan page, including the repayment calculator. */
 export default async function LoansPage() {
   const rates = await getRates();
-  const products = rates.lending.map((entry) => ({
-    code: entry.productCode,
-    name: entry.productName,
-  }));
-  const headlineApr = lowestRateBps(rates.lending.map((entry) => entry.representativeAprBps));
+  const overdrafts = overdraftRows(rates);
+  const effectiveFrom = latestEffectiveFrom(rates);
 
   return (
     <>
@@ -104,37 +99,24 @@ export default async function LoansPage() {
         breadcrumbs={[{ href: '/', label: 'Home' }]}
         image={SCENES.loans}
       >
-        <RateQuote
-          basisPoints={headlineApr}
-          unit="APR"
-          basis="representative, fixed"
-          effectiveFrom={rates.effectiveFrom}
-          variant="display"
-        />
+        {/* No representative APR is quoted here any more. The figure that used to sit in
+            this slot came from `rates.lending[].representativeAprBps` — a shape the API has
+            never returned, so it was only ever the fallback's zero dressed up as a rate.
+            Personal-loan APRs are published, but only as a CMS rate table reachable through
+            the calculator; there is no public endpoint that lists them. Quoting nothing is
+            the honest state until there is. */}
       </PageHeader>
 
-      <Section id="calculator" labelledBy="loan-calculator-heading">
-        <SectionHeading
-          id="loan-calculator-heading"
-          eyebrow="Calculator"
-          title="Work out the real cost first"
-          description="Quoted by the same engine that builds the repayment schedule, so the monthly payment here is the payment the loan carries."
-        />
-        <div className="mt-8">
-          <LoanCalculator products={products} />
-        </div>
-      </Section>
-
-      <Section tone="surface" labelledBy="loan-rates-heading">
-        <SectionHeading
-          id="loan-rates-heading"
-          eyebrow="Rates"
-          title="What we lend, and at what price"
-        />
-        <div className="mt-8">
-          <LendingRateTable rates={rates} />
-        </div>
-      </Section>
+      {/* The overdraft board, which is the borrowing rate this page can actually source.
+          Personal-loan rates belong here too and cannot be fetched — see the note above. */}
+      {effectiveFrom === null || overdrafts.length === 0 ? null : (
+        <Section tone="surface" labelledBy="loan-rates-heading">
+          <SectionHeading id="loan-rates-heading" eyebrow="Rates" title="What an overdraft costs" />
+          <div className="mt-8">
+            <LendingRateTable rows={overdrafts} effectiveFrom={effectiveFrom} />
+          </div>
+        </Section>
+      )}
 
       <Section labelledBy="loan-promises-heading">
         <SectionHeading

@@ -1,42 +1,51 @@
-import type { PublicRates } from '@reliance/api-client';
-import { MoneyText } from '@reliance/ui';
-
 import { DataCell, DataRow, DataTable, RowHeader } from '@/components/marketing/data-table';
-import { formatBps } from '@/lib/format';
+import { formatBps, formatDate } from '@/lib/format';
+import type { OverdraftRateRow } from '@/lib/rates';
 
 const COLUMNS = [
-  { key: 'product', label: 'Product' },
-  { key: 'apr', label: 'Representative APR', numeric: true },
-  { key: 'max', label: 'Maximum amount', numeric: true },
+  { key: 'product', label: 'Account' },
+  { key: 'ear', label: 'Arranged overdraft EAR', numeric: true },
 ] as const;
 
-/** The lending side of the published rate board. */
-export function LendingRateTable({ rates }: { readonly rates: PublicRates }) {
+/**
+ * The borrowing side of the published rate board.
+ *
+ * This table used to be headed "Representative APR" and to list a maximum loan amount,
+ * against a `lending` array the API has never returned. What `/public/rates` actually
+ * publishes is `debitInterestBps` — the arranged-overdraft rate on a current account,
+ * which is an EAR, not an APR, and carries no lending limit. Quoting an overdraft rate
+ * under an APR heading would misstate a borrowing cost on a bank's own rate board, so the
+ * table now says what the figure is.
+ *
+ * Personal-loan APRs are not on the public surface at all: they live behind
+ * `/loans/products`, which the marketing client is forbidden from calling. Until a public
+ * loan-products endpoint exists, the loans page cannot publish a rate board.
+ */
+export function LendingRateTable({
+  rows,
+  effectiveFrom,
+}: {
+  readonly rows: readonly OverdraftRateRow[];
+  readonly effectiveFrom: string;
+}) {
   return (
     <DataTable
-      caption="Representative APR and maximum amount for each lending product"
+      caption="Arranged overdraft rates by account"
       columns={COLUMNS}
       footnote={
         <>
-          Representative APR means at least 51% of accepted applicants are offered that rate or
-          better. Your own rate depends on your circumstances and is quoted in full, with the total
-          amount repayable, before you commit to anything.
+          Effective from {formatDate(effectiveFrom)}. EAR stands for Equivalent Annual Rate and
+          shows what an arranged overdraft costs over a year if you stayed in it, with interest
+          charged on interest. Your own limit depends on your circumstances and is quoted before you
+          agree to it.
         </>
       }
     >
-      {rates.lending.map((entry) => (
-        <DataRow key={entry.productCode}>
-          <RowHeader detail={entry.productCode}>{entry.productName}</RowHeader>
+      {rows.map((row) => (
+        <DataRow key={row.code}>
+          <RowHeader detail={row.code}>{row.name}</RowHeader>
           <DataCell numeric>
-            <span className="text-fg font-medium">{formatBps(entry.representativeAprBps)}</span>
-          </DataCell>
-          <DataCell numeric>
-            <MoneyText
-              amount={entry.maxAmount.amount}
-              currency={entry.maxAmount.currency}
-              muted
-              srLabel="Maximum amount"
-            />
+            <span className="text-fg font-medium">{formatBps(row.annualRateBps)}</span>
           </DataCell>
         </DataRow>
       ))}

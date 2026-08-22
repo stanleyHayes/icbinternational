@@ -12,7 +12,7 @@ import { JsonLdScript } from '@/components/seo/json-ld-script';
 import { SCENES } from '@/content/photography';
 import { BANK, DEPOSIT_PROTECTION } from '@/content/site';
 import { getCmsPage, getRates } from '@/lib/api/public-data';
-import { highestRateBps } from '@/lib/rates';
+import { highestRateBps, latestEffectiveFrom, savingsRows } from '@/lib/rates';
 import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo/json-ld';
 import { pageMetadata } from '@/lib/seo/metadata';
 
@@ -100,7 +100,9 @@ const QUESTIONS = [
 /** The savings page, including the growth projection. */
 export default async function SavingsPage() {
   const rates = await getRates();
-  const headlineRate = highestRateBps(rates.savings.map((entry) => entry.annualRateBps));
+  const savings = savingsRows(rates);
+  const effectiveFrom = latestEffectiveFrom(rates);
+  const headlineRate = highestRateBps(savings.map((row) => row.annualRateBps));
   const breadcrumbTrail = [
     { name: 'Home', path: '/' },
     { name: 'Savings', path: '/savings' },
@@ -119,22 +121,27 @@ export default async function SavingsPage() {
           basisPoints={headlineRate}
           unit="AER"
           basis="variable, on the Easy Access Saver"
-          effectiveFrom={rates.effectiveFrom}
+          effectiveFrom={effectiveFrom ?? undefined}
           variant="display"
         />
       </PageHeader>
 
-      <Section labelledBy="savings-rates-heading">
-        <SectionHeading
-          id="savings-rates-heading"
-          eyebrow="Rates"
-          title="What we pay, on everything"
-          description="One table. No introductory rate that quietly drops after twelve months."
-        />
-        <div className="mt-8">
-          <SavingsRateTable rates={rates} />
-        </div>
-      </Section>
+      {/* A rate board with no rates on it is worse than no rate board: it reads as "we pay
+          nothing" rather than "this could not be loaded". `effectiveFrom` is null in exactly
+          that case, and the table needs it anyway to print the date the rates took effect. */}
+      {effectiveFrom === null ? null : (
+        <Section labelledBy="savings-rates-heading">
+          <SectionHeading
+            id="savings-rates-heading"
+            eyebrow="Rates"
+            title="What we pay, on everything"
+            description="One table. No introductory rate that quietly drops after twelve months."
+          />
+          <div className="mt-8">
+            <SavingsRateTable rows={savings} effectiveFrom={effectiveFrom} />
+          </div>
+        </Section>
+      )}
 
       {/* No published rate means nothing to project at. The calculator quotes the rate in
           its own intro and compounds against it, so rendering it without one would put a

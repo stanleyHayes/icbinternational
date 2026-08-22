@@ -6,7 +6,9 @@ import { FxBoardTable } from '@/components/rates/fx-board-table';
 import { LendingRateTable } from '@/components/rates/lending-rate-table';
 import { SavingsRateTable } from '@/components/rates/savings-rate-table';
 import { getFees, getFxBoard, getRates } from '@/lib/api/public-data';
+import { feeEntries } from '@/lib/fees';
 import { formatDate } from '@/lib/format';
+import { latestEffectiveFrom, overdraftRows, savingsRows } from '@/lib/rates';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = pageMetadata({
@@ -32,7 +34,11 @@ const CONTENTS = [
  * a customer can be charged lives only in a PDF.
  */
 export default async function RatesAndFeesPage() {
-  const [rates, fees, fxBoard] = await Promise.all([getRates(), getFees(), getFxBoard()]);
+  const [rates, groupedFees, fxBoard] = await Promise.all([getRates(), getFees(), getFxBoard()]);
+  const savings = savingsRows(rates);
+  const overdrafts = overdraftRows(rates);
+  const fees = feeEntries(groupedFees);
+  const effectiveFrom = latestEffectiveFrom(rates);
 
   return (
     <>
@@ -56,32 +62,38 @@ export default async function RatesAndFeesPage() {
             ))}
           </ul>
         </nav>
-        <p className="text-fg-subtle mt-6 text-sm">Last updated {formatDate(rates.asOf)}.</p>
+        {effectiveFrom === null ? null : (
+          <p className="text-fg-subtle mt-6 text-sm">Last updated {formatDate(effectiveFrom)}.</p>
+        )}
       </PageHeader>
 
-      <Section id="savings" labelledBy="savings-heading">
-        <SectionHeading
-          id="savings-heading"
-          eyebrow="Savings"
-          title="What we pay you"
-          description="Interest is paid monthly and starts earning on the day the money arrives."
-        />
-        <div className="mt-8">
-          <SavingsRateTable rates={rates} />
-        </div>
-      </Section>
+      {effectiveFrom === null ? null : (
+        <Section id="savings" labelledBy="savings-heading">
+          <SectionHeading
+            id="savings-heading"
+            eyebrow="Savings"
+            title="What we pay you"
+            description="Interest is paid monthly and starts earning on the day the money arrives."
+          />
+          <div className="mt-8">
+            <SavingsRateTable rows={savings} effectiveFrom={effectiveFrom} />
+          </div>
+        </Section>
+      )}
 
-      <Section id="lending" tone="surface" labelledBy="lending-heading">
-        <SectionHeading
-          id="lending-heading"
-          eyebrow="Borrowing"
-          title="What borrowing costs"
-          description="Fixed for the whole term, with the total amount repayable quoted before you apply."
-        />
-        <div className="mt-8">
-          <LendingRateTable rates={rates} />
-        </div>
-      </Section>
+      {effectiveFrom === null ? null : (
+        <Section id="lending" tone="surface" labelledBy="lending-heading">
+          <SectionHeading
+            id="lending-heading"
+            eyebrow="Borrowing"
+            title="What an overdraft costs"
+            description="Charged only on the days you are overdrawn, and only on the amount you are overdrawn by."
+          />
+          <div className="mt-8">
+            <LendingRateTable rows={overdrafts} effectiveFrom={effectiveFrom} />
+          </div>
+        </Section>
+      )}
 
       <Section id="charges" labelledBy="charges-heading">
         <SectionHeading

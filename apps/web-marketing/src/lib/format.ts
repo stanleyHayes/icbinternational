@@ -101,3 +101,39 @@ export function formatTerm(months: number): string {
 
   return remainder === 0 ? yearLabel : `${yearLabel} ${String(remainder)} months`;
 }
+
+/** UK area codes that are two digits rather than three. */
+const UK_TWO_DIGIT_AREAS = new Set(['20', '23', '24', '28', '29']);
+const UK_PREFIX = '+44';
+const SHORT_AREA_DIGITS = 2;
+const LONG_AREA_DIGITS = 3;
+/** A two-digit area leaves eight digits, grouped 4-4; a three-digit area leaves seven, 3-4. */
+const GROUP_AFTER_SHORT_AREA = 4;
+const GROUP_AFTER_LONG_AREA = 3;
+
+/**
+ * An E.164 number as a reader would write it down.
+ *
+ * The contract stores every number in E.164 and says so — one form, comparable, no
+ * guessing at a country. That is the right thing to transmit and the wrong thing to print:
+ * `+442079464400` on a branch card is a string a customer has to decode before they can
+ * dial it. The `tel:` href keeps the E.164, exactly as the footer already does with
+ * `BANK.phone` and `BANK.phoneDisplay`; this is only for the text beside it.
+ *
+ * UK numbers only. Anything else is returned untouched rather than mangled into a shape
+ * its own country would not recognise.
+ */
+export function formatPhone(e164: string): string {
+  if (!e164.startsWith(UK_PREFIX)) return e164;
+
+  const national = e164.slice(UK_PREFIX.length);
+  const area = UK_TWO_DIGIT_AREAS.has(national.slice(0, SHORT_AREA_DIGITS))
+    ? national.slice(0, SHORT_AREA_DIGITS)
+    : national.slice(0, LONG_AREA_DIGITS);
+  const rest = national.slice(area.length);
+
+  // Both groupings are how the number is printed on the branch's own door.
+  const split =
+    area.length === SHORT_AREA_DIGITS ? GROUP_AFTER_SHORT_AREA : GROUP_AFTER_LONG_AREA;
+  return `0${area} ${rest.slice(0, split)} ${rest.slice(split)}`;
+}

@@ -79,3 +79,20 @@ export function buildPage<T>(options: {
     },
   };
 }
+
+/**
+ * The whole list, declared as a single exhausted page.
+ *
+ * Some collections are complete by nature — the product catalogue, the fee schedule, the
+ * branch directory — and paging them would be pretending. They still owe the client the
+ * list envelope: `paginated()` in `@reliance/contracts` requires `page`, and a handler
+ * that returns a bare array produces `{ data }` with no `page`, which every generated
+ * client rejects at the schema boundary. That failure is silent on the far side — the
+ * marketing site's `withFallback` turns it into an empty section rather than an error —
+ * so the endpoint looks healthy in curl and renders as blank in production.
+ *
+ * Six controllers already spell this literal out by hand. New callers should use this.
+ */
+export function wholeList<T>(data: T[]): PageResult<T> {
+  return { data, page: { cursor: null, limit: data.length, hasMore: false, total: data.length } };
+}

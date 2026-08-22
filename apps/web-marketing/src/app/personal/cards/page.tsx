@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/marketing/page-header';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { FeeTable } from '@/components/rates/fee-table';
 import { getFees } from '@/lib/api/public-data';
+import { feeEntries } from '@/lib/fees';
 import { pageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = pageMetadata({
@@ -93,7 +94,7 @@ const QUESTIONS = [
 
 /** The cards page. */
 export default async function CardsPage() {
-  const fees = await getFees();
+  const fees = feeEntries(await getFees());
   const cardFees = fees.filter((fee) => fee.kind.startsWith('CARD') || fee.kind.startsWith('ATM'));
 
   return (

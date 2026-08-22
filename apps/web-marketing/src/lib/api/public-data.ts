@@ -8,15 +8,16 @@
 
 import { cache } from 'react';
 
-import { ApiClientError, type PublicRates } from '@reliance/api-client';
+import { ApiClientError } from '@reliance/api-client';
 import { AccountType, ErrorCode } from '@reliance/contracts';
 import type {
   BankLocation,
   CmsPage,
   Faq,
-  FeeScheduleEntry,
   FxBoard,
   Product,
+  ProductFees,
+  ProductRates,
 } from '@reliance/contracts';
 
 import { publicApi } from './client';
@@ -24,7 +25,8 @@ import { publicApi } from './client';
 /** The catalogue is four products; the fee schedule is six lines. One page holds both. */
 const CATALOGUE_PAGE_SIZE = 50;
 
-const shouldUseFallback = () => process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production';
+const shouldUseFallback = () =>
+  process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production';
 
 async function withFallback<T>(request: () => Promise<T>, fallback: T): Promise<T> {
   try {
@@ -71,7 +73,8 @@ const FALLBACK_PRODUCTS: readonly Product[] = [
     version: 1,
     name: 'Savings Account',
     tagline: 'Grow your balance with easy access',
-    description: 'A simple savings account that helps your money work harder without locking it away.',
+    description:
+      'A simple savings account that helps your money work harder without locking it away.',
     accountType: AccountType.SAVINGS,
     currencies: ['GBP'],
     minKycTier: 0,
@@ -95,12 +98,8 @@ const FALLBACK_PRODUCTS: readonly Product[] = [
   },
 ] as const;
 
-const FALLBACK_RATES: PublicRates = {
-  savings: [],
-  lending: [],
-  effectiveFrom: '2024-01-01',
-  asOf: '2024-01-01T00:00:00.000Z',
-};
+/** No rate is quotable when the catalogue could not be read. See `lib/rates.ts`. */
+const FALLBACK_RATES: readonly ProductRates[] = [];
 
 const FALLBACK_FX_BOARD: FxBoard = {
   base: 'GBP',
@@ -108,14 +107,14 @@ const FALLBACK_FX_BOARD: FxBoard = {
   rates: [],
 };
 
-const FALLBACK_FEES: readonly FeeScheduleEntry[] = [];
+const FALLBACK_FEES: readonly ProductFees[] = [];
 const FALLBACK_LOCATIONS: readonly BankLocation[] = [];
 const FALLBACK_FAQS: readonly Faq[] = [];
 
 /** Headline savings and lending rates, with the date they took effect. */
-export const getRates = cache(async (): Promise<PublicRates> => {
+export const getRates = cache(async (): Promise<readonly ProductRates[]> => {
   return withFallback(async () => {
-    const { data } = await publicApi().public.rates();
+    const { data } = await publicApi().public.rates({ limit: CATALOGUE_PAGE_SIZE });
     return data;
   }, FALLBACK_RATES);
 });
@@ -129,7 +128,7 @@ export const getFxBoard = cache(async (): Promise<FxBoard> => {
 });
 
 /** The published fee schedule. */
-export const getFees = cache(async (): Promise<readonly FeeScheduleEntry[]> => {
+export const getFees = cache(async (): Promise<readonly ProductFees[]> => {
   return withFallback(async () => {
     const { data } = await publicApi().public.fees({ limit: CATALOGUE_PAGE_SIZE });
     return data;

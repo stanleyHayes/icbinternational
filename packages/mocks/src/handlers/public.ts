@@ -28,32 +28,37 @@ const MILESTONE_COUNT = 5;
 
 /** The unauthenticated marketing surface. */
 export const publicHandlers: readonly MockRoute[] = [
+  // One entry per catalogue product, matching ProductsController.rates(). The mock used to
+  // answer with a savings/lending split that the API has never served, which is precisely
+  // how the marketing site came to be written against a shape that only existed here.
   route(MockMethod.GET, routes.public.rates, ({ db }) =>
-    resourceOk({
-      savings: db.products
-        .filter((product) => product.creditInterestTiers.length > 0)
-        .map((product) => ({
-          productCode: product.code,
-          productName: product.name,
-          annualRateBps: product.creditInterestTiers[0]?.annualRateBps ?? 0,
-          minBalance: product.minBalance,
-        })),
-      lending: db.loanProducts.map((product) => ({
-        productCode: product.code,
-        productName: product.name,
-        representativeAprBps: product.representativeAprBps,
-        maxAmount: product.maxAmount,
+    paginateStatic(
+      db.products.map((product) => ({
+        code: product.code,
+        name: product.name,
+        accountType: product.accountType,
+        creditInterestTiers: product.creditInterestTiers,
+        debitInterestBps: product.debitInterestBps,
+        effectiveFrom: product.effectiveFrom,
       })),
-      effectiveFrom: db.clock.dateDaysAgo(30),
-      asOf: db.clock.nowIso(),
-    }),
+    ),
   ),
 
   route(MockMethod.GET, routes.public.fxBoard, ({ db }) =>
     resourceOk({ base: 'GBP', rates: db.fxRates, asOf: db.clock.nowIso() }),
   ),
 
-  route(MockMethod.GET, routes.public.fees, ({ db }) => paginateStatic(db.fees)),
+  // Charges grouped under the product that levies them, matching ProductsController.fees().
+  route(MockMethod.GET, routes.public.fees, ({ db }) =>
+    paginateStatic(
+      db.products.map((product) => ({
+        code: product.code,
+        name: product.name,
+        monthlyFee: product.monthlyFee,
+        fees: product.fees,
+      })),
+    ),
+  ),
 
   route(MockMethod.GET, routes.public.products, ({ db, query }) =>
     paginate(
