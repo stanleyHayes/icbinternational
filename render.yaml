@@ -53,18 +53,23 @@ services:
         value: "1"
 
       # ── Service URLs ─────────────────────────────────────────────────────────
-      # Set these to your actual deployed domains.
+      # Blueprint-managed rather than sync: false, deliberately. The CORS allowlist is
+      # exactly [WEB_MARKETING_URL, WEB_CLIENT_URL, WEB_ADMIN_URL] (config.service.ts),
+      # and every one of these carries a localhost default in configuration.ts. An unset
+      # value therefore does not fail loudly at boot — it allowlists localhost, and every
+      # browser call from a production front end is blocked with no ACAO header. Holding
+      # them in the blueprint keeps that failure mode out of the dashboard's hands.
       - key: API_URL
-        sync: false   # e.g. https://reliance-api.onrender.com
+        value: https://api.reliancevault.net
 
       - key: WEB_MARKETING_URL
-        sync: false   # e.g. https://www.yourdomain.com
+        value: https://www.reliancevault.net
 
       - key: WEB_CLIENT_URL
-        sync: false   # e.g. https://app.yourdomain.com
+        value: https://client.reliancevault.net
 
       - key: WEB_ADMIN_URL
-        sync: false   # e.g. https://operations.yourdomain.com
+        value: https://admin.reliancevault.net
 
       # ── Database ─────────────────────────────────────────────────────────────
       # Must be a replica set — the ledger uses multi-document transactions.
@@ -97,7 +102,7 @@ services:
       # Set to your deployed API's public hostname (no protocol, no trailing slash).
       # e.g. reliance-api.onrender.com  — used as the cookie domain.
       - key: COOKIE_DOMAIN
-        sync: false
+        value: api.reliancevault.net
 
       - key: COOKIE_SECURE
         value: "true"
