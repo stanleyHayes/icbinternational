@@ -93,7 +93,10 @@ const QUESTIONS = [
  */
 export default async function OpenAnAccountPage() {
   const products = await getProducts();
-  const breadcrumbTrail = [{ name: 'Home', path: '/' }, { name: 'Open an account', path: '/open-an-account' }];
+  const breadcrumbTrail = [
+    { name: 'Home', path: '/' },
+    { name: 'Open an account', path: '/open-an-account' },
+  ];
 
   return (
     <>
@@ -108,7 +111,7 @@ export default async function OpenAnAccountPage() {
         <h2 id="picker-heading" className="sr-only">
           Choose an account
         </h2>
-        <AccountPicker products={products} applyBaseUrl={`${APP_URL}/apply`} />
+        <AccountPicker products={products} applyBaseUrl={`${APP_URL}/register`} />
       </Section>
 
       <Section tone="surface" labelledBy="steps-heading">
