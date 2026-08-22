@@ -6,8 +6,10 @@ import {
   routes,
   type BankLocation,
   type LocationSearchQuery,
+  type Paginated,
 } from '@reliance/contracts';
 
+import { wholeList } from '../../common/pagination/cursor.js';
 import { zodBody } from '../../common/pipes/zod-validation.pipe.js';
 import { LocationService, parsePoint } from '../cms/index.js';
 
@@ -60,15 +62,17 @@ export class PublicReferenceController {
   @PublicCache({ maxAgeSeconds: DIRECTORY_MAX_AGE_SECONDS })
   async locationDirectory(
     @Query(zodBody(locationSearchQuerySchema)) query: LocationSearchQuery,
-  ): Promise<BankLocation[]> {
+  ): Promise<Paginated<BankLocation>> {
     const near = query.near ? parsePoint(query.near) : null;
 
-    return this.locations.search({
-      ...(near ? { near } : {}),
-      radiusMetres: query.radiusMetres,
-      ...(query.kind ? { kind: query.kind } : {}),
-      ...(query.query ? { query: query.query } : {}),
-      limit: query.limit,
-    });
+    return wholeList(
+      await this.locations.search({
+        ...(near ? { near } : {}),
+        radiusMetres: query.radiusMetres,
+        ...(query.kind ? { kind: query.kind } : {}),
+        ...(query.query ? { query: query.query } : {}),
+        limit: query.limit,
+      }),
+    );
   }
 }
