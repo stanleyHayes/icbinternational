@@ -111,6 +111,22 @@ services:
       - key: CSRF_SECRET
         sync: false
 
+      # ── Seeded operator ──────────────────────────────────────────────────────
+      # The foundation seed provisions the super-admin. Both of these have fixtures
+      # hard-coded in the repository, which is fine for a local Mongo and is a published
+      # credential for a deployed bank — the authenticator seed included, so the second
+      # factor is published alongside the first. Set them here and the seed uses them
+      # instead. Leave them unset and the seed falls back to the fixtures in git.
+      #   openssl rand -base64 24     # password
+      #   node -e "const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';let v=0,n=0,o='';for(const x of require('crypto').randomBytes(20)){v=((v<<8)|x)>>>0;n+=8;while(n>=5){o+=A[(v>>>(n-5))&31];n-=5}}console.log(o)"
+      # (`(v<<8)>>>0` keeps the accumulator inside 32 bits — multiplying by 256 instead
+      #  overflows MAX_SAFE_INTEGER and silently emits a tail of `A`s, i.e. zero bits.)
+      - key: SEED_OPERATOR_PASSWORD
+        sync: false
+
+      - key: SEED_OPERATOR_TOTP_SECRET
+        sync: false
+
       # Argon2id cost — OWASP minimums; raise memory before time.
       - key: ARGON2_MEMORY_KIB
         value: "19456"
